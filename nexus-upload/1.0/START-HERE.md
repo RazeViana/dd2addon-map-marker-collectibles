@@ -1,15 +1,17 @@
-# Nexus upload kit â€” version 1.0
+# Nexus upload kit - version 1.0
 
-This folder contains the prepared release files. The package has not been uploaded to Nexus. Source credits and the unresolved publication permissions are documented in [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md).
+This folder contains the prepared release files. The mod has not been uploaded to Nexus. Source credits and publication permissions are recorded in [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md).
 
-## Upload files
+## Files to use
 
-- `Map-Markers-and-Collectables-by-Raze-v1.0.zip` â€” main mod download. Upload this ZIP, not the whole kit folder.
-- [DESCRIPTION.md](DESCRIPTION.md) â€” Nexus description in Markdown. Use its rendered content in the Nexus rich-text editor; the source file is maintained as Markdown.
-- [listing.json](listing.json) â€” title, summary, author, category, requirement, and download details.
-- [CHANGELOG.md](CHANGELOG.md) â€” release notes.
-- `images/minimap-gameplay.jpg` â€” gameplay capture showing custom minimap markers. Caption: "Nearby collectable markers on the minimap during exploration."
-- `SHA256SUMS.txt` and `package-manifest.json` â€” archive checksum and file manifest.
+- `Map-Markers-and-Collectables-by-Raze-v1.0.zip` - the mod download. Upload this ZIP, rather than the whole folder.
+- [DESCRIPTION.md](DESCRIPTION.md) - the page description in Markdown.
+- [listing.json](listing.json) - the short summary and download details.
+- [CHANGELOG.md](CHANGELOG.md) - what is included in version 1.0.
+- [images/logo.png](images/logo.png) - the mod's logo for the page.
+- Your own in-game screenshots - show the full map and the minimap during exploration.
+
+The folder also contains a checksum and file list for checking the download.
 
 ## Page details
 
@@ -25,10 +27,18 @@ This folder contains the prepared release files. The package has not been upload
 | Download category | Main Files |
 | Donation Points | Disabled under the current source terms |
 
-Copy the short summary and file description from `listing.json`, add the Markdown description and changelog, and attach the gameplay image. A full-map screenshot can be added as another example. Resolve publication rights as described in the third-party notice before publishing; preserve the credits at the bottom of the description.
+## Put the page together
 
-## Package and rebuild
+1. Copy the summary and download description from `listing.json`.
+2. Use the text from `DESCRIPTION.md` for the main description. It is maintained here as Markdown; preserve its headings and lists in the Nexus editor.
+3. Add the release notes from `CHANGELOG.md`.
+4. Upload the logo and add your own in-game screenshots. Suggested captions: "Collectable locations on the full map" and "Find nearby collectables while exploring."
+5. Upload the mod ZIP as the main download.
 
-The archive contains seven Lua files, twelve location JSON files, and four metadata/documentation files. It supports manual installation and includes `modinfo.ini` at the root for Fluffy Mod Manager. REFramework, personal preferences, runtime reports, probes, and development files are excluded.
+Keep the credits at the bottom of the description. Resolve publication rights as described in the third-party notice before publishing.
 
-Run `python tests/run.py` and `python scripts/build.py` from the project root. The builder refreshes the main archive, the copy in this folder, the changelog, the checksum, and the file manifest.
+## Refreshing the download
+
+The ZIP includes the mod and installation instructions. It works with Fluffy Mod Manager or a manual installation.
+
+For build instructions and verification details, see [the development notes](../../docs/DEVELOPMENT.md).

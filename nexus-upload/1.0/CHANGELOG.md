@@ -2,14 +2,12 @@
 
 ## 1.0
 
-Initial public release version of Map Markers and Collectables by Raze.
+First release of Map Markers and Collectables by Raze.
 
-- Full-map and nearby minimap markers for Seeker's Tokens, Golden Trove Beetles, and chest categories.
-- Shared category visibility, icon, and color controls, with separate acquired and unacquired settings.
-- Upright minimap symbols as the camera turns, with adjustable distance, height, and marker limits.
-- Expanded total icon capacity: 2,048 full-map sprite slots and 256 minimap slots, with up to 200 custom minimap markers.
-- Native icon priority and safe restoration of borrowed minimap slots.
-- Dedicated settings and data paths, with settings validation and sensible defaults.
-- Runtime diagnostics for troubleshooting.
-
-Public version numbering starts at 1.0.
+- Find Seeker's Tokens, Golden Trove Beetles, and chests on the full map and minimap.
+- Choose which items to show, including items you have already collected.
+- Customize marker symbols and colors.
+- Keep minimap symbols upright while turning the camera.
+- Show more markers on both maps.
+- Adjust how far away items appear and how many nearby markers you see.
+- Keep your preferences between play sessions.

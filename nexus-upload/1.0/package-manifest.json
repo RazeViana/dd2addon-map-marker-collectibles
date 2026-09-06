@@ -1,18 +1,18 @@
 [
   {
     "path": "modinfo.ini",
-    "bytes": 282,
-    "sha256": "5159c1f718cabf11b84b321eb102c1b1ce83c0c01f42912ab12b5c6f93cadebf"
+    "bytes": 235,
+    "sha256": "ae70af68ac8f0258482b34289b75d2165d062d7ae270ac017ebf99ae9c615f17"
   },
   {
     "path": "README.md",
-    "bytes": 6815,
-    "sha256": "a4443b83899943c736ff27b377a43169f0d2ff15863bc54fe3eeb92d7b66a6b0"
+    "bytes": 3204,
+    "sha256": "fa7770ffd57d6e76ab0b1753ddacfac8c763ba15ced382c80a09675c0fc0ecaf"
   },
   {
     "path": "CHANGELOG.md",
-    "bytes": 763,
-    "sha256": "b5e6d485272b62eed197b0affb04cbe8ab7acce29a9de062b2c346b725a664a9"
+    "bytes": 499,
+    "sha256": "525b797fa98a088844f299aa8a8567f58a68cea41a107ad3ac731e251d887518"
   },
   {
     "path": "THIRD_PARTY_NOTICES.md",

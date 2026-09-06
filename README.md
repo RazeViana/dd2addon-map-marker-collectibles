@@ -1,66 +1,54 @@
 # Map Markers and Collectables by Raze
 
-A Dragon's Dogma 2 mod by Raze that adds customizable collectible markers to the full map and minimap.
+Find Seeker's Tokens, Golden Trove Beetles, and chests more easily in Dragon's Dogma 2. This mod marks their locations on your full map and shows nearby items on your minimap while you explore.
 
-**Current version: 1.0.** Includes nearby minimap markers, upright symbols, shared category controls, and expanded icon capacity on both maps.
+**Current version: 1.0.**
 
-The full map supports Seeker's Tokens, Golden Trove Beetles, four chest sizes, and three special chest categories. Each category has separate visibility, icon, and color settings for acquired and unacquired items, plus display priority controls. Tokens and beetles are enabled by default; chest categories can be enabled in the menu. Twelve datasets are included; the three Sphinx datasets are not exposed as menu categories.
+## What it does
 
-The minimap shares the category visibility, icons, and colors. It selects the nearest eligible locations, refreshes collection state twice per second, and uses the game's coordinate projection. Collectible symbols stay upright as the camera turns. Native game icons take priority over custom markers.
+- Shows tokens, beetles, and different types of chests on both maps.
+- Lets you choose which items to show, including items you have already collected.
+- Lets you change marker symbols and colors to suit your preferences.
+- Keeps minimap symbols upright as you turn the camera.
+- Gives you more room for markers on both maps.
+- Lets you adjust how far away nearby items appear and how many markers appear on the minimap.
+
+Tokens and beetles are shown by default. Turn on chest categories in the mod's menu if you want to find those too.
 
 ## Install
 
-Requires [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8), installed and working before installing this mod. Fluffy Mod Manager is optional; manual installation is supported.
+You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8). Install it first.
 
-1. Close the game and disable any other collectable-marker scripts to prevent duplicate markers.
-2. Import `Map-Markers-and-Collectables-by-Raze-v1.0.zip` into Fluffy, or extract its `reframework` folder into the game folder containing `DD2.exe`.
-3. Launch the game and expand **Map Markers and Collectables by Raze** in REFramework's Script Generated UI. Show the minimap and open the full map to see enabled markers.
+1. Close the game and disable any other mod that adds collectable markers, so you do not see duplicates.
+2. Install `Map-Markers-and-Collectables-by-Raze-v1.0.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy its `reframework` folder into your game folder, alongside `DD2.exe`.
+3. Start the game. In the REFramework menu, open **Script Generated UI > Map Markers and Collectables by Raze**.
+4. Choose the items you want to see, then explore with your full map or minimap.
 
-The mod reads `reframework/data/raze_MapMarkersAndCollectables/`. It reads and saves preferences only in `reframework/data/raze_MapMarkersAndCollectables_settings.json`. A missing or malformed settings file uses defaults; invalid individual values also revert to defaults.
+## Make it your own
 
-When updating this mod, overwrite its files and keep the settings file.
+Use the category options to choose what appears on your maps and change its symbol or color. **Unacquired** means items you have not collected; **Acquired** means items you have already collected.
 
-## Compatibility and uninstall
+Turn **Show on minimap** on or off whenever you like. Under **Minimap settings**, you can change how far away items appear, limit markers above or below you, and choose how many nearby markers to show. Nearby items appear first. Lower the number if your minimap feels crowded.
 
-Other collectable-marker scripts can create duplicates. Scripts that modify the same map icon pools may conflict; compatibility with every UI or map mod has not been verified.
+## Need help?
 
-To uninstall, close the game and disable the mod in Fluffy. For a manual installation, remove `reframework/autorun/raze_MapMarkersAndCollectables.lua`, `reframework/autorun/raze_MapMarkersAndCollectables_Diagnostics.lua`, the `reframework/autorun/raze_MapMarkersAndCollectables/` folder, and the `reframework/data/raze_MapMarkersAndCollectables/` folder. Keep `raze_MapMarkersAndCollectables_settings.json` to retain preferences for reinstalling. REFramework itself does not need to be removed.
+If markers are missing, make sure the category is enabled. For minimap markers, also check that the game's minimap is visible and **Show on minimap** is turned on. There may be no matching items close enough to you.
 
-## Minimap settings
+Restart the game after installing or updating. If you see an error, include its message when reporting the problem. Other mods that change map markers may conflict.
 
-**Show on minimap** enables the overlay. **Minimap settings** controls the search radius (default 180 world units), vertical range (60), and marker limit (24, adjustable up to 200). Existing settings are preserved on upgrade; raise **Maximum custom icons** to use the higher allowance. The on-screen counter reports custom icons actually drawn. The count may be lower than the configured limit because of the minimap boundary, category filters, collected state, and space needed by native game icons.
+## Update or uninstall
 
-The renderer only uses currently unused native sprite slots. It returns those slots before the next native update and restores their previous appearance. If a runtime error occurs, minimap drawing pauses and the menu shows the error. Toggle **Show on minimap** to retry after the cause is resolved. Updating files while the game is running requires **ScriptRunner > Reset scripts** or a game restart.
+To update, replace this mod's files with the new download. Keep `reframework/data/raze_MapMarkersAndCollectables_settings.json` to keep your choices.
 
-## Icon capacity
+To uninstall, close the game and disable the mod in Fluffy Mod Manager. If you installed manually, remove these files and folders:
 
-The full map's sprite pool expands from 1,024 to 2,048 slots. The minimap's pool expands from 50 to 256 slots, with up to 200 custom markers. The menu reports each pool's current capacity. These are total sprite slots shared with the game's icons, so the actual custom count depends on native usage and category filters.
+- `reframework/autorun/raze_MapMarkersAndCollectables.lua`
+- `reframework/autorun/raze_MapMarkersAndCollectables_Diagnostics.lua`
+- `reframework/autorun/raze_MapMarkersAndCollectables/`
+- `reframework/data/raze_MapMarkersAndCollectables/`
 
-Expansion preserves existing icons, creates hidden sprites with the same atlas and scale context, and reuses an already expanded pool after a script reset. It runs when each map is ready and is recreated with the HUD. If allocation is unavailable on another runtime, the menu reports the error and the original capacity remains available. Higher counts can increase map clutter and rendering work.
+You can keep the settings file if you plan to reinstall. Leave REFramework installed if your other mods use it.
 
-## Validation
+## Credits
 
-On 2026-09-06 with REFramework TDB 83, the full-map pool expanded to 2,048 and the minimap pool to 256. The full map displayed 1,272 custom markers plus three native icons, leaving 773 slots free. Hiding small chests reduced the custom count to 683 and cleared all 251 visible slots beyond the original limit; restoring the category returned those icons and the 1,272 custom count. The expanded minimap survived script reloads and continued showing nearby markers. No script error appeared during these checks. Raze previously confirmed upright minimap symbols while turning the camera, full-map/minimap transitions, and the visibility toggle.
-
-Six offline Lua test files cover map behavior, settings, diagnostics, nearby selection, pool expansion/reuse/failure handling, and rendering 200 custom minimap markers alongside 56 native icons. Collection removal and save/load still require in-game confirmation; the maximum 200-marker minimap load has offline coverage but has not been reached naturally in the live test area.
-
-## Minimap diagnostics
-
-The independent diagnostics script exports `reframework/data/raze_MapMarkersAndCollectables_minimap_diagnostics.json` at startup. For a report with the live HUD present, load a save, show the minimap, and press **Export Minimap Diagnostics** under **Map Markers and Collectables by Raze - Diagnostics**. Share that JSON along with `re2_framework_log.txt` from the game folder.
-
-The exporter reads type metadata and checks whether the HUD exists. It does not add icons or modify game objects or saves. Use its report to investigate compatibility with another game or REFramework version.
-
-## Development
-
-Python 3.12 and Lupa 2.6 are used for offline verification. Install the test dependency with `python -m pip install --target .tools/python lupa==2.6`, then run:
-
-```powershell
-python tests/run.py
-python scripts/build.py
-```
-
-The builder checks dataset hashes against `scripts/dataset-manifest.json` and validates every GUID and position before creating the ZIP. It also refreshes the Nexus upload kit and checksums. Personal settings, probes, test dependencies, and diagnostics output are excluded from the package. Repository development notes are in `docs/DEVELOPMENT.md`.
-
-The repository's Nexus description is maintained as Markdown in `nexus-upload/1.0/DESCRIPTION.md`.
-
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the original code and dataset credits.
+Mod adaptation and added features by Raze. Original code and location data are credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
