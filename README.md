@@ -1,10 +1,10 @@
 # Map Markers and Collectables by Raze
 
-A Dragon's Dogma 2 mod by Raze that adds customizable collectible markers to the full map and minimap. Based on Arisen's Almanac by gibbed.
+A Dragon's Dogma 2 mod by Raze that adds customizable collectible markers to the full map and minimap.
 
 **Current version: 1.0.** Includes nearby minimap markers, upright symbols, shared category controls, and expanded icon capacity on both maps.
 
-The full map supports Seeker's Tokens, Golden Trove Beetles, four chest sizes, and three special chest categories. Each category has separate visibility, icon, and color settings for acquired and unacquired items, plus display priority controls. Tokens and beetles are enabled by default; chest categories can be enabled in the menu. All 12 supplied datasets are retained, including the three Sphinx datasets that the original script did not expose as categories.
+The full map supports Seeker's Tokens, Golden Trove Beetles, four chest sizes, and three special chest categories. Each category has separate visibility, icon, and color settings for acquired and unacquired items, plus display priority controls. Tokens and beetles are enabled by default; chest categories can be enabled in the menu. Twelve datasets are included; the three Sphinx datasets are not exposed as menu categories.
 
 The minimap shares the category visibility, icons, and colors. It selects the nearest eligible locations, refreshes collection state twice per second, and uses the game's coordinate projection. Collectible symbols stay upright as the camera turns. Native game icons take priority over custom markers.
 
@@ -12,18 +12,17 @@ The minimap shares the category visibility, icons, and colors. It selects the ne
 
 Requires [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8), installed and working before installing this mod. Fluffy Mod Manager is optional; manual installation is supported.
 
-1. Close the game and disable Arisen's Almanac in Fluffy Mod Manager. With a manual installation, move `reframework/autorun/gibbed_Almanac.lua` out of `autorun`. The old deprecated `gibbed_SeekersTokenMarkers.lua` can also be removed. Do not run both map scripts together: each adds its own markers.
-2. Keep `reframework/data/gibbed_Almanac_settings.json` if you want to reuse your settings.
-3. Import `Map-Markers-and-Collectables-by-Raze-v1.0.zip` into Fluffy, or extract its `reframework` folder into the game folder containing `DD2.exe`.
-4. Launch the game and expand **Map Markers and Collectables by Raze** in REFramework's Script Generated UI. Show the minimap and open the full map to see enabled markers.
+1. Close the game and disable any other collectable-marker scripts to prevent duplicate markers.
+2. Import `Map-Markers-and-Collectables-by-Raze-v1.0.zip` into Fluffy, or extract its `reframework` folder into the game folder containing `DD2.exe`.
+3. Launch the game and expand **Map Markers and Collectables by Raze** in REFramework's Script Generated UI. Show the minimap and open the full map to see enabled markers.
 
-The mod reads `reframework/data/raze_MapMarkersAndCollectables/`. It saves settings to `reframework/data/raze_MapMarkersAndCollectables_settings.json`. On first load, existing Almanac settings are imported if no usable new settings file exists. The old file is never overwritten. Invalid values revert to defaults.
+The mod reads `reframework/data/raze_MapMarkersAndCollectables/`. It reads and saves preferences only in `reframework/data/raze_MapMarkersAndCollectables_settings.json`. A missing or malformed settings file uses defaults; invalid individual values also revert to defaults.
 
-When updating an earlier development build of this mod, overwrite its files and keep the settings file. Version 1.0 is the first public release number and includes the features tested in the development builds.
+When updating this mod, overwrite its files and keep the settings file.
 
 ## Compatibility and uninstall
 
-Disable Arisen's Almanac and the deprecated Seeker's Token Markers script before using this mod. Other scripts that modify the same map icon pools may conflict; compatibility with every UI or map mod has not been verified.
+Other collectable-marker scripts can create duplicates. Scripts that modify the same map icon pools may conflict; compatibility with every UI or map mod has not been verified.
 
 To uninstall, close the game and disable the mod in Fluffy. For a manual installation, remove `reframework/autorun/raze_MapMarkersAndCollectables.lua`, `reframework/autorun/raze_MapMarkersAndCollectables_Diagnostics.lua`, the `reframework/autorun/raze_MapMarkersAndCollectables/` folder, and the `reframework/data/raze_MapMarkersAndCollectables/` folder. Keep `raze_MapMarkersAndCollectables_settings.json` to retain preferences for reinstalling. REFramework itself does not need to be removed.
 
@@ -60,6 +59,8 @@ python tests/run.py
 python scripts/build.py
 ```
 
-The builder checks dataset integrity against the source backup and validates every GUID and position before creating the ZIP. Runtime settings, original sources, old preview, test dependencies, and diagnostics output are excluded from the package.
+The builder checks dataset hashes against `scripts/dataset-manifest.json` and validates every GUID and position before creating the ZIP. It also refreshes the Nexus upload kit and checksums. Personal settings, probes, test dependencies, and diagnostics output are excluded from the package. Repository development notes are in `docs/DEVELOPMENT.md`.
+
+The repository's Nexus description is maintained as Markdown in `nexus-upload/1.0/DESCRIPTION.md`.
 
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the original code and dataset credits.

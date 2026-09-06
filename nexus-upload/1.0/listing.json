@@ -5,7 +5,10 @@
   "version": "1.0",
   "author": "Raze",
   "category": "User Interface",
-  "suggested_tags": ["User Interface", "Quality of Life"],
+  "suggested_tags": [
+    "User Interface",
+    "Quality of Life"
+  ],
   "summary": "Customizable full-map and minimap markers for Seeker's Tokens, Golden Trove Beetles, and chests. Includes upright minimap icons, shared category controls, and expanded icon limits.",
   "required_mods": [
     {
@@ -19,11 +22,12 @@
     "name": "Map Markers and Collectables by Raze",
     "version": "1.0",
     "archive": "Map-Markers-and-Collectables-by-Raze-v1.0.zip",
-    "description": "Version 1.0. Full-map and minimap collectible markers with expanded icon capacity. Requires REFramework. Supports manual installation or Fluffy Mod Manager. Disable Arisen's Almanac before installing."
+    "description": "Version 1.0. Full-map and minimap collectible markers with expanded icon capacity. Requires REFramework. Supports manual installation or Fluffy Mod Manager. Disable other collectable-marker scripts before installing."
   },
   "donation_points": false,
-  "publication_status": "Awaiting permission from gibbed to publish modified code and bundled datasets",
+  "publication_status": "See THIRD_PARTY_NOTICES.md for source credits and publication permissions",
   "permission_confirmed": false,
   "permission_checked_on": "2026-09-06",
-  "upstream_permission_url": "https://www.nexusmods.com/dragonsdogma2/mods/194"
+  "source_notice": "../../THIRD_PARTY_NOTICES.md",
+  "description_file": "DESCRIPTION.md"
 }

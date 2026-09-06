@@ -1,9 +1,7 @@
 --[[
 Map Markers and Collectables by Raze
 
-Adapted from Arisen's Almanac by gibbed, using the source supplied with
-this project (including its existing compatibility fixes).
-Original source and dataset credits: see THIRD_PARTY_NOTICES.md.
+Source and dataset attribution: see THIRD_PARTY_NOTICES.md.
 ]]
 
 local MOD_NAME = "Map Markers and Collectables by Raze"
@@ -331,8 +329,7 @@ local marker_type_names =
 }
 
 local settings_filename = "raze_MapMarkersAndCollectables_settings.json"
-local loaded_settings, imported_settings = settings_util.load(
-  json, settings_filename, "gibbed_Almanac_settings.json")
+local loaded_settings = settings_util.load(json, settings_filename)
 
 local settings_default_generic =
 {
@@ -357,10 +354,6 @@ local save_settings = function()
   end
   settings_message = "Settings saved."
   return true
-end
-
-if imported_settings and save_settings() then
-  settings_message = "Imported your previous marker settings."
 end
 
 re.on_config_save(

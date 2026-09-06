@@ -2,6 +2,7 @@
 -- This checks Lua control flow and emitted icons; it does not simulate the native UI.
 local hooks, callbacks, objects, next_address = {}, {}, {}, 1000
 local messages, writes, ids, toggled = {}, {}, {}, false
+local settings_reads = {}
 local managers = {}
 local function list(items)
   return { get_Count = function() return #items end, get_Item = function(_, i) return items[i + 1] end }
@@ -79,7 +80,7 @@ re = { on_config_save = function(callback) callbacks.save = callback end,
   on_draw_ui = function(callback) callbacks.ui = callback end }
 json = {
   load_file = function(path)
-    if path:match("_settings.json$") then return nil end
+    if path:match("_settings.json$") then settings_reads[#settings_reads + 1] = path; return nil end
     if path == "raze_MapMarkersAndCollectables/167.json" then
       return { locations = {
         ["00000001-0000-0000-0000-000000000000"] = { x = 1, y = 0, z = 1 },
@@ -109,9 +110,11 @@ imgui = {
 }
 dofile(TEST_ROOT .. "/reframework/autorun/raze_MapMarkersAndCollectables.lua")
 assert(#messages == 0, "GUID construction or script initialization failed")
+assert(#settings_reads == 1 and settings_reads[1] == "raze_MapMarkersAndCollectables_settings.json",
+  "initialization accessed another mod's settings")
 callbacks.save()
 assert(writes["raze_MapMarkersAndCollectables_settings.json"] ~= nil)
-assert(writes["gibbed_Almanac_settings.json"] == nil)
+for filename in pairs(writes) do assert(filename == "raze_MapMarkersAndCollectables_settings.json") end
 hooks["app.ui040205..ctor"].pre({ [2] = map })
 hooks["app.ui040205..ctor"].post(91)
 -- Main menu / loading transitions must not dereference absent managers.

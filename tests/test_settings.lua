@@ -30,23 +30,22 @@ assert(actual.markers.Chests.unacquired_icon_type == 14)
 assert(actual.markers.Chests.unacquired_icon_color_gui == 0xFF332211)
 assert(types.Tokens.settings_default.unacquired_show == true)
 
--- A current file wins; old settings are imported only when no usable current table exists.
+-- Only the requested settings file is read; unrelated files cannot affect defaults.
 local calls = {}
-local legacy = { markers = { Tokens = { acquired_show = true } } }
+local current = { markers = { Tokens = { acquired_show = true } } }
 local api = { load_file = function(path)
-  calls[#calls + 1] = path
-  if path == "old.json" then return legacy end
+  calls[#calls + 1] = tostring(path)
+  if path ~= "current.json" then return current end
 end }
-local loaded, migrated = settings.load(api, "new.json", "old.json")
-assert(loaded == legacy and migrated == true)
-assert(table.concat(calls, ",") == "new.json,old.json")
+local loaded = settings.load(api, "current.json")
+assert(loaded == nil and #calls == 1, "missing settings triggered an unrelated file read")
 calls = {}
-api.load_file = function(path) calls[#calls + 1] = path; return {} end
-loaded, migrated = settings.load(api, "new.json", "old.json")
-assert(type(loaded) == "table" and migrated == false and #calls == 1)
+api.load_file = function(path) calls[#calls + 1] = path; return current end
+loaded = settings.load(api, "current.json")
+assert(loaded == current and #calls == 1)
 api.load_file = function() error("invalid JSON") end
-loaded, migrated = settings.load(api, "new.json", "old.json")
-assert(loaded == nil and migrated == false)
+loaded = settings.load(api, "current.json")
+assert(loaded == nil)
 
 actual = settings.normalize({minimap={enabled=false,radius=99999,height=-10,max_markers=1000}}, names, types, generic)
 assert(actual.minimap.enabled == false)

@@ -1,15 +1,8 @@
 local M = {}
 
-local function read_table(api, path)
-  local ok, value = pcall(api.load_file, path)
+function M.load(api, filename)
+  local ok, value = pcall(api.load_file, filename)
   if ok and type(value) == "table" then return value end
-end
-
-function M.load(api, filename, legacy_filename)
-  local current = read_table(api, filename)
-  if current ~= nil then return current, false end
-  local legacy = read_table(api, legacy_filename)
-  return legacy, legacy ~= nil
 end
 
 function M.argb_to_abgr(value)
