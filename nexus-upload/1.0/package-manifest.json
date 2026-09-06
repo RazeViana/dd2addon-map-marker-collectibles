@@ -1,0 +1,117 @@
+[
+  {
+    "path": "modinfo.ini",
+    "bytes": 282,
+    "sha256": "5159c1f718cabf11b84b321eb102c1b1ce83c0c01f42912ab12b5c6f93cadebf"
+  },
+  {
+    "path": "README.md",
+    "bytes": 7211,
+    "sha256": "12d814a72ccb4e31d315caad913ed5bf69a9415c6fc26db6c0a3870347732811"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "bytes": 806,
+    "sha256": "323649660f706c797daf98a2b9f94a5429f4cf5b60b78dbf4e5e7a535e12ec2d"
+  },
+  {
+    "path": "THIRD_PARTY_NOTICES.md",
+    "bytes": 1970,
+    "sha256": "8d8a68d2e2969f045cc736c1c56230c9a23a2a7a74828b16cfc83bb7440e8fd0"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/diagnostics.lua",
+    "bytes": 3882,
+    "sha256": "fdff142b35550f539dfd020edcf47900d1b4a3eb48d77212d2fdc707244531ed"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/minimap.lua",
+    "bytes": 3617,
+    "sha256": "80d52555cc6fc7e5082d6b878b7d310f8cd517461875716d8a1cf373bda15b35"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/nearby.lua",
+    "bytes": 907,
+    "sha256": "5617beaef8f876e6fe8db86db6296da828533a6173098a2097018a96ebfe0107"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/settings.lua",
+    "bytes": 2663,
+    "sha256": "f611ddde6b4c6ca29cbbca78a0abf106659fc73413b59c08a3fe851f4415d7e1"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/sprite_pool.lua",
+    "bytes": 3604,
+    "sha256": "66271feec3ebaa30b4939773f60e241f32b31b117bf18000530f24020f3a4779"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables.lua",
+    "bytes": 37323,
+    "sha256": "22d16f9c9a6c83121fd3e193c85228b6917653ada680963b578ed7ae5818dea5"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables_Diagnostics.lua",
+    "bytes": 1448,
+    "sha256": "f55b072c5b4d5089f0ece64f45b901563942ae3f3692e1574bb9f0ddc70bf278"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/10.json",
+    "bytes": 50063,
+    "sha256": "0813af17105b0296ab1bb3642e5518d8d1dc97e500b27adb1aa14024c6f0a1b9"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/11.json",
+    "bytes": 18519,
+    "sha256": "b3a339bf652ed9f37ee24250e67dfe9d92a060c3f852c4b4ecde94285f0da70d"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/12.json",
+    "bytes": 5720,
+    "sha256": "9ed0c2cd0941cf9c015fa2e23436d7f02907a6d0a0c2652656ae898b98864672"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/13.json",
+    "bytes": 546,
+    "sha256": "6aa5112ceb5807f94875d28e8a39c40052563ea548a71e16a5de28cae6dfda4c"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/161.json",
+    "bytes": 7068,
+    "sha256": "a4e37d23c986e5fcfd684736eb2a0e75f2360686f4cebcd34afc06486530d606"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/167.json",
+    "bytes": 20389,
+    "sha256": "b19abea60005992def3734f5f0c497acea2c340f1f65c57c2505860bc43eb89b"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/465.json",
+    "bytes": 1293,
+    "sha256": "cc9b1aa49d32b53b396cbfee42260d578e6f4ce53394640d042af3ac3dca3fe0"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/495.json",
+    "bytes": 7538,
+    "sha256": "095db84b1b1d2c3597f7f7ed508c4a316058f0cf7db7f425f89b8a72b37fd399"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/653.json",
+    "bytes": 548,
+    "sha256": "344e32c9ee52c5f32ffe734d9465fe5f5567b46d1759a6f751f87d1ad8ca9032"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/692.json",
+    "bytes": 548,
+    "sha256": "caab0b4a268e717945fe71e5116e0c116d8410a3beb064005d724d6e6c8dd1a0"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/693.json",
+    "bytes": 792,
+    "sha256": "b554e9d6e018447135ad931e77e4b872d3410833ed762d34ec243086578122cf"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/694.json",
+    "bytes": 548,
+    "sha256": "faf6c28ab0bde2c87dc3893158b4b86074c2e342096e2e7dcbd3d198873bca05"
+  }
+]

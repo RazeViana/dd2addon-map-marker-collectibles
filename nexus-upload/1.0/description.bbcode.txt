@@ -1,0 +1,63 @@
+[size=5][b]Map Markers and Collectables by Raze[/b][/size]
+
+Find Seeker's Tokens, Golden Trove Beetles, and chests with customizable markers on your full map and minimap. Choose which categories to display, set their icons and colors, and keep nearby collectables in view while exploring.
+
+[b]Version 1.0[/b]
+
+[size=4][b]Features[/b][/size]
+[list]
+[*]Full-map and nearby minimap markers for Seeker's Tokens, Golden Trove Beetles, four chest sizes, and three special chest categories.
+[*]Separate visibility, icon, and color settings for acquired and unacquired items.
+[*]Shared category settings across both maps, with category priority controls.
+[*]Minimap symbols stay upright when you turn the camera.
+[*]Adjustable minimap search radius, height range, and custom-marker limit.
+[*]Expanded full-map capacity: 2,048 total sprite slots.
+[*]Expanded minimap capacity: 256 total sprite slots, with up to 200 custom markers. Native game icons take priority.
+[*]Automatic import of existing Arisen's Almanac settings on first use, when this mod does not already have a usable settings file.
+[/list]
+
+[size=4][b]Requirements[/b][/size]
+[url=https://www.nexusmods.com/dragonsdogma2/mods/8]REFramework for Dragon's Dogma 2[/url] must be installed and working. Fluffy Mod Manager is optional. Arisen's Almanac is not required to run this bundled release.
+
+[size=4][b]Installation[/b][/size]
+[list=1]
+[*]Close the game. Disable Arisen's Almanac and the deprecated Seeker's Token Markers script if installed.
+[*]Keep your old gibbed_Almanac_settings.json if you want to import those preferences.
+[*]Import the ZIP into Fluffy Mod Manager and enable it, or extract the ZIP's reframework folder into the game folder containing DD2.exe.
+[*]Launch the game. In REFramework, expand Script Generated UI > Map Markers and Collectables by Raze.
+[*]Choose your categories, show the minimap, and open the full map.
+[/list]
+
+For a manual migration, move gibbed_Almanac.lua and the deprecated gibbed_SeekersTokenMarkers.lua out of reframework/autorun. Running both map mods can create duplicate markers or conflicts.
+
+[size=4][b]Settings[/b][/size]
+Tokens and beetles are enabled by default. Enable chest categories in the menu if you want to see them.
+
+[b]Show on minimap[/b] switches nearby minimap markers on or off. Under [b]Minimap settings[/b], the defaults are a search radius of 180 world units, a height range of 60, and a maximum of 24 custom markers. You can raise [b]Maximum custom icons[/b] to 200. The nearest eligible items are selected first.
+
+The drawn count can be lower than the chosen limit because of the minimap boundary, category filters, collected state, or space used by native icons. Expanded capacities are total slots shared with the game's own icons. Higher marker counts can increase clutter and rendering work.
+
+Preferences are stored in reframework/data/raze_MapMarkersAndCollectables_settings.json. Keep this file when updating. Version 1.0 includes the features tested in the earlier local development builds.
+
+[size=4][b]Compatibility and troubleshooting[/b][/size]
+[list]
+[*]Use this mod with Arisen's Almanac and the deprecated Seeker's Token Markers script disabled.
+[*]Other mods that change map icon pools may conflict. Compatibility with every map or UI mod has not been verified.
+[*]If no minimap markers appear, check that the game's minimap is visible, Show on minimap is enabled, and eligible items are within the distance and height ranges.
+[*]After changing Lua files while the game is running, use REFramework > ScriptRunner > Reset scripts or restart the game.
+[*]For errors, include the message and re2_framework_log.txt in a bug report. The included Diagnostics menu can export a runtime report for minimap troubleshooting.
+[/list]
+
+[size=4][b]Testing[/b][/size]
+Both maps, camera rotation, category toggles, and script reloads have been checked in game with REFramework TDB 83. The full map displayed 1,272 custom markers plus three native icons. Markers beyond the original capacity cleared and returned correctly when their category was toggled.
+
+The maximum 200-marker minimap load has automated test coverage but has not been reached naturally in the live test area. Collection removal and save/load behavior still need broader in-game testing.
+
+[size=4][b]Uninstall[/b][/size]
+Close the game and disable the mod in Fluffy. For manual installation, remove the two raze_MapMarkersAndCollectables Lua entry points and the matching folders under reframework/autorun and reframework/data. Keep the separate settings JSON if you want to retain your preferences. Leave REFramework installed for your other mods.
+
+[size=4][b]Credits[/b][/size]
+[b]Raze[/b] — this adaptation, minimap support, expanded icon capacity, settings migration, and diagnostics.
+[b]gibbed[/b] — [url=https://www.nexusmods.com/dragonsdogma2/mods/194]Arisen's Almanac[/url], the original map-marker implementation, and the location datasets. Original source: [url=https://github.com/gibbed/DD2-REFramework-Scripts]DD2 REFramework Scripts[/url].
+
+Original source and dataset credits are retained in the download. This is a modified version of Arisen's Almanac; it is not an official update from gibbed.

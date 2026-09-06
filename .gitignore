@@ -1,0 +1,9 @@
+.tools/
+dist/
+__pycache__/
+reframework/data/*_settings.json
+reframework/data/*_diagnostics.json
+reference/runtime/
+*.log
+.env
+.env.*

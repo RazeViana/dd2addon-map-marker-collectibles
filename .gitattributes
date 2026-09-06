@@ -1,0 +1,6 @@
+* text=auto eol=lf
+# Location files are compared byte for byte with the supplied source archive.
+reframework/data/**/*.json -text
+*.zip binary
+*.jpg binary
+*.png binary
