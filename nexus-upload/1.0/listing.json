@@ -30,5 +30,6 @@
   "permission_checked_on": "2026-09-06",
   "source_notice": "../../THIRD_PARTY_NOTICES.md",
   "description_file": "DESCRIPTION.md",
-  "logo_file": "images/logo.png"
+  "logo_file": "images/logo.png",
+  "banner_file": "images/banner.png"
 }

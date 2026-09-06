@@ -9,6 +9,7 @@ This folder contains the prepared release files. The mod has not been uploaded t
 - [listing.json](listing.json) - the short summary and download details.
 - [CHANGELOG.md](CHANGELOG.md) - what is included in version 1.0.
 - [images/logo.png](images/logo.png) - the mod's logo for the page.
+- [images/banner.png](images/banner.png) - the 1300 x 372 banner for the top of the page.
 - Your own in-game screenshots - show the full map and the minimap during exploration.
 
 The folder also contains a checksum and file list for checking the download.
@@ -32,7 +33,7 @@ The folder also contains a checksum and file list for checking the download.
 1. Copy the summary and download description from `listing.json`.
 2. Use the text from `DESCRIPTION.md` for the main description. It is maintained here as Markdown; preserve its headings and lists in the Nexus editor.
 3. Add the release notes from `CHANGELOG.md`.
-4. Upload the logo and add your own in-game screenshots. Suggested captions: "Collectable locations on the full map" and "Find nearby collectables while exploring."
+4. Add the banner at the top of the page, upload the logo, and add your own in-game screenshots. Suggested captions: "Collectable locations on the full map" and "Find nearby collectables while exploring."
 5. Upload the mod ZIP as the main download.
 
 Keep the credits at the bottom of the description. Resolve publication rights as described in the third-party notice before publishing.
