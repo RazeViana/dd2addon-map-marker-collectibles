@@ -7,11 +7,17 @@ import re
 import shutil
 import uuid
 from zipfile import ZipFile, ZIP_DEFLATED
+from icon_assets import validate as validate_icon_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 PREFIX = "raze_MapMarkersAndCollectables"
 DATA = ROOT / "reframework/data" / PREFIX
 EXPECTED_FILES = {"10", "11", "12", "13", "161", "167", "465", "495", "653", "692", "693", "694"}
+# Only player-facing runtime files belong in the release, even if debug scripts are staged nearby.
+RUNTIME_FILES = [f"reframework/autorun/{PREFIX}.lua"] + [
+    f"reframework/autorun/{PREFIX}/{module}.lua"
+    for module in ("minimap", "nearby", "object_icons", "settings", "sprite_pool")
+]
 
 
 def build():
@@ -19,7 +25,6 @@ def build():
     version = metadata["version"]
     assert re.fullmatch(r"\d+\.\d+(?:\.\d+)?", version), "Invalid release version"
     assert f'imgui.text("v{version} - ' in (ROOT / f"reframework/autorun/{PREFIX}.lua").read_text(encoding="utf-8"), "UI version mismatch"
-    assert f'version = "{version}"' in (ROOT / f"reframework/autorun/{PREFIX}/diagnostics.lua").read_text(encoding="utf-8"), "Diagnostics version mismatch"
     assert f"**Current version: {version}.**" in (ROOT / "README.md").read_text(encoding="utf-8"), "README version mismatch"
     datasets = sorted(DATA.glob("*.json"))
     assert {path.stem for path in datasets} == EXPECTED_FILES, "Missing or unexpected location datasets"
@@ -39,8 +44,9 @@ def build():
             assert all(type(position[axis]) in (int, float) and math.isfinite(position[axis]) for axis in ("x", "y", "z"))
         location_count += len(locations)
     files = [ROOT / "modinfo.ini", ROOT / "README.md", ROOT / "CHANGELOG.md", ROOT / "THIRD_PARTY_NOTICES.md"]
-    files += sorted((ROOT / "reframework/autorun").rglob("*.lua"))
+    files += [ROOT / name for name in RUNTIME_FILES]
     files += datasets
+    files += validate_icon_assets()
     output = ROOT / f"dist/Map-Markers-and-Collectables-by-Raze-v{version}.zip"
     output.parent.mkdir(exist_ok=True)
     with ZipFile(output, "w", ZIP_DEFLATED) as package:
@@ -49,7 +55,14 @@ def build():
     with ZipFile(output) as package:
         assert package.testzip() is None
         assert len(package.namelist()) == len(files)
-        assert not any("_settings.json" in name for name in package.namelist())
+        names = set(package.namelist())
+        assert not any(re.search(r"diagnostic|probe|debug|_settings\.json", name, re.I) for name in names), "Development files in release"
+        assert {name for name in names if name.endswith(".lua")} == set(RUNTIME_FILES)
+        for name in RUNTIME_FILES:
+            source = package.read(name).decode("utf-8")
+            for dependency in re.findall(r'''require\(["']([^"']+)["']\)''', source):
+                if dependency.startswith(PREFIX + "."):
+                    assert "reframework/autorun/" + dependency.replace(".", "/") + ".lua" in names, f"Missing runtime dependency: {dependency}"
         package_manifest = [{"path": name, "bytes": len(package.read(name)),
                              "sha256": hashlib.sha256(package.read(name)).hexdigest()}
                             for name in package.namelist()]

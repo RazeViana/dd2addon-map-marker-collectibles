@@ -9,4 +9,6 @@
 
 **Raze** maintains this adaptation and its identity, nearby minimap rendering, upright symbols, expanded icon capacity, settings validation, error handling, and diagnostics. Compatibility changes already present in the supplied source are retained; their separate authorship has not been independently established.
 
+The four object-marker designs are included as SVG source. The extended atlas layouts retain Dragon's Dogma 2's native UV coordinates and reference its installed map textures; those game textures remain Capcom's assets and are not bundled in this download. The UVS and TEX file formats were checked against [REE-Lib](https://github.com/kagenocookie/RE-Engine-Lib) and [RE Engine 010 Templates](https://github.com/alphazolam/RE-Engine-010-Templates).
+
 The upstream Nexus permissions checked on 2026-09-06 require permission for modification and asset reuse and disallow Donation Points for mods using the assets. Permission has not been obtained. This notice preserves attribution and does not grant redistribution rights. [Nexus submission guidelines](https://help.nexusmods.com/article/28-file-submission-guidelines) distinguish attribution from permission.

@@ -17,9 +17,14 @@ function M.create(options)
         local ref = saved.ref
         ref:set_Visible(false)
         ref:set_IconType(saved.icon_type)
+        if saved.sequence ~= nil then
+          ref.Sprite:set_UVSequenceNo(saved.sequence)
+          ref.Sprite:set_UVPatternNo(saved.pattern)
+        end
         ref:set_Color(saved.color)
         ref:set_Position(saved.position)
         ref:set_Rotation(saved.rotation)
+        ref:set_Scale(saved.scale)
       end)
       if not ok then
         failed[#failed + 1] = saved
@@ -76,11 +81,16 @@ function M.create(options)
         if slot == nil then break end
         -- Record state before the first write, so a later setter failure can be undone.
         self.owned[#self.owned + 1] = { ref = slot, icon_type = slot:get_IconType(), color = slot:get_Color(),
-          position = slot:get_Position(), rotation = slot:get_Rotation() }
-        slot:set_IconType(marker.icon_type)
+          position = slot:get_Position(), rotation = slot:get_Rotation(), scale = slot:get_Scale(),
+          sequence = slot.Sprite and slot.Sprite:get_UVSequenceNo(),
+          pattern = slot.Sprite and slot.Sprite:get_UVPatternNo() }
+        slot:set_IconType(options.native_type and options.native_type(marker.icon_type) or marker.icon_type)
+        if options.apply_icon then options.apply_icon(ui, slot, marker.icon_type) end
         slot:set_Position(pos)
         -- Only directional markers need camera-relative heading; keep collectible glyphs upright.
         slot:set_Rotation(0)
+        local scale = options.get_icon_scale and options.get_icon_scale() or 1
+        slot:set_Scale(self.owned[#self.owned].scale * scale)
         options.set_color(slot, marker.icon_color)
         slot:set_Visible(true)
         self.count = self.count + 1

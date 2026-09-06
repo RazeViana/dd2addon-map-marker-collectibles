@@ -14,6 +14,8 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
   assert(actual.markers.Tokens.unacquired_show == true)
   assert(actual.markers.Chests.unacquired_show == false)
   assert(#actual.marker_order == 2)
+  assert(actual.object_icons == true)
+  assert(actual.icon_size == 50)
 end
 local actual = settings.normalize({ marker_order = { "Chests", "Chests", "Deleted" }, markers = {
   Tokens = { unacquired_show = false, acquired_show = "true", unacquired_icon_type = 999,
@@ -54,3 +56,11 @@ actual = settings.normalize({minimap={enabled=true,radius=100,height=30,max_mark
 assert(actual.minimap.radius == 100 and actual.minimap.height == 30 and actual.minimap.max_markers == 5)
 actual = settings.normalize({minimap={max_markers=200}}, names, types, generic)
 assert(actual.minimap.max_markers == 200, "expanded minimap limit is rejected")
+actual = settings.normalize({object_icons=false}, names, types, generic)
+assert(actual.object_icons == false, "game-symbol preference was lost")
+for _, size in ipairs({25, 50, 100, 150}) do
+  assert(settings.normalize({icon_size=size}, names, types, generic).icon_size == size)
+end
+for _, size in ipairs({0, 151, '50', 0/0}) do
+  assert(settings.normalize({icon_size=size}, names, types, generic).icon_size == 50)
+end

@@ -9,7 +9,7 @@
     "User Interface",
     "Quality of Life"
   ],
-  "summary": "Find Seeker's Tokens, Golden Trove Beetles, and chests on your map and minimap. Choose which items appear and customize their marker symbols and colors.",
+  "summary": "Find Seeker's Tokens, Golden Trove Beetles, and chests on your map and minimap. Choose which items appear and customize their marker symbols, colors, and size.",
   "required_mods": [
     {
       "name": "REFramework",

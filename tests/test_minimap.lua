@@ -2,7 +2,14 @@ local minimap = require("raze_MapMarkersAndCollectables.minimap")
 local time, reads = 0, 0
 local function icon(visible, color)
   return {
-    visible = visible, color = color, icon_type = 33, position = { x = 0, y = 0, z = 0 }, rotation = 0,
+    Sprite = { sequence = 7, pattern = 9,
+      get_UVSequenceNo = function(self) return self.sequence end,
+      set_UVSequenceNo = function(self, value) self.sequence = value end,
+      get_UVPatternNo = function(self) return self.pattern end,
+      set_UVPatternNo = function(self, value) self.pattern = value end },
+    visible = visible, color = color, icon_type = 33, position = { x = 0, y = 0, z = 0 }, rotation = 0, scale = 1.2,
+    get_Scale = function(self) return self.scale end,
+    set_Scale = function(self, value) self.scale = value end,
     get_Visible = function(self) return self.visible end,
     set_Visible = function(self, value) self.visible = value end,
     get_Color = function(self) return self.color end,
@@ -28,6 +35,11 @@ local markers = {
   { key = "edge", pos = {x=20,y=0,z=0}, icon_type = 25, icon_color = 100 }
 }
 local renderer = minimap.create({ settings = enabled, clock = function() return time end,
+  get_icon_scale = function() return 0.5 end,
+  native_type = function(value) return value == 76 and 31 or value end,
+  apply_icon = function(_, ref, value)
+    ref.Sprite:set_UVSequenceNo(2); ref.Sprite:set_UVPatternNo(value == 76 and 0 or 2)
+  end,
   get_markers = function() reads = reads + 1; return markers end,
   vector = function(pos) return pos end, set_color = function(ref, color) ref:set_Color(color) end })
 renderer:before(ui)
@@ -36,15 +48,19 @@ assert(icons[1].color == 10 and icons[1].visible, "native icon overwritten")
 assert(icons[2].visible and icons[2].color == 100 and icons[2].position.x == 10)
 assert(icons[3].visible and icons[3].position.x == 20)
 assert(renderer.count == 2)
+assert(icons[2].scale == 0.6 and icons[1].scale == 1.2, 'marker sizing affected a native icon')
 -- Collectible symbols are upright screen glyphs, regardless of camera heading.
 for _, heading in ipairs({0, math.pi / 2, math.pi, -math.pi / 2}) do
   ui.getSpriteIconRot = function() return heading end
   renderer:before(ui); renderer:after(ui)
   assert(icons[2].rotation == 0 and icons[3].rotation == 0,
     "collectible symbols rotate with the camera")
+  assert(icons[2].scale == 0.6, 'icon size shrank on repeated updates')
 end
 renderer:before(ui)
 assert(not icons[2].visible and icons[2].color == 20 and icons[2].icon_type == 33)
+assert(icons[2].Sprite.sequence == 7 and icons[2].Sprite.pattern == 9, 'borrowed atlas coordinates were not restored')
+assert(icons[2].scale == 1.2, 'native scale was not restored')
 -- The game can reclaim a previously unused slot on its next update.
 icons[2].visible = true; icons[2].color = 77
 renderer:after(ui)
@@ -106,3 +122,8 @@ assert(renderer.count == 200 and icons[256].visible and icons[256].color == 1000
 for i = 1, 56 do assert(icons[i].visible and icons[i].color == i, "native icon overwritten at high capacity") end
 renderer:clear()
 for i = 57, 256 do assert(not icons[i].visible and icons[i].color == i, "expanded slot not restored") end
+markers = {{key='token',pos={x=1,y=0,z=0},icon_type=76,icon_color=100}}
+renderer:invalidate(); renderer:after(ui)
+assert(icons[57].icon_type == 31 and icons[57].Sprite.pattern == 0, 'custom symbol was not drawn through a native slot')
+renderer:clear()
+assert(icons[57].Sprite.sequence == 7 and icons[57].Sprite.pattern == 9)

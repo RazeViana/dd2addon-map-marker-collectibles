@@ -22,6 +22,9 @@ end
 function M.normalize(loaded, names, marker_types, generic)
   if type(loaded) ~= "table" then loaded = {} end
   local result = { marker_order = {}, markers = {}, minimap = { enabled = true, radius = 180, height = 60, max_markers = 24 } }
+  result.object_icons = loaded.object_icons ~= false
+  local size = loaded.icon_size
+  result.icon_size = type(size) == "number" and size % 1 == 0 and size >= 25 and size <= 150 and size or 50
   local minimap = type(loaded.minimap) == "table" and loaded.minimap or {}
   if type(minimap.enabled) == "boolean" then result.minimap.enabled = minimap.enabled end
   for key, bounds in pairs({ radius = { 25, 300 }, height = { 10, 150 }, max_markers = { 1, 200 } }) do

@@ -3,7 +3,7 @@ param(
     [string]$GamePath
 )
 $ErrorActionPreference = 'Stop'
-$projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$debugRoot = Join-Path $PSScriptRoot 'development'
 $gameRoot = (Resolve-Path -LiteralPath $GamePath).Path
 if (-not (Test-Path -LiteralPath (Join-Path $gameRoot 'DD2.exe') -PathType Leaf)) {
     throw 'The target must be the game folder containing DD2.exe.'
@@ -13,7 +13,7 @@ $relativeFiles = @(
     'reframework/autorun/raze_MapMarkersAndCollectables/diagnostics.lua'
 )
 $copies = foreach ($relativePath in $relativeFiles) {
-    $source = [IO.Path]::GetFullPath((Join-Path $projectRoot $relativePath))
+    $source = [IO.Path]::GetFullPath((Join-Path $debugRoot $relativePath))
     $destination = [IO.Path]::GetFullPath((Join-Path $gameRoot $relativePath))
     if (-not $destination.StartsWith($gameRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
         throw 'Destination is outside the game folder.'

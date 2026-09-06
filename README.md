@@ -7,8 +7,11 @@ Find Seeker's Tokens, Golden Trove Beetles, and chests more easily in Dragon's D
 ## What it does
 
 - Shows tokens, beetles, and different types of chests on both maps.
+- Uses recognizable token, beetle, chest, and special chest symbols.
+- Shows simple names when you hover over full-map markers, such as **Chest (S)** and **Special Chest (L)**.
 - Lets you choose which items to show, including items you have already collected.
 - Lets you change marker symbols and colors to suit your preferences.
+- Starts with smaller icons and lets you adjust their size on both maps.
 - Keeps minimap symbols upright as you turn the camera.
 - Gives you more room for markers on both maps.
 - Lets you adjust how far away nearby items appear and how many markers appear on the minimap.
@@ -20,7 +23,7 @@ Tokens and beetles are shown by default. Turn on chest categories in the mod's m
 You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8). Install it first.
 
 1. Close the game and disable any other mod that adds collectable markers, so you do not see duplicates.
-2. Install `Map-Markers-and-Collectables-by-Raze-v1.0.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy its `reframework` folder into your game folder, alongside `DD2.exe`.
+2. Install `Map-Markers-and-Collectables-by-Raze-v1.0.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
 3. Start the game. In the REFramework menu, open **Script Generated UI > Map Markers and Collectables by Raze**.
 4. Choose the items you want to see, then explore with your full map or minimap.
 
@@ -28,7 +31,11 @@ You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdog
 
 Use the category options to choose what appears on your maps and change its symbol or color. **Unacquired** means items you have not collected; **Acquired** means items you have already collected.
 
+**Use object icons** gives tokens, beetles, chests, and special chests their own symbols. Turn it off to use your saved game symbols and choose others in each category. Your colors and category choices are kept. Chest labels use **S**, **M**, **L**, and **XL** for small, medium, large, and extra large.
+
 Turn **Show on minimap** on or off whenever you like. Under **Minimap settings**, you can change how far away items appear, limit markers above or below you, and choose how many nearby markers to show. Nearby items appear first. Lower the number if your minimap feels crowded.
+
+Use **Icon size (%)** to resize this mod's markers on both maps. The default is **50%** (half size), and the slider goes from **25% to 150%**.
 
 ## Need help?
 
@@ -43,9 +50,9 @@ To update, replace this mod's files with the new download. Keep `reframework/dat
 To uninstall, close the game and disable the mod in Fluffy Mod Manager. If you installed manually, remove these files and folders:
 
 - `reframework/autorun/raze_MapMarkersAndCollectables.lua`
-- `reframework/autorun/raze_MapMarkersAndCollectables_Diagnostics.lua`
 - `reframework/autorun/raze_MapMarkersAndCollectables/`
 - `reframework/data/raze_MapMarkersAndCollectables/`
+- `natives/stm/raze/mapmarkers/`
 
 You can keep the settings file if you plan to reinstall. Leave REFramework installed if your other mods use it.
 

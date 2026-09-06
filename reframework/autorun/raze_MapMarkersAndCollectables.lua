@@ -7,6 +7,12 @@ Source and dataset attribution: see THIRD_PARTY_NOTICES.md.
 local MOD_NAME = "Map Markers and Collectables by Raze"
 local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
+local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
+local object_icon_error
+local object_icons = object_icon_util.create(sdk, function(message)
+  object_icon_error = message
+  log.warn(MOD_NAME .. ": " .. message)
+end)
 local sprite_pools = require("raze_MapMarkersAndCollectables.sprite_pool").create(sdk)
 local capacity_status = {}
 local function ensure_icon_capacity(ui, kind, target)
@@ -81,6 +87,10 @@ do
       " from " .. expected)
   end
 end
+
+-- A valid item-name ID lets the game position and show its native hover panel.
+-- setupIconName below replaces the displayed text only for our own markers.
+local hover_name_guid = guid_parse(nil, "e26516a9-39b1-4e5d-a814-34aba7c7e023")
 
 local ui040205_add_map_icon_info_list = ui040205_t:get_method("addMapIconInfoList")
 local ui040205_add_map_icon_sprite_info_list = ui040205_t:get_method("addMapIconSpriteInfoList")
@@ -216,8 +226,8 @@ local marker_types =
     data = json.load_file("raze_MapMarkersAndCollectables/167.json"),
     gimmick_id = 167,
     get_state_callbacks = seeker_token_get_state_callbacks,
-    -- The message for "Seeker's Token" in natives/stm/message/ui/itemname.msg.22
-    name_guid = guid_parse(nil, "e26516a9-39b1-4e5d-a814-34aba7c7e023"),
+    name = "Seeker's Token",
+    object_icon = 76,
     settings_default =
     {
       unacquired_icon_type = 25,
@@ -234,8 +244,8 @@ local marker_types =
     data = json.load_file("raze_MapMarkersAndCollectables/161.json"),
     gimmick_id = 161,
     get_state_callbacks = golden_trove_beetle_get_state_callbacks,
-    -- The message for "Golden Trove Beetle" in natives/stm/message/ui/itemname.msg.22
-    name_guid = guid_parse(nil, "5ea2aa79-668a-45d2-8f5b-3d87203c90a9"),
+    name = "Golden Trove Beetle",
+    object_icon = 77,
     settings_default =
     {
       unacquired_icon_type = 25,
@@ -248,70 +258,70 @@ local marker_types =
   },
   ["Chests (S)"] =
   {
-    label = "Chests (S)",
+    label = "Small Chests",
     data = json.load_file("raze_MapMarkersAndCollectables/10.json"),
     gimmick_id = 10,
     get_state_callbacks = chest_get_state_callbacks,
-    -- The message for "I espy a chest, just yonder." in natives/stm/message/pawn/pawntalk_cmn.msg.22
-    name_guid = guid_parse(nil, "dea13d38-3955-48dd-8413-8e9defe16896"),
+    name = "Chest (S)",
+    object_icon = 78,
   },
   ["Chests (M)"] =
   {
-    label = "Chests (M)",
+    label = "Medium Chests",
     data = json.load_file("raze_MapMarkersAndCollectables/11.json"),
     gimmick_id = 11,
     get_state_callbacks = chest_get_state_callbacks,
-    -- The message for "Lo, a chest!" in natives/stm/message/pawn/pawntalk_cmn.msg.22
-    name_guid = guid_parse(nil, "cd63af40-607a-4ddc-895e-7c92ba3a8c57"),
+    name = "Chest (M)",
+    object_icon = 78,
   },
   ["Chests (L)"] =
   {
-    label = "Chests (L)",
+    label = "Large Chests",
     data = json.load_file("raze_MapMarkersAndCollectables/12.json"),
     gimmick_id = 12,
     get_state_callbacks = chest_get_state_callbacks,
-    -- The message for "What might yon chest contain?" in natives/stm/message/pawn/pawntalk_cmn.msg.22
-    name_guid = guid_parse(nil, "a46c513a-7881-4e88-8795-a55597d3bb62"),
+    name = "Chest (L)",
+    object_icon = 78,
   },
   -- 13, Sphinx's opulent chest
   -- 465, Chest (L), sealed by Sphinx
   ["Chests (XL)"] =
   {
-    label = "Chests (XL)",
+    label = "Extra Large Chests",
     tooltip = "Also known as 'sunken chests'. Most of these are only available in post-game.",
     data = json.load_file("raze_MapMarkersAndCollectables/495.json"),
     gimmick_id = 495,
     get_state_callbacks = chest_get_state_callbacks,
-    -- The message for "Do my eyes deceive me, or is that a treasure chest!?" in natives/stm/message/pawn/pawntalk_cmn.msg.22
-    name_guid = guid_parse(nil, "54950c76-795d-4a40-98fe-c18046a15b5d"),
+    name = "Chest (XL)",
+    object_icon = 78,
   },
   -- 653, Sphinx's opulent chest
   ["Special Chests (S)"] =
   {
-    label = "Special Chests (S)",
+    label = "Small Special Chests",
     data = json.load_file("raze_MapMarkersAndCollectables/692.json"),
     gimmick_id = 692,
     get_state_callbacks = chest_get_state_callbacks,
-    -- The message for "I espy a chest, just yonder." in natives/stm/message/pawn/pawntalk_cmn.msg.22
-    name_guid = guid_parse(nil, "dea13d38-3955-48dd-8413-8e9defe16896"),
+    name = "Special Chest (S)",
+    object_icon = 79,
   },
   ["Special Chests (M)"] =
   {
-    label = "Special Chests (M)",
+    label = "Medium Special Chests",
     data = json.load_file("raze_MapMarkersAndCollectables/693.json"),
     gimmick_id = 693,
     get_state_callbacks = chest_get_state_callbacks,
-    -- The message for "Lo, a chest!" in natives/stm/message/pawn/pawntalk_cmn.msg.22
-    name_guid = guid_parse(nil, "cd63af40-607a-4ddc-895e-7c92ba3a8c57"),
+    name = "Special Chest (M)",
+    object_icon = 79,
   },
   ["Special Chests (L)"] =
   {
-    label = "Special Chests (L)",
+    label = "Large Special Chests",
     data = json.load_file("raze_MapMarkersAndCollectables/694.json"),
     gimmick_id = 694,
     get_state_callbacks = chest_get_state_callbacks,
-    -- The message for "What might yon chest contain?" in natives/stm/message/pawn/pawntalk_cmn.msg.22
-    name_guid = guid_parse(nil, "a46c513a-7881-4e88-8795-a55597d3bb62"),
+    name = "Special Chest (L)",
+    object_icon = 79,
   },
 }
 -- also used as default ordering
@@ -382,16 +392,19 @@ local update_marker_count = function(game_count, script_count, remaining_count, 
 end
 
 local ui_map = nil
+local hover_labels = {}
 
 local draw_marker_type_settings = function(setting_prefix, marker_type, marker_settings)
   local icon_type_key = setting_prefix .. "_icon_type"
   local icon_color_key = setting_prefix .. "_icon_color"
   local icon_color_gui_key = setting_prefix .. "_icon_color_gui"
   local dirty = nil
-  local changed, new_value = imgui.drag_int("Icon Type", marker_settings[icon_type_key], 1, 0, 75)
-  if changed then
-    marker_settings[icon_type_key] = new_value
-    dirty = true
+  if not settings.object_icons then
+    local changed, new_value = imgui.drag_int("Icon Type", marker_settings[icon_type_key], 1, 0, 75)
+    if changed then
+      marker_settings[icon_type_key] = new_value
+      dirty = true
+    end
   end
   if imgui.tree_node("Icon Color") then
     local changed, new_value = imgui.color_picker_argb("", marker_settings[icon_color_gui_key], 0x30000)
@@ -414,7 +427,7 @@ local draw_marker_type_settings = function(setting_prefix, marker_type, marker_s
       marker_settings[icon_color_key] = settings_default[icon_color_key]
       marker_settings[icon_color_gui_key] = argb_to_abgr(settings_default[icon_color_key])
     end
-    dirty = false
+    dirty = true
   end
   return dirty
 end
@@ -426,6 +439,11 @@ re.on_draw_ui(function()
   local reorder_index = 0
   if imgui.tree_node(MOD_NAME) then
     imgui.text("v1.0 - Map and minimap markers")
+    local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
+    if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
+    local size_changed, icon_size = imgui.slider_int("Icon size (%)", settings.icon_size, 25, 150)
+    if size_changed then settings.icon_size = icon_size; markers_dirty = true end
+    if object_icon_error then imgui.text(object_icon_error) end
     if settings_message ~= nil then imgui.text(settings_message) end
     local changed, enabled = imgui.checkbox("Show on minimap", settings.minimap.enabled)
     if changed then
@@ -707,7 +725,7 @@ local get_markers = function(collectibles)
               id = collectible.id,
               pos = collectible.pos,
               marker_type = collectible.marker_type,
-              icon_type = icon_type,
+              icon_type = settings.object_icons and collectible.marker_type.object_icon or icon_type,
               icon_color = icon_color,
             })
         until true
@@ -756,11 +774,20 @@ local get_icon_pool = function(this)
   return pool, pool_used, pool_limit
 end
 
--- doot!
+local fullmap_sizes = {}
+local function restore_fullmap_sizes()
+  for _, saved in ipairs(fullmap_sizes) do saved.ref:set_Scale(saved.scale) end
+  fullmap_sizes = {}
+end
+local function apply_fullmap_sizes()
+  for _, saved in ipairs(fullmap_sizes) do saved.ref:set_Scale(saved.scale * settings.icon_size / 100) end
+end
+
 local add_markers = function(this)
   if this == nil then
     return
   end
+  hover_labels = {}
 
   local generate_manager = sdk.get_managed_singleton("app.GenerateManager")
   local gimmick_manager = sdk.get_managed_singleton("app.GimmickManager")
@@ -855,7 +882,7 @@ local add_markers = function(this)
       info.IconId        = 0
       info.SortNo        = 0
       info.UniqId        = marker.id
-      info.IconType      = marker.icon_type
+      info.IconType      = object_icon_util.native_type(marker.icon_type)
       info.Timing        = 0
       info.Pos           = vec3
       info.Area          = -1 -- app.AIAreaDefinition.None
@@ -869,17 +896,23 @@ local add_markers = function(this)
         0,
         icon_index_obj:get_address() + int_t_value_offset,
         -1,
-        marker_type.name_guid, false)
+        hover_name_guid, false)
       if ui_icon == nil then
         log.debug("failed to add icon for " .. marker.id:ToString())
         break
       end
+
+      -- A direct name keeps the hover label specific to this custom marker.
+      ui_icon.Name = marker_type.name
+      hover_labels[ui_icon:get_address()] = marker_type.name
 
       icon_index = icon_index_obj:read_dword(int_t_value_offset)
 
       -- no ref means no color, icon still shows though
       local map_icon_ref = ui_icon[icon_pool.ref]
       if map_icon_ref ~= nil then
+        fullmap_sizes[#fullmap_sizes + 1] = { ref = map_icon_ref, scale = map_icon_ref:get_Scale() }
+        object_icons:apply(this, "fullmap", map_icon_ref, marker.icon_type)
         icon_color_obj:write_dword(uint_t_value_offset, marker.icon_color)
         map_icon_ref:set_Color(icon_color_obj:get_address() + uint_t_value_offset)
       end
@@ -927,12 +960,25 @@ sdk.hook(
   ui040205_t:get_method("onDestroy"),
   function(args)
     sprite_pools:destroy(sdk.to_managed_object(args[2]), "fullmap")
+    object_icons:destroy(sdk.to_managed_object(args[2]), "fullmap")
+    fullmap_sizes = {}
+    hover_labels = {}
     ui_map = nil
   end,
   function(retval)
     return retval
   end
 )
+
+local hover_map
+sdk.hook(ui040205_t:get_method("setupIconName"),
+  function(args) hover_map = sdk.to_managed_object(args[2]) end,
+  function(retval)
+    local selected = hover_map and hover_map.SelectedIcon
+    local label = selected and hover_labels[selected:get_address()]
+    if label and hover_map.TxtName then hover_map.TxtName:set_Message(label) end
+    return retval
+  end)
 
 -- hook update so that setupMapIcon is called from within the UI thread (assumed) to avoid crashing calling it directly
 sdk.hook(
@@ -950,17 +996,29 @@ sdk.hook(
   end
 )
 
--- the juice
+-- Native updates can rewrite sprite scale; apply an absolute size to our own refs only.
+local scale_map
+sdk.hook(ui040205_t:get_method("updateMapIcon"),
+  function(args) scale_map = sdk.to_managed_object(args[2]) end,
+  function(retval)
+    if scale_map == ui_map then apply_fullmap_sizes() end
+    return retval
+  end)
+
 sdk.hook(
   ui040205_t:get_method("setupMapIcon"),
   function(args)
     ui_map = sdk.to_managed_object(args[2])
+    -- Restore borrowed state before native setup can reuse these slots for game icons.
+    restore_fullmap_sizes()
+    object_icons:clear(ui_map, "fullmap")
   end,
   function(retval)
     local this = ui_map
     if this ~= nil then
       add_markers(this)
       this:updateMapIcon()
+      apply_fullmap_sizes()
     end
     return retval
   end
@@ -993,6 +1051,9 @@ if ui020301_t and thread and thread.get_hook_storage then
     local color = uint_t:create_instance():add_ref()
     minimap_renderer = require("raze_MapMarkersAndCollectables.minimap").create({
       settings = settings.minimap, clock = os.clock, get_markers = get_minimap_markers,
+      native_type = object_icon_util.native_type,
+      get_icon_scale = function() return settings.icon_size / 100 end,
+      apply_icon = function(ui, ref, icon_type) object_icons:apply(ui, "minimap", ref, icon_type) end,
       vector = function(pos) return Vector3f.new(pos.x, pos.y, pos.z) end,
       set_color = function(ref, value)
         color:write_dword(uint_t_value_offset, value)
@@ -1028,14 +1089,20 @@ if ui020301_t and thread and thread.get_hook_storage then
         local this = sdk.to_managed_object(args[2])
         minimap_renderer:destroy(this)
         sprite_pools:destroy(this, "minimap")
+        object_icons:destroy(this, "minimap")
       end, function(retval) return retval end)
-    end
-    if re.on_script_reset then
-      re.on_script_reset(function() pcall(minimap_renderer.clear, minimap_renderer) end)
     end
   else
     minimap_error = "Minimap updateIcon is unavailable in this game version."
   end
 else
   minimap_error = "Minimap requires app.ui020301 and REFramework's thread API."
+end
+
+if re.on_script_reset then
+  re.on_script_reset(function()
+    if minimap_renderer then pcall(minimap_renderer.clear, minimap_renderer) end
+    pcall(restore_fullmap_sizes)
+    pcall(object_icons.restore, object_icons)
+  end)
 end
