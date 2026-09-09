@@ -2,7 +2,7 @@ local nearby = require("raze_MapMarkersAndCollectables.nearby")
 local M = {}
 
 function M.create(options)
-  local self = { count = 0, owned = {}, candidates = nil, refreshed_at = -math.huge, ui = nil,
+  local self = { count = 0, height_count = 0, owned = {}, candidates = nil, refreshed_at = -math.huge, ui = nil,
     update_count = 0, status = "Waiting for the minimap HUD" }
 
   function self:invalidate()
@@ -11,7 +11,7 @@ function M.create(options)
 
   function self:clear()
     local failed, first_error = {}, nil
-    self.count = 0
+    self.count, self.height_count = 0, 0
     for _, saved in ipairs(self.owned) do
       local ok, err = pcall(function()
         local ref = saved.ref
@@ -45,14 +45,14 @@ function M.create(options)
       self.candidates, self.refreshed_at = candidates, refreshed_at
     else
       -- The old HUD may already be destroyed; never dereference its sprite objects.
-      self.owned, self.count, self.candidates = {}, 0, nil
+      self.owned, self.count, self.height_count, self.candidates = {}, 0, 0, nil
       self.ui = ui
     end
   end
 
   function self:after(ui)
     local settings = options.settings
-    self.count = 0
+    self.count, self.height_count = 0, 0
     if not settings.enabled then self.status = "Disabled"; return end
     if not ui.IsInit or ui.PlChara == nil or ui.MapIconList == nil then
       self.status = "Waiting for the player and minimap"; return
@@ -69,38 +69,75 @@ function M.create(options)
     local cursor, count = 0, pool:get_Count()
     local screen_radius = ui.MapOutRange
     if type(screen_radius) ~= "number" or screen_radius <= 0 then return end
+    local function borrow_slot()
+      while cursor < count do
+        local ref = pool:get_Item(cursor)
+        cursor = cursor + 1
+        if ref and not ref:get_Visible() then
+          -- Record state before the first write so partial failures can be undone.
+          local saved = { ref = ref, icon_type = ref:get_IconType(), color = ref:get_Color(),
+            position = ref:get_Position(), rotation = ref:get_Rotation(), scale = ref:get_Scale(),
+            sequence = ref.Sprite and ref.Sprite:get_UVSequenceNo(),
+            pattern = ref.Sprite and ref.Sprite:get_UVPatternNo() }
+          self.owned[#self.owned + 1] = saved
+          return ref, saved
+        end
+      end
+    end
+    local indicators = {}
     for _, marker in ipairs(selected) do
       local pos = ui:getIconPos(options.vector(marker.pos))
       if pos.x * pos.x + pos.y * pos.y <= screen_radius * screen_radius then
-        local slot
-        while cursor < count do
-          local ref = pool:get_Item(cursor)
-          cursor = cursor + 1
-          if ref and not ref:get_Visible() then slot = ref; break end
-        end
+        local slot, saved = borrow_slot()
         if slot == nil then break end
-        -- Record state before the first write, so a later setter failure can be undone.
-        self.owned[#self.owned + 1] = { ref = slot, icon_type = slot:get_IconType(), color = slot:get_Color(),
-          position = slot:get_Position(), rotation = slot:get_Rotation(), scale = slot:get_Scale(),
-          sequence = slot.Sprite and slot.Sprite:get_UVSequenceNo(),
-          pattern = slot.Sprite and slot.Sprite:get_UVPatternNo() }
         slot:set_IconType(options.native_type and options.native_type(marker.icon_type) or marker.icon_type)
         if options.apply_icon then options.apply_icon(ui, slot, marker.icon_type) end
         slot:set_Position(pos)
         -- Only directional markers need camera-relative heading; keep collectible glyphs upright.
         slot:set_Rotation(0)
         local scale = options.get_icon_scale and options.get_icon_scale() or 1
-        slot:set_Scale(self.owned[#self.owned].scale * scale)
+        slot:set_Scale(saved.scale * scale)
         options.set_color(slot, marker.icon_color)
         slot:set_Visible(true)
         self.count = self.count + 1
+        if settings.height_indicators and options.apply_height and slot.Sprite then
+          local difference = marker.pos.y - origin.y
+          if math.abs(difference) > (settings.height_tolerance or 3) then
+            indicators[#indicators + 1] = { x = pos.x, y = pos.y, z = pos.z,
+              direction = difference > 0 and 1 or -1, color = marker.icon_color,
+              scale = saved.scale * scale, height = math.abs(slot.Sprite:get_Size().h) }
+          end
+        end
+      end
+    end
+    -- Collectible markers get priority; arrows use only the slots still available.
+    local arrow_slot
+    for _, indicator in ipairs(indicators) do
+      local slot = arrow_slot or borrow_slot()
+      if not slot then break end
+      -- Keep an unshown slot available if this arrow is clipped or has no artwork.
+      arrow_slot = slot
+      slot:set_IconType(31)
+      slot:set_Scale(indicator.scale * 0.6)
+      if options.apply_height(ui, slot, indicator.direction) then
+        local offset = (indicator.height + math.abs(slot.Sprite:get_Size().h)) / 2 + 2
+        local pos = options.vector({ x = indicator.x, y = indicator.y - indicator.direction * offset, z = indicator.z })
+        if pos.x * pos.x + pos.y * pos.y <= screen_radius * screen_radius then
+          slot:set_Position(pos)
+          slot:set_Rotation(0)
+          options.set_color(slot, indicator.color)
+          slot:set_Visible(true)
+          if slot.TexBG then slot.TexBG:set_Visible(false) end
+          self.height_count = self.height_count + 1
+          arrow_slot = nil
+        end
       end
     end
   end
 
   function self:destroy(ui)
     if self.ui == ui then
-      self.owned, self.ui, self.candidates, self.count = {}, nil, nil, 0
+      self.owned, self.ui, self.candidates, self.count, self.height_count = {}, nil, nil, 0, 0
     end
   end
   return self

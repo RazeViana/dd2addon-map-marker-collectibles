@@ -66,6 +66,16 @@ manager=module.create(api)
 assert(manager:ensure(map,"fullmap",5)==5 and created==previous_created)
 assert(manager:ensure(map,"minimap",4)==4 and map.MapIconList:get_Count()==4)
 assert(map.MapIconList:get_Item(0).Sprite.visible, "native slots changed")
+-- Turning on height indicators can grow a running minimap without replacing native entries.
+local native_minimap_slot = map.MapIconList:get_Item(0)
+assert(manager:ensure(map,"minimap",512)==512)
+assert(map.MapIconList:get_Item(0)==native_minimap_slot and native_minimap_slot.Sprite.visible)
+previous_created=created
+assert(manager:ensure(map,"minimap",256)==512 and created==previous_created,
+  "disabling height indicators rebuilt the minimap pool")
+manager=module.create(api)
+assert(manager:ensure(map,"minimap",512)==512 and created==previous_created,
+  "script reset duplicated the arrow-capable pool")
 -- Failure before publication leaves the native pool intact and is not retried every frame.
 map=ui(); original=map.MapIconSprite; array_fail=true
 local count, err=manager:ensure(map,"fullmap",5)

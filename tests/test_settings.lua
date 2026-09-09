@@ -16,6 +16,10 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
   assert(#actual.marker_order == 2)
   assert(actual.object_icons == true)
   assert(actual.icon_size == 50)
+  assert(actual.fullmap and actual.fullmap.enabled == true,
+    "existing settings must keep full-map markers enabled")
+  assert(actual.minimap.height_indicators == true and actual.minimap.height_tolerance == 3,
+    "height indicators must default on with a small level-height tolerance")
 end
 local actual = settings.normalize({ marker_order = { "Chests", "Chests", "Deleted" }, markers = {
   Tokens = { unacquired_show = false, acquired_show = "true", unacquired_icon_type = 999,
@@ -56,6 +60,26 @@ actual = settings.normalize({minimap={enabled=true,radius=100,height=30,max_mark
 assert(actual.minimap.radius == 100 and actual.minimap.height == 30 and actual.minimap.max_markers == 5)
 actual = settings.normalize({minimap={max_markers=200}}, names, types, generic)
 assert(actual.minimap.max_markers == 200, "expanded minimap limit is rejected")
+actual = settings.normalize({minimap={height_indicators=false,height_tolerance=8}}, names, types, generic)
+assert(actual.minimap.height_indicators == false and actual.minimap.height_tolerance == 8,
+  "saved height-indicator preferences were lost")
+for _, tolerance in ipairs({0, 1, 30}) do
+  actual = settings.normalize({minimap={height_tolerance=tolerance}}, names, types, generic)
+  assert(actual.minimap.height_tolerance == tolerance)
+end
+for _, tolerance in ipairs({-1, 31, 1.5, '3', 0/0}) do
+  actual = settings.normalize({minimap={height_indicators='false',height_tolerance=tolerance}}, names, types, generic)
+  assert(actual.minimap.height_indicators == true and actual.minimap.height_tolerance == 3)
+end
+for _, enabled in ipairs({ false, true }) do
+  actual = settings.normalize({fullmap={enabled=enabled},minimap={enabled=not enabled}}, names, types, generic)
+  assert(actual.fullmap.enabled == enabled, "saved full-map visibility was lost")
+  assert(actual.minimap.enabled == not enabled, "map visibility settings are coupled")
+end
+for _, fullmap in ipairs({false, "bad", {}, {enabled="false"}, {enabled=0}}) do
+  actual = settings.normalize({fullmap=fullmap}, names, types, generic)
+  assert(actual.fullmap.enabled == true, "malformed full-map settings lost the enabled default")
+end
 actual = settings.normalize({object_icons=false}, names, types, generic)
 assert(actual.object_icons == false, "game-symbol preference was lost")
 for _, size in ipairs({25, 50, 100, 150}) do

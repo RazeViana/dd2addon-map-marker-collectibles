@@ -1,0 +1,36 @@
+{
+  "title": "Map Markers and Collectables by Raze",
+  "game": "Dragon's Dogma 2",
+  "game_domain": "dragonsdogma2",
+  "version": "1.2",
+  "author": "Raze",
+  "category": "User Interface",
+  "suggested_tags": [
+    "User Interface",
+    "Quality of Life"
+  ],
+  "summary": "Find tokens, beetles, and chests on your map and minimap. Height arrows show items above or below you. Choose which maps and items show markers, with custom symbols, colors, and size.",
+  "required_mods": [
+    {
+      "name": "REFramework",
+      "url": "https://www.nexusmods.com/dragonsdogma2/mods/8",
+      "notes": "Required. Install REFramework for Dragon's Dogma 2 before this mod."
+    }
+  ],
+  "main_file": {
+    "category": "Main Files",
+    "name": "Map Markers and Collectables by Raze",
+    "version": "1.2",
+    "archive": "Map-Markers-and-Collectables-by-Raze-v1.2.zip",
+    "description": "Version 1.2. Adds minimap height arrows and independent full-map visibility, fixes the marker-name script error, and includes zoom, beetle-state, and packaging fixes. Requires REFramework. Install the complete ZIP and restart the game."
+  },
+  "donation_points": false,
+  "publication_status": "See THIRD_PARTY_NOTICES.md for source credits and publication permissions",
+  "permission_confirmed": false,
+  "permission_checked_on": "2026-09-06",
+  "source_notice": "../../THIRD_PARTY_NOTICES.md",
+  "description_file": "DESCRIPTION.md",
+  "logo_file": "images/logo.png",
+  "banner_file": "images/banner.png",
+  "release_notes_file": "RELEASE-NOTES.md"
+}

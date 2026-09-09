@@ -1,4 +1,4 @@
--- The extended atlases retain the native patterns and append our four object symbols.
+-- Extended atlases preserve native patterns and add object symbols and minimap arrows.
 local M = {}
 local original_paths = {
   fullmap = 'Gui/ui01/Common/map/UVS_map_01.uvs',
@@ -27,8 +27,8 @@ function M.create(api, warn)
     state.refs = {}
   end
 
-  function self:apply(ui, kind, ref, icon_type)
-    if M.native_type(icon_type) == icon_type or not ref or not ref.Sprite then return false end
+  local function apply_pattern(ui, kind, ref, sequence, pattern)
+    if not ref or not ref.Sprite then return false end
     local state = self.states[kind]
     if not state or state.ui ~= ui then
       state = { ui = ui, refs = {} }
@@ -46,7 +46,7 @@ function M.create(api, warn)
       end)
       if not ok then
         state.error = tostring(err)
-        warn('Object icons unavailable; using game symbols. ' .. state.error)
+        warn('Custom map artwork unavailable; using game symbols without height indicators. ' .. state.error)
       end
     end
     if state.error then return false end
@@ -55,9 +55,18 @@ function M.create(api, warn)
     if kind == 'fullmap' then
       state.refs[#state.refs + 1] = { sprite = sprite, sequence = sprite:get_UVSequenceNo(), pattern = sprite:get_UVPatternNo() }
     end
-    sprite:set_UVSequenceNo(2)
-    sprite:set_UVPatternNo(icon_type - 76)
+    sprite:set_UVSequenceNo(sequence)
+    sprite:set_UVPatternNo(pattern)
     return true
+  end
+
+  function self:apply(ui, kind, ref, icon_type)
+    if M.native_type(icon_type) == icon_type then return false end
+    return apply_pattern(ui, kind, ref, 2, icon_type - 76)
+  end
+
+  function self:apply_height(ui, ref, direction)
+    return apply_pattern(ui, 'minimap', ref, 3, direction > 0 and 0 or 1)
   end
 
   function self:destroy(ui, kind)

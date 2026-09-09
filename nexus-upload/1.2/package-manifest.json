@@ -1,0 +1,132 @@
+[
+  {
+    "path": "modinfo.ini",
+    "bytes": 238,
+    "sha256": "4caff4633b1c7a5dbb023cae6e1a3b58d7f0aad551a983edcd495a7b1d46f400"
+  },
+  {
+    "path": "docs/raze_MapMarkersAndCollectables/README.md",
+    "bytes": 5048,
+    "sha256": "fa16cffdda7413ab41f4bf1ac4efe5ced33f89d9c30f93928a48093cd554a25f"
+  },
+  {
+    "path": "docs/raze_MapMarkersAndCollectables/CHANGELOG.md",
+    "bytes": 1728,
+    "sha256": "e30650eea33a1e9dcec0d5c2495aa0b6ae50ec7c272d3ee614e8784435bfaed7"
+  },
+  {
+    "path": "docs/raze_MapMarkersAndCollectables/THIRD_PARTY_NOTICES.md",
+    "bytes": 1858,
+    "sha256": "38d8a2e8459a4255ade5c474ef620bd8ba45e50c85904e6a20d4e1194ca18696"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables.lua",
+    "bytes": 39543,
+    "sha256": "b8edf46f69dbd66f69c920f7ad9f6dbf986348a88b0bf3221ee0eaa3de70dcdb"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/minimap.lua",
+    "bytes": 6039,
+    "sha256": "36ffe289de03e34d43a620fd81a6009acf2bb5f2e68f49b66844635b26032dd3"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/nearby.lua",
+    "bytes": 907,
+    "sha256": "5617beaef8f876e6fe8db86db6296da828533a6173098a2097018a96ebfe0107"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/object_icons.lua",
+    "bytes": 3185,
+    "sha256": "341a78f75f034750d8972a47fb9ea4b13c8648fd4cfce7b516e66dd8819dea9b"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/settings.lua",
+    "bytes": 3032,
+    "sha256": "09f606fbb9e029c407edfab09a205c059cfbd2b7d579ca656a42eb0c00e1824e"
+  },
+  {
+    "path": "reframework/autorun/raze_MapMarkersAndCollectables/sprite_pool.lua",
+    "bytes": 3604,
+    "sha256": "66271feec3ebaa30b4939773f60e241f32b31b117bf18000530f24020f3a4779"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/10.json",
+    "bytes": 49785,
+    "sha256": "e0bffbf2c0ca37e6bb46c6e40726f98b8e7fbac1f37d47f4743c6a5411cdc895"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/11.json",
+    "bytes": 18241,
+    "sha256": "a21ea1730ccd6856c3628a3d67d5e24f9fcbefdb826c86b28dc6629778c0191b"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/12.json",
+    "bytes": 5442,
+    "sha256": "9494c3d028b4d1bf3f35a0171b1247571ac012d6637a4cce367dee7bde6d56e2"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/13.json",
+    "bytes": 268,
+    "sha256": "c304e26b445f86d3001cc74d03c9de6f3c7233627e88e4d681b2ac3118dde665"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/161.json",
+    "bytes": 6790,
+    "sha256": "104f607c866d3653f594b761c79fa8246f08db79afbe4b6ab6246b2acd004123"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/167.json",
+    "bytes": 20111,
+    "sha256": "6547164f117520d1c9c5341411b450b0d0e2c8b9b4f04d17aa9d4cb9429363b7"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/465.json",
+    "bytes": 1015,
+    "sha256": "c4dcb0f4306026ac13c37b0046c7faa574a464105d4956d55f79d8ef47479d77"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/495.json",
+    "bytes": 7260,
+    "sha256": "28859a3628c261115e15c7633e3182c3ebdba31e08b36048808a3aa107a5c30b"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/653.json",
+    "bytes": 270,
+    "sha256": "50d9a18f52dfbbc63fead776af237a4ee4d53771dcd5b27449a84357067b4584"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/692.json",
+    "bytes": 270,
+    "sha256": "626c4610e4ec08a4038036c12461f98934e9e56ffd21774628ef3fc6049520c2"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/693.json",
+    "bytes": 514,
+    "sha256": "1d417505ef58dbfbe18f61cf020458d5807e3ac8879b01c3b8fbfa293b7b5417"
+  },
+  {
+    "path": "reframework/data/raze_MapMarkersAndCollectables/694.json",
+    "bytes": 270,
+    "sha256": "e074f36c4860db646e2f16284853af717dda287a1b7ad8ae3ad2538e41cd72df"
+  },
+  {
+    "path": "natives/stm/raze/mapmarkers/fullmap.uvs.8",
+    "bytes": 3228,
+    "sha256": "5a283104d5efd7542893a73d9095f51beb538d2944842d7122b56ea031428724"
+  },
+  {
+    "path": "natives/stm/raze/mapmarkers/minimap.uvs.8",
+    "bytes": 3312,
+    "sha256": "c0583e2d49873bb1368f23e3bb77deb4219c622c534e65ebe8c221a44acb8bfa"
+  },
+  {
+    "path": "natives/stm/raze/mapmarkers/markers.tex.251211553",
+    "bytes": 262200,
+    "sha256": "7d67b283c8fe54c9deb43a601cd83db12379ca6d7b2ecf9587f172a7082d1bd9"
+  },
+  {
+    "path": "natives/stm/raze/mapmarkers/height-arrows.tex.251211553",
+    "bytes": 131128,
+    "sha256": "b8a21a84ff73138227217b106a6f5d31ead5a75b41623327764a97d34d1d91b1"
+  }
+]

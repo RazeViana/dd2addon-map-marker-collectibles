@@ -4,6 +4,17 @@ local hooks, callbacks, objects, next_address = {}, {}, {}, 1000
 local messages, writes, ids, toggled = {}, {}, {}, false
 local settings_reads = {}
 local managers = {}
+local gimmicks_by_type, saved_keys, saved_records = {}, {}, {}
+local minimap_get_markers, minimap_options
+local minimap_module = require("raze_MapMarkersAndCollectables.minimap")
+local create_minimap = minimap_module.create
+minimap_module.create = function(options)
+  minimap_options = options
+  minimap_get_markers = options.get_markers
+  return create_minimap(options)
+end
+local hook_storage = {}
+thread = { get_hook_storage = function() return hook_storage end }
 local function list(items)
   return { get_Count = function() return #items end, get_Item = function(_, i) return items[i + 1] end }
 end
@@ -28,7 +39,7 @@ local map = {
   MapIcon = { get_Length = function() return 1 end },
   MapIconSprite = { get_Length = function() return 3 end },
   MapIconInfoList = list({ { IconSprite = {} } }),
-  emitted = {}, refreshes = 0, NowScale = 1,
+  emitted = {}, refreshes = 0, NowScale = 1, IconScale = 1,
   isInDispRange = function(_, pos) return pos.x > 0 end,
   get_Valid = function() return true end,
   updateMapIcon = function(self) self.refreshes = self.refreshes + 1 end
@@ -38,7 +49,7 @@ function map:setMapScale()
   hooks["app.ui040205.setupMapIcon"].pre({ [2] = self })
   for _, info in ipairs(previous) do
     local ref = info.ui_icon.IconSprite
-    assert(ref.scale == 1, 'borrowed scale was not restored before native setup')
+    assert(ref.scale == ref.initial_scale, 'borrowed scale was not restored before native setup')
     assert(ref.Sprite.sequence == 1, 'borrowed UV sequence was not restored before native setup')
     -- Native setup may reuse old custom slots for unrelated game icons.
     ref.scale, ref.Sprite.sequence, ref.Sprite.pattern = 2, 0, 3
@@ -53,7 +64,12 @@ function map:setMapScale()
   end
 end
 local function method(type_name, name)
-  if name == "getGimmickList(app.GimmickID)" then return function() return list({}) end end
+  if name == "getGimmickList(app.GimmickID)" then
+    return function(_, id) return list(gimmicks_by_type[id] or {}) end
+  end
+  if name == "getContext(System.Type)" then
+    return function(record, context_type) return record[context_type] end
+  end
   if name == "addMapIconInfoList" or name == "addMapIconSpriteInfoList" then
     return function(self, info, _, pointer, _, name_guid)
       assert(info.Pos.x > 0 and info.IsEnable and info.UniqId ~= nil)
@@ -62,8 +78,20 @@ local function method(type_name, name)
       cursor.value = cursor.value + 1
       self.emitted[#self.emitted + 1] = info
       local ui_icon = box()
-      ui_icon.Name, ui_icon.NameId = "Pawn dialogue", name_guid
-      ui_icon.IconSprite = { scale = 1,
+      ui_icon.NameId = name_guid
+      assert(name_guid:call("ToString") == "e26516a9-39b1-4e5d-a814-34aba7c7e023",
+        "missing native item-name GUID for the hover panel")
+      -- Reproduce the reported native newindex failure while keeping reads valid.
+      -- Marker creation and hover text must work without assigning the Name field.
+      setmetatable(ui_icon, {
+        __index = function(_, key) if key == "Name" then return "Native item name" end end,
+        __newindex = function(self, key, value)
+          if key == "Name" then error("native MapIconInfo.Name assignment rejected") end
+          rawset(self, key, value)
+        end
+      })
+      local slot_scale = self.slot_scales and self.slot_scales[#self.emitted] or 1
+      ui_icon.IconSprite = { scale = slot_scale, initial_scale = slot_scale,
         get_Scale = function(self) return self.scale end,
         set_Scale = function(self, value) self.scale = value end,
         set_Color = function(_, color_pointer)
@@ -92,7 +120,7 @@ sdk = {
   end,
   hook = function(member, pre, post) hooks[member] = { pre = pre, post = post } end,
   get_managed_singleton = function(name) return managers[name] end,
-  to_managed_object = function(value) return value end
+  to_managed_object = function(value) return objects[value] or value end
 }
 ValueType = { new = function()
   local value = { bytes = {} }
@@ -160,8 +188,25 @@ local lock_count = 0
 local database = { Lock = {
   readLock = function() lock_count = lock_count + 1 end,
   readUnlock = function() lock_count = lock_count - 1 end },
-  IndexCreator = { UniqueID2Keys = { TryGetValue = function() return false end } }
+  IndexCreator = { UniqueID2Keys = { TryGetValue = function(_, id, pointer)
+    local key = saved_keys[id.key]
+    if not key then return false end
+    objects[pointer].value = key:get_address()
+    return true
+  end } },
+  Records = setmetatable({ get_Count = function() return #saved_records end }, {
+    __index = function(_, index) return saved_records[index + 1] end
+  })
 }
+local function save_context(guid, context_type, context)
+  local key = box()
+  key.KeyForSystem = #saved_records
+  key.get_IsValid = function() return true end
+  saved_keys[guid] = key
+  saved_records[#saved_records + 1] = {
+    get_Record = function() return { [context_type] = context } end
+  }
+end
 managers["app.GenerateManager"] = { isNeverGenerate = function() return false end }
 managers["app.GimmickManager"] = {}
 managers["app.ContextDBMS"] = { get_CurrentDB = function() return database end }
@@ -169,7 +214,6 @@ map:setMapScale()
 assert(lock_count == 0)
 assert(#map.emitted == 2)
 assert(map.emitted[1].color == 0xFF00CC00)
-assert(map.emitted[1].ui_icon.Name == "Seeker's Token", "custom hover label was not assigned")
 assert(map.emitted[1].IconType == 31 and map.emitted[1].ui_icon.IconSprite.Sprite.pattern == 0,
   'token did not use the token artwork')
 assert(map.emitted[1].ui_icon.IconSprite.scale == 0.5, 'full-map icon was not halved')
@@ -177,6 +221,32 @@ local size_hook = hooks['app.ui040205.updateMapIcon']
 size_hook.pre({[2]=map}); size_hook.post(91)
 size_hook.pre({[2]=map}); size_hook.post(91)
 assert(map.emitted[1].ui_icon.IconSprite.scale == 0.5, 'full-map size accumulated')
+-- Reused and newly available slots can retain scales from different zoom levels.
+-- Both tokens must use the current map scale, including when native updates skip a slot.
+map.slot_scales, map.IconScale = { 0.6, 1.2 }, 0.8
+map:setMapScale()
+for _, info in ipairs(map.emitted) do
+  assert(math.abs(info.ui_icon.IconSprite.scale - 0.4) < 1e-6,
+    'same token artwork has different sizes after reusing slots at a new zoom')
+end
+local native_ref = { scale = 1.7, set_Scale = function(self, value) self.scale = value end }
+map.MapIconInfoList = list({ { IconSprite = native_ref }, map.emitted[1].ui_icon, map.emitted[2].ui_icon })
+for _, zoom in ipairs({ { 1.2, 0.6 }, { 0.6, 0.3 }, { 0.8, 0.4 } }) do
+  map.IconScale = zoom[1]
+  for frame = 1, 3 do
+    size_hook.pre({ [2] = map })
+    -- Simulate native scale writes for only one of the two custom slots.
+    map.emitted[1].ui_icon.IconSprite.scale = map.IconScale
+    assert(size_hook.post(91) == 91)
+    for _, info in ipairs(map.emitted) do
+      assert(math.abs(info.ui_icon.IconSprite.scale - zoom[2]) < 1e-6,
+        'custom sizes did not follow zoom consistently or accumulated across frames')
+    end
+    assert(native_ref.scale == 1.7, 'zoom sizing changed a native marker')
+  end
+end
+map.slot_scales, map.IconScale = nil, 1
+map:setMapScale()
 local hover_hook = hooks["app.ui040205.setupIconName"]
 assert(hover_hook, "map hover display is not hooked")
 map.TxtName = { message = "Native text", set_Message = function(self, message) self.message = message end }
@@ -220,13 +290,81 @@ for category, label in pairs({
       or category:find('Special', 1, true) and 3 or 2
     assert(emitted.IconType == 31 and emitted.ui_icon.IconSprite.Sprite.sequence == 2
       and emitted.ui_icon.IconSprite.Sprite.pattern == expected, 'wrong object artwork for ' .. category)
-    assert(emitted.ui_icon.Name == label, "wrong hover label for " .. category)
     map.SelectedIcon = emitted.ui_icon
     map.TxtName.message = "Native text"
     hover_hook.pre({ [2] = map }); hover_hook.post(91)
     assert(map.TxtName.message == label, "native hover text was not replaced for " .. category)
   end
 end
+-- A save can contain acquired state before the mod has ever seen a pickup.
+local beetle_guid = "00000004-0000-0000-0000-000000000000"
+local function show_category(category)
+  for name, marker in pairs(saved_settings.markers) do
+    marker.unacquired_show, marker.acquired_show = name == category, false
+  end
+  hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
+end
+show_category("Golden Trove Beetles")
+save_context(beetle_guid, "app.GatherContext", { get_Num = function() return 0 end })
+map:setMapScale()
+assert(#map.emitted == 0, 'previously collected beetle appeared before its area loaded')
+-- In NG+ an empty beetle location may still have a loaded gimmick reporting not broken.
+gimmicks_by_type[161] = {{
+  get_UniqId = function() return { ToString = function() return beetle_guid .. "_0" end } end,
+  get_IsBroken = function() return false end
+}}
+local nearby_markers = minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60)
+assert(#nearby_markers == 0, 'nearby refresh resurrected a beetle already collected in the save')
+hooks["app.ui040205..ctor"].pre({ [2] = map })
+hooks["app.ui040205..ctor"].post(91)
+map:setMapScale()
+assert(#map.emitted == 0, 'nearby refresh made a collected beetle reappear on the world map')
+-- An acquired-only view must use the same saved status, rather than simply suppress the icon.
+saved_settings.markers["Golden Trove Beetles"].unacquired_show = false
+saved_settings.markers["Golden Trove Beetles"].acquired_show = true
+hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
+assert(#minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 1,
+  'saved beetle was not classified as acquired')
+-- Loading a different save must discard the previous save's acquired cache.
+saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
+show_category("Golden Trove Beetles")
+save_context(beetle_guid, "app.GatherContext", { get_Num = function() return 1 end })
+map:setMapScale()
+assert(#map.emitted == 1, 'another save inherited acquired beetle state')
+gimmicks_by_type[161] = {{
+  get_UniqId = function() return { ToString = function() return beetle_guid .. "_0" end } end,
+  get_IsBroken = function() return false end
+}}
+assert(#minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 1,
+  'an uncollected beetle was hidden when its area loaded')
+saved_keys, saved_records = {}, {}
+assert(#minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 1,
+  'a beetle with no saved collection record was assumed acquired')
+save_context(beetle_guid, "app.GatherContext", { get_Num = function() return 1 end })
+-- A fresh pickup can be observed live before the saved context catches up.
+gimmicks_by_type[161] = {{
+  get_UniqId = function() return { ToString = function() return beetle_guid .. "_0" end } end,
+  get_IsBroken = function() return true end
+}}
+assert(#minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 0,
+  'fresh beetle pickup was ignored while saved state lagged')
+-- Existing token and chest saves are also read without a live object or pickup history.
+saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
+show_category("Seeker's Tokens")
+save_context("00000001-0000-0000-0000-000000000000", "app.GimmickContext", {
+  isOnFreeBit = function(_, bit) assert(bit == 16); return true end
+})
+map:setMapScale()
+assert(#map.emitted == 1 and map.emitted[1].UniqId.key == "00000002-0000-0000-0000-000000000000",
+  'existing token save was not distinguished from an uncollected token')
+saved_keys, saved_records = {}, {}
+show_category("Chests (S)")
+save_context(beetle_guid, "app.GmItemContext", { get_IsPick = function() return true end })
+map:setMapScale()
+assert(#map.emitted == 0, 'previously opened chest appeared with no live object')
+saved_keys, saved_records = {}, {}
+show_category("Special Chests (L)")
+map:setMapScale()
 -- Switching to game symbols retains the saved choice and forces a map refresh.
 local old_checkbox = imgui.checkbox
 imgui.checkbox = function(label, value)
@@ -242,6 +380,83 @@ imgui.slider_int = function(_, value) return true, 125 end
 callbacks.ui(); hooks['app.ui040205.update'].pre({[2]=map})
 assert(map.emitted[1].ui_icon.IconSprite.scale == 1.25, 'size slider did not refresh game symbols')
 imgui.slider_int = function(_, value) return false, value end
+-- Full-map visibility is independent, refreshes an open map, and survives saving.
+local function toggle_map(label, enabled)
+  local found = false
+  imgui.checkbox = function(name, value)
+    if name == label then found = true; return value ~= enabled, enabled end
+    return false, value
+  end
+  callbacks.ui()
+  imgui.checkbox = old_checkbox
+  assert(found, "missing visibility control: " .. label)
+  hooks["app.ui040205.update"].pre({ [2] = map })
+end
+local hidden_icon = map.emitted[1].ui_icon
+toggle_map("Show on full map", false)
+assert(#map.emitted == 0, "disabling the full map left custom markers visible")
+assert(map.MapIconInfoList:get_Count() == 1, "disabling custom markers removed native map entries")
+map.SelectedIcon, map.TxtName.message = hidden_icon, "Native text"
+hover_hook.pre({ [2] = map }); hover_hook.post(91)
+assert(map.TxtName.message == "Native text", "disabled full map retained a custom hover label")
+callbacks.save()
+assert(writes["raze_MapMarkersAndCollectables_settings.json"].fullmap.enabled == false,
+  "full-map visibility was not saved")
+assert(saved_settings.minimap.enabled == true, "full-map toggle disabled the minimap")
+assert(#minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 1,
+  "full-map toggle suppressed minimap candidates")
+-- Reopening while disabled must also skip collectible lookups.
+hooks["app.ui040205..ctor"].pre({ [2] = map })
+hooks["app.ui040205..ctor"].post(91)
+local get_manager = sdk.get_managed_singleton
+sdk.get_managed_singleton = function() error("disabled full map queried collectible state") end
+map:setMapScale()
+sdk.get_managed_singleton = get_manager
+assert(#map.emitted == 0, "reopening a disabled full map added custom markers")
+toggle_map("Show on minimap", false)
+toggle_map("Show on full map", true)
+assert(#map.emitted == 1, "re-enabling the full map did not restore selected categories")
+assert(saved_settings.minimap.enabled == false, "full-map toggle enabled the minimap")
+assert(map.emitted[1].IconType == 25 and map.emitted[1].ui_icon.IconSprite.scale == 1.25,
+  "full-map toggle lost symbol or size preferences")
+map.SelectedIcon = map.emitted[1].ui_icon
+hover_hook.pre({ [2] = map }); hover_hook.post(91)
+assert(map.TxtName.message == "Special Chest (L)", "re-enabled full map lost hover labels")
+toggle_map("Show on minimap", true)
+assert(#map.emitted == 1, "minimap toggle hid full-map markers")
+callbacks.save()
+assert(writes["raze_MapMarkersAndCollectables_settings.json"].fullmap.enabled == true,
+  "re-enabled full-map visibility was not saved")
+-- The actual settings controls feed the live minimap renderer and config save.
+local old_tree_node = imgui.tree_node
+imgui.tree_node = function(label) return label == "Minimap settings" or old_tree_node(label) end
+imgui.drag_int = function(label, value)
+  if label == "Height tolerance (world units)" then return true, 7 end
+  return false, value
+end
+toggle_map("Show height indicators", false)
+callbacks.save()
+assert(minimap_options.settings.height_indicators == false and minimap_options.settings.height_tolerance == 7,
+  "height controls did not reach the live minimap renderer")
+assert(writes["raze_MapMarkersAndCollectables_settings.json"].minimap.height_tolerance == 7,
+  "height tolerance was not saved")
+toggle_map("Show height indicators", true)
+assert(minimap_options.settings.height_indicators == true and #map.emitted == 1)
+imgui.tree_node = old_tree_node
+-- The main entry point connects both directions to the installed arrow atlas.
+local mini_atlas = { get_ResourcePath = function() return "Gui/ui01/Common/map/UVS_map_03.uvs" end,
+  add_ref = function(self) return self end }
+local mini_ui = { MapIconSpriteSet = {
+  get_UVSequence = function() return mini_atlas end,
+  set_UVSequence = function(_, value) mini_atlas = value end
+} }
+local arrow_sprite = { sequence = 1, pattern = 25,
+  set_UVSequenceNo = function(self, value) self.sequence = value end,
+  set_UVPatternNo = function(self, value) self.pattern = value end }
+assert(minimap_options.apply_height(mini_ui, {Sprite=arrow_sprite}, 1))
+assert(arrow_sprite.sequence == 3 and arrow_sprite.pattern == 0)
+assert(minimap_options.apply_height(mini_ui, {Sprite=arrow_sprite}, -1))
+assert(arrow_sprite.pattern == 1 and mini_atlas:get_ResourcePath() == "raze/mapmarkers/minimap.uvs")
 local stale = map.SelectedIcon
 hooks["app.ui040205.onDestroy"].pre({ [2] = map })
 map.SelectedIcon = stale

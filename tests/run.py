@@ -1,6 +1,7 @@
 """Run the Lua checks with Lua 5.4 through Lupa; no game installation required."""
 from pathlib import Path
 import sys
+import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / ".tools" / "python"))
@@ -25,3 +26,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from icon_assets import validate
 validate()
 print("PASS icon assets and unchanged native atlas entries")
+result = unittest.TextTestRunner(verbosity=2).run(
+    unittest.defaultTestLoader.discover(str(ROOT / "tests"), pattern="test_*.py"))
+if not result.wasSuccessful():
+    sys.exit(1)

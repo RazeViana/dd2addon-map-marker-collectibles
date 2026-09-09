@@ -18,6 +18,23 @@ RUNTIME_FILES = [f"reframework/autorun/{PREFIX}.lua"] + [
     f"reframework/autorun/{PREFIX}/{module}.lua"
     for module in ("minimap", "nearby", "object_icons", "settings", "sprite_pool")
 ]
+DOCUMENTATION_FILES = ("README.md", "CHANGELOG.md", "THIRD_PARTY_NOTICES.md")
+
+
+def validate_package_paths(names):
+    """Fluffy copies payload paths into the game; reserve all of ours to this mod."""
+    seen = set()
+    owned_directories = (f"docs/{PREFIX}/", f"reframework/autorun/{PREFIX}/",
+                         f"reframework/data/{PREFIX}/", "natives/stm/raze/mapmarkers/")
+    for name in names:
+        assert "\\" not in name and all(part not in ("", ".", "..") for part in name.split("/")), \
+            f"Invalid package path: {name}"
+        key = name.casefold()
+        assert key not in seen, f"Duplicate package path: {name}"
+        seen.add(key)
+        # modinfo.ini is Fluffy's package metadata, not an installed game file.
+        assert (name in ("modinfo.ini", f"reframework/autorun/{PREFIX}.lua")
+                or name.startswith(owned_directories)), f"Unowned package path: {name}"
 
 
 def build():
@@ -49,9 +66,13 @@ def build():
     files += validate_icon_assets()
     output = ROOT / f"dist/Map-Markers-and-Collectables-by-Raze-v{version}.zip"
     output.parent.mkdir(exist_ok=True)
+    entries = [(path, f"docs/{PREFIX}/{path.name}" if path.parent == ROOT
+                and path.name in DOCUMENTATION_FILES else path.relative_to(ROOT).as_posix())
+               for path in files]
+    validate_package_paths([name for _, name in entries])
     with ZipFile(output, "w", ZIP_DEFLATED) as package:
-        for path in files:
-            package.write(path, path.relative_to(ROOT).as_posix())
+        for path, name in entries:
+            package.write(path, name)
     with ZipFile(output) as package:
         assert package.testzip() is None
         assert len(package.namelist()) == len(files)

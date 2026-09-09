@@ -184,8 +184,10 @@ local golden_trove_beetle_get_state_callbacks =
   -- nearby
   function(args)
     local gimmick = args.gimmick_map[args.collectible_id:ToString()]
-    if gimmick ~= nil then
-      return gimmick:get_IsBroken()
+    -- A fresh pickup is conclusive, but an unbroken loaded gimmick does not
+    -- override the save's depleted GatherContext (including earlier playthroughs).
+    if gimmick ~= nil and gimmick:get_IsBroken() == true then
+      return true
     end
     return nil
   end,
@@ -438,13 +440,18 @@ re.on_draw_ui(function()
   local collectibles_dirty = false
   local reorder_index = 0
   if imgui.tree_node(MOD_NAME) then
-    imgui.text("v1.0 - Map and minimap markers")
+    imgui.text("v1.2 - Map and minimap markers")
     local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
     if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
     local size_changed, icon_size = imgui.slider_int("Icon size (%)", settings.icon_size, 25, 150)
     if size_changed then settings.icon_size = icon_size; markers_dirty = true end
     if object_icon_error then imgui.text(object_icon_error) end
     if settings_message ~= nil then imgui.text(settings_message) end
+    local fullmap_changed, show_fullmap = imgui.checkbox("Show on full map", settings.fullmap.enabled)
+    if fullmap_changed then
+      settings.fullmap.enabled = show_fullmap
+      markers_dirty = true
+    end
     local changed, enabled = imgui.checkbox("Show on minimap", settings.minimap.enabled)
     if changed then
       settings.minimap.enabled = enabled
@@ -458,15 +465,19 @@ re.on_draw_ui(function()
     if capacity_status.fullmap then imgui.text(capacity_status.fullmap) end
     if capacity_status.minimap then imgui.text(capacity_status.minimap) end
     if imgui.tree_node("Minimap settings") then
+      local height_changed, show_height = imgui.checkbox("Show height indicators", settings.minimap.height_indicators)
+      if height_changed then settings.minimap.height_indicators = show_height; markers_dirty = true end
       for _, field in ipairs({
         { "radius", "Search radius (world units)", 25, 300 },
         { "height", "Maximum height difference", 10, 150 },
+        { "height_tolerance", "Height tolerance (world units)", 0, 30 },
         { "max_markers", "Maximum custom icons", 1, 200 }
       }) do
         local edited, value = imgui.drag_int(field[2], settings.minimap[field[1]], 1, field[3], field[4])
         if edited then settings.minimap[field[1]] = value; markers_dirty = true end
       end
       imgui.text("Uses the category visibility and colors below. Nearest items are shown first.")
+      imgui.text("Height arrows point up or down. No arrow is shown within the height tolerance.")
       imgui.tree_pop()
     end
     if marker_label ~= nil then
@@ -779,8 +790,11 @@ local function restore_fullmap_sizes()
   for _, saved in ipairs(fullmap_sizes) do saved.ref:set_Scale(saved.scale) end
   fullmap_sizes = {}
 end
-local function apply_fullmap_sizes()
-  for _, saved in ipairs(fullmap_sizes) do saved.ref:set_Scale(saved.scale * settings.icon_size / 100) end
+local function apply_fullmap_sizes(this)
+  -- Slot scales can belong to an earlier zoom, especially when slots are reused.
+  -- Use the map's current icon scale for every custom marker; snapshots are only for restoration.
+  local scale = this.IconScale * settings.icon_size / 100
+  for _, saved in ipairs(fullmap_sizes) do saved.ref:set_Scale(scale) end
 end
 
 local add_markers = function(this)
@@ -788,6 +802,12 @@ local add_markers = function(this)
     return
   end
   hover_labels = {}
+
+  if not settings.fullmap.enabled then
+    show_exception, show_warning = false, false
+    marker_label = "Full map: Disabled"
+    return
+  end
 
   local generate_manager = sdk.get_managed_singleton("app.GenerateManager")
   local gimmick_manager = sdk.get_managed_singleton("app.GimmickManager")
@@ -902,8 +922,8 @@ local add_markers = function(this)
         break
       end
 
-      -- A direct name keeps the hover label specific to this custom marker.
-      ui_icon.Name = marker_type.name
+      -- setupIconName applies our label through TxtName:set_Message. Keep it in Lua
+      -- so a native MapIconInfo.Name assignment cannot abort marker creation.
       hover_labels[ui_icon:get_address()] = marker_type.name
 
       icon_index = icon_index_obj:read_dword(int_t_value_offset)
@@ -1001,7 +1021,7 @@ local scale_map
 sdk.hook(ui040205_t:get_method("updateMapIcon"),
   function(args) scale_map = sdk.to_managed_object(args[2]) end,
   function(retval)
-    if scale_map == ui_map then apply_fullmap_sizes() end
+    if scale_map == ui_map then apply_fullmap_sizes(scale_map) end
     return retval
   end)
 
@@ -1018,7 +1038,7 @@ sdk.hook(
     if this ~= nil then
       add_markers(this)
       this:updateMapIcon()
-      apply_fullmap_sizes()
+      apply_fullmap_sizes(this)
     end
     return retval
   end
@@ -1054,6 +1074,7 @@ if ui020301_t and thread and thread.get_hook_storage then
       native_type = object_icon_util.native_type,
       get_icon_scale = function() return settings.icon_size / 100 end,
       apply_icon = function(ui, ref, icon_type) object_icons:apply(ui, "minimap", ref, icon_type) end,
+      apply_height = function(ui, ref, direction) return object_icons:apply_height(ui, ref, direction) end,
       vector = function(pos) return Vector3f.new(pos.x, pos.y, pos.z) end,
       set_color = function(ref, value)
         color:write_dword(uint_t_value_offset, value)
@@ -1071,7 +1092,7 @@ if ui020301_t and thread and thread.get_hook_storage then
         thread.get_hook_storage().raze_minimap = this
         local ok, err = pcall(function()
           minimap_renderer:before(this)
-          if this.IsInit then ensure_icon_capacity(this, "minimap", 256) end
+          if this.IsInit then ensure_icon_capacity(this, "minimap", settings.minimap.height_indicators and 512 or 256) end
         end)
         if not ok then report_error(err) end
       end,

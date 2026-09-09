@@ -21,13 +21,19 @@ end
 
 function M.normalize(loaded, names, marker_types, generic)
   if type(loaded) ~= "table" then loaded = {} end
-  local result = { marker_order = {}, markers = {}, minimap = { enabled = true, radius = 180, height = 60, max_markers = 24 } }
+  local result = { marker_order = {}, markers = {}, fullmap = { enabled = true },
+    minimap = { enabled = true, radius = 180, height = 60, max_markers = 24,
+      height_indicators = true, height_tolerance = 3 } }
   result.object_icons = loaded.object_icons ~= false
   local size = loaded.icon_size
   result.icon_size = type(size) == "number" and size % 1 == 0 and size >= 25 and size <= 150 and size or 50
+  local fullmap = type(loaded.fullmap) == "table" and loaded.fullmap or {}
+  if type(fullmap.enabled) == "boolean" then result.fullmap.enabled = fullmap.enabled end
   local minimap = type(loaded.minimap) == "table" and loaded.minimap or {}
   if type(minimap.enabled) == "boolean" then result.minimap.enabled = minimap.enabled end
-  for key, bounds in pairs({ radius = { 25, 300 }, height = { 10, 150 }, max_markers = { 1, 200 } }) do
+  if type(minimap.height_indicators) == "boolean" then result.minimap.height_indicators = minimap.height_indicators end
+  for key, bounds in pairs({ radius = { 25, 300 }, height = { 10, 150 }, max_markers = { 1, 200 },
+    height_tolerance = { 0, 30 } }) do
     local value = minimap[key]
     if type(value) == "number" and value % 1 == 0 and value >= bounds[1] and value <= bounds[2] then
       result.minimap[key] = value
