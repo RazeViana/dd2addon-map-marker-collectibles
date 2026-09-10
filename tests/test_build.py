@@ -91,6 +91,23 @@ class PackageTests(unittest.TestCase):
             with self.subTest(alias=alias), self.assertRaises(AssertionError):
                 validate_package_paths(["docs/raze_MapMarkersAndCollectables/README.md", alias])
 
+    def test_plain_text_nexus_description_build(self):
+        import json
+        version = dict(line.split("=", 1) for line in (self.root / "modinfo.ini").read_text().splitlines())["version"]
+        upload = self.root / "nexus-upload" / version
+        upload.mkdir(parents=True)
+        (upload / "listing.json").write_text(json.dumps({
+            "version": version,
+            "main_file": {"version": version, "archive": self.archive.name},
+            "description_file": "DESCRIPTION.txt"
+        }), encoding="utf-8")
+        (upload / "DESCRIPTION.txt").write_text("Plain-text Nexus description.\n", encoding="utf-8")
+        result = subprocess.run([sys.executable, str(self.root / "scripts/build.py")],
+                                cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual((upload / self.archive.name).read_bytes(), self.archive.read_bytes())
+        self.assertTrue((upload / "SHA256SUMS.txt").is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

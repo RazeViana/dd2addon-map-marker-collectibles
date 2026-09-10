@@ -63,7 +63,11 @@ function M.create(options)
       self.candidates = options.get_markers(origin, settings.radius, settings.height) or {}
       self.refreshed_at = now
     end
-    local selected = nearby.select(self.candidates, origin, settings.radius, settings.height, settings.max_markers)
+    local candidates = self.candidates
+    -- Fog can change while collectible positions are cached. Filter before the
+    -- marker limit so hidden chests cannot crowd out visible collectibles.
+    if options.filter_markers then candidates = options.filter_markers(ui, candidates) end
+    local selected = nearby.select(candidates, origin, settings.radius, settings.height, settings.max_markers)
     self.status = ("%d nearby collectibles"):format(#selected)
     local pool = ui.MapIconList
     local cursor, count = 0, pool:get_Count()

@@ -25,6 +25,7 @@ function M.normalize(loaded, names, marker_types, generic)
     minimap = { enabled = true, radius = 180, height = 60, max_markers = 24,
       height_indicators = true, height_tolerance = 3 } }
   result.object_icons = loaded.object_icons ~= false
+  result.hide_unexplored_chests = loaded.hide_unexplored_chests == true
   local size = loaded.icon_size
   result.icon_size = type(size) == "number" and size % 1 == 0 and size >= 25 and size <= 150 and size or 50
   local fullmap = type(loaded.fullmap) == "table" and loaded.fullmap or {}

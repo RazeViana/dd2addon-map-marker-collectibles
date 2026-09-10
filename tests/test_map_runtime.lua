@@ -457,6 +457,73 @@ assert(minimap_options.apply_height(mini_ui, {Sprite=arrow_sprite}, 1))
 assert(arrow_sprite.sequence == 3 and arrow_sprite.pattern == 0)
 assert(minimap_options.apply_height(mini_ui, {Sprite=arrow_sprite}, -1))
 assert(arrow_sprite.pattern == 1 and mini_atlas:get_ResourcePath() == "raze/mapmarkers/minimap.uvs")
+-- Fog filtering is independent of acquisition, artwork, and each map's visibility.
+local fog_revealed, fog_queries = false, 0
+local fog_mask = { MaskBit = { get_Length = function() return 1 end } }
+local previous_method = method
+method = function(type_name, name)
+  if type_name == "app.GuiManager.MapMaskInfo" and name == "isMaskOff(via.vec3)" then
+    return function(mask, pos)
+      fog_queries = fog_queries + 1
+      assert(mask == fog_mask and pos.x == 1 and pos.z == 1)
+      return fog_revealed
+    end
+  end
+  return previous_method(type_name, name)
+end
+managers["app.GuiManager"] = { getMaskInfo = function(_, area)
+  assert(area == 17, "fog lookup did not use the displayed area")
+  return fog_mask
+end }
+map.LocalAreaNow = 17
+local fog_ui = { LocalAreaNow = 17 }
+toggle_map("Hide chests in unexplored areas", true)
+assert(#map.emitted == 0, "enabling fog filtering left a special chest visible")
+assert(#minimap_options.filter_markers(fog_ui, minimap_get_markers({x=1,y=0,z=1},180,60)) == 0,
+  "fog-covered chest appeared on the minimap")
+callbacks.save()
+assert(writes["raze_MapMarkersAndCollectables_settings.json"].hide_unexplored_chests == true,
+  "fog preference was not saved")
+local original_range, queries_before = map.isInDispRange, fog_queries
+map.isInDispRange = function() return false end
+map:setMapScale()
+assert(#map.emitted == 0 and fog_queries == queries_before,
+  "chest outside the displayed local map was sent to its native fog lookup")
+map.isInDispRange = original_range
+for _, category in ipairs({"Chests (S)", "Chests (M)", "Chests (L)", "Chests (XL)",
+    "Special Chests (S)", "Special Chests (M)", "Special Chests (L)"}) do
+  show_category(category)
+  fog_revealed = false
+  map:setMapScale()
+  assert(#map.emitted == 0, "fog did not hide " .. category)
+  fog_revealed = true
+  -- Neither the collectible cache nor the marker cache is invalidated here.
+  map:setMapScale()
+  assert(#map.emitted == 1, "revealing fog left a cached chest hidden: " .. category)
+end
+fog_revealed = false
+for _, category in ipairs({"Seeker's Tokens", "Golden Trove Beetles"}) do
+  show_category(category)
+  map:setMapScale()
+  assert(#map.emitted > 0, "chest fog toggle affected " .. category)
+end
+show_category("Chests (S)")
+save_context(beetle_guid, "app.GmItemContext", { get_IsPick = function() return true end })
+fog_revealed = true
+map:setMapScale()
+assert(#map.emitted == 0, "revealed fog overrode acquired-chest visibility")
+saved_settings.markers["Chests (S)"].acquired_show = true
+hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
+map:setMapScale()
+assert(#map.emitted == 1)
+fog_revealed = false
+map:setMapScale()
+assert(#map.emitted == 0, "acquired-only chest bypassed fog filtering")
+toggle_map("Hide chests in unexplored areas", false)
+assert(#map.emitted == 1 and map.emitted[1].IconType == 25,
+  "disabling fog filtering did not restore the saved chest display")
+callbacks.save()
+assert(saved_settings.hide_unexplored_chests == false)
 local stale = map.SelectedIcon
 hooks["app.ui040205.onDestroy"].pre({ [2] = map })
 map.SelectedIcon = stale

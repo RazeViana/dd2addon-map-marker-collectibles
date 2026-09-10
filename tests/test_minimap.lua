@@ -237,3 +237,35 @@ assert(icons[3].color == 102 and icons[3].position.y > 0 and icons[3].position.y
 assert(#renderer.owned == 3, 'reusing a clipped arrow slot duplicated its restoration snapshot')
 renderer:destroy(ui)
 assert(renderer.height_count == 0 and #renderer.owned == 0, 'destroyed HUD retained arrow references')
+-- Fog filtering runs before the limit and again while nearby candidates are cached.
+icons = {icon(true, 10), icon(false, 20), icon(false, 30)}
+markers = {
+  {key='chest',pos={x=1,y=0,z=0},icon_type=25,icon_color=101},
+  {key='token',pos={x=5,y=0,z=0},icon_type=25,icon_color=102}
+}
+ui.PlUPos = {x=0,y=0,z=0}
+local show_chest, candidate_reads = false, 0
+local filtered_renderer = minimap.create({
+  settings = { enabled=true, radius=100, height=60, max_markers=1 },
+  clock = function() return 0 end,
+  get_markers = function() candidate_reads = candidate_reads + 1; return markers end,
+  filter_markers = function(current_ui, candidates)
+    assert(current_ui == ui)
+    return show_chest and candidates or {candidates[2]}
+  end,
+  vector = function(pos) return pos end,
+  set_color = function(ref, color) ref:set_Color(color) end
+})
+filtered_renderer:before(ui); filtered_renderer:after(ui)
+assert(filtered_renderer.count == 1 and icons[2].color == 102,
+  'a hidden nearby chest consumed the only permitted marker')
+show_chest = true
+filtered_renderer:before(ui); filtered_renderer:after(ui)
+assert(candidate_reads == 1 and icons[2].color == 101,
+  'newly revealed chest waited for cached collectible positions to expire')
+show_chest = false
+filtered_renderer:before(ui); filtered_renderer:after(ui)
+assert(icons[2].color == 102 and icons[1].color == 10 and icons[1].visible,
+  'changing fog left a stale chest or changed a native icon')
+filtered_renderer:clear()
+assert(not icons[2].visible and icons[2].color == 20, 'fog-filtered sprite was not restored')

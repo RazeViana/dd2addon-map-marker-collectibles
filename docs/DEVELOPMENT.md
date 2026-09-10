@@ -1,16 +1,20 @@
 # Development
 
-Map Markers and Collectables by Raze is a Dragon's Dogma 2 REFramework Lua mod. The current packaged release is 1.2. Source and dataset attribution is documented in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+Map Markers and Collectables by Raze is a Dragon's Dogma 2 REFramework Lua mod. The current packaged release is 1.3. Source and dataset attribution is documented in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
 
 ## Runtime
 
-The main entry point is `reframework/autorun/raze_MapMarkersAndCollectables.lua`. Its modules handle settings, nearby selection, minimap rendering, object icons, and sprite-pool expansion. Diagnostics and probes are development tools outside the release runtime.
+The main entry point is `reframework/autorun/raze_MapMarkersAndCollectables.lua`. Its modules handle settings, nearby selection, minimap rendering, object icons, chest fog visibility, and sprite-pool expansion. Diagnostics and probes are development tools outside the release runtime.
 
 The full map uses `app.ui040205.setupMapIcon`. Nearby minimap markers are rendered after `app.ui020301.updateIcon`, using the game's projection and currently unused sprite slots. Borrowed minimap slots are restored before the next native update. Glyph rotation stays at zero while the map positions follow the game's projection.
 
 The sprite-pool module preserves existing native entries and grows the full-map sprite array to 2,048 and the minimap list to 512 when height indicators are enabled (256 otherwise). Disabling arrows does not shrink a pool already expanded to 512. The managed icon wrapper requires simplified allocation; initialized native fields and independent foreground/background sprites are copied before publication to the HUD. Expanded pools are reused after script resets.
 
 Settings are read only from `raze_MapMarkersAndCollectables_settings.json`. Missing or malformed files use normalized defaults. No other mod's settings are read or imported.
+
+`hide_unexplored_chests` defaults to false; only a saved boolean true enables it. **Hide chests in unexplored areas** filters all seven chest categories on both maps, after normal category/acquisition selection. `fog_of_war.lua` reads `GuiManager:getMaskInfo(ui.LocalAreaNow)` and calls the exact `MapMaskInfo:isMaskOff(via.vec3)` overload with each chest's world coordinates. Both UI fields and method signatures were checked against the installed executable's TDB 83 metadata without starting the game; `MaskBit` initialization is checked before querying. No fog setters or save writes are used.
+
+Full-map filtering runs after the marker cache on each native setup, so reopening or rebuilding the map reads current fog. Minimap filtering runs each update before distance sorting and the marker limit, while collectible positions can remain cached. Hidden chests therefore do not consume available marker slots, and revealed chests appear without waiting for that cache to expire. Area masks are resolved on every pass and never retained across save or area changes. Missing fog data or a failed lookup hides affected chest markers and shows a recoverable status message; other categories remain visible. Native boundary behavior, caves/towns, and fog edges still need the user's in-game testing.
 
 `fullmap.enabled` defaults to true, including when an existing settings file has no full-map preference. **Show on full map** and **Show on minimap** are independent controls saved through the existing settings mechanism. Changing full-map visibility requests the normal UI-thread map rebuild. Its pre-hook restores borrowed sprite state; the disabled path clears hover labels and skips custom marker creation, collectible queries, and pool expansion. The runtime regression covers disabling an open map, reopening while disabled, restoring markers and hover labels, retaining symbol/size choices, saving both states, and minimap independence. In-game verification of the new toggle is pending.
 
@@ -36,7 +40,7 @@ python tests/run.py
 python scripts/build.py
 ```
 
-The build writes `dist/Map-Markers-and-Collectables-by-Raze-v1.2.zip` and refreshes the matching archive, changelog, checksum, and package manifest in `nexus-upload/1.2/`. The earlier `nexus-upload/1.0/` package remains unchanged. The current Nexus description is maintained in `nexus-upload/1.2/DESCRIPTION.md`, and release notes are in `nexus-upload/1.2/RELEASE-NOTES.md`. An explicit file list includes only the six runtime Lua files, four icon assets, twelve datasets, and player documentation/metadata. Build verification rejects diagnostics, probes, debug files, and saved settings, and checks that all runtime modules are included.
+The build writes `dist/Map-Markers-and-Collectables-by-Raze-v1.3.zip` and refreshes the matching archive, changelog, checksum, and package manifest in `nexus-upload/1.3/`. The earlier 1.0 and 1.2 packages remain unchanged. Nexus page descriptions use plain text; the current copy is `nexus-upload/1.3/DESCRIPTION.txt`, selected by `description_file` in the listing. GitHub release notes remain in `nexus-upload/1.3/RELEASE-NOTES.md`. An explicit file list includes only the seven runtime Lua files, four icon assets, twelve datasets, and player documentation/metadata. Build verification rejects diagnostics, probes, debug files, and saved settings, and checks that all runtime modules are included.
 
 README, changelog, and third-party notices are packaged together under `docs/raze_MapMarkersAndCollectables/`, preserving their relative links without overwriting other mods' root documentation. Source documents remain at the repository root. The builder rejects duplicate destinations (case insensitive) and payload paths outside this mod's directories; `modinfo.ini` is the only root entry and is Fluffy metadata. Build tests install the ZIP alongside Crowded Cities 1.0.0's documented file paths and verify its files survive unchanged.
 
@@ -48,7 +52,7 @@ To install diagnostics for a local investigation, run `./scripts/install-diagnos
 
 ## Verification
 
-Seven Lua test files cover full-map labels and symbols, settings isolation and validation, diagnostics, nearby selection, minimap slot restoration, atlas switching, and sprite expansion/reuse/failure handling. The minimap stress fixture renders 200 custom markers alongside 56 native icons. Runtime Lua files are syntax checked. Asset validation checks that every original atlas entry is unchanged and the custom texture and UV coordinates are valid.
+Eight Lua test files cover full-map labels and symbols, settings isolation and validation, diagnostics, nearby selection, minimap slot restoration, fog visibility and recovery, atlas switching, and sprite expansion/reuse/failure handling. Fog regressions exercise the actual main-script controls and all chest categories, saved preferences, acquisition rules, exploration with cached markers, local-area changes, unavailable data, and filtering before the minimap limit. The minimap stress fixture renders 200 custom markers alongside 56 native icons. Runtime Lua files are syntax checked. Asset validation checks that every original atlas entry is unchanged and the custom texture and UV coordinates are valid.
 
 The 1.2 height-indicator regression additionally renders 200 collectible icons and 200 arrows alongside 56 native icons in a 512-slot pool. It checks direction, tolerance boundaries, current player height with cached candidates, camera rotation, restored state, toggles, missing artwork, map edges, HUD destruction, and collectible priority when slots are exhausted. Settings controls and atlas callbacks are exercised through the main entry point. Packaging checks verify that both arrow glyphs reference the installed texture. In-game verification of position, scale, readability, and transitions is left to the user for this build; none of these offline fixtures simulates the native HUD.
 

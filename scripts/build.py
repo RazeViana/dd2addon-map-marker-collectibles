@@ -16,7 +16,7 @@ EXPECTED_FILES = {"10", "11", "12", "13", "161", "167", "465", "495", "653", "69
 # Only player-facing runtime files belong in the release, even if debug scripts are staged nearby.
 RUNTIME_FILES = [f"reframework/autorun/{PREFIX}.lua"] + [
     f"reframework/autorun/{PREFIX}/{module}.lua"
-    for module in ("minimap", "nearby", "object_icons", "settings", "sprite_pool")
+    for module in ("fog_of_war", "minimap", "nearby", "object_icons", "settings", "sprite_pool")
 ]
 DOCUMENTATION_FILES = ("README.md", "CHANGELOG.md", "THIRD_PARTY_NOTICES.md")
 
@@ -92,7 +92,7 @@ def build():
         listing = json.loads((upload_dir / "listing.json").read_text(encoding="utf-8"))
         assert listing["version"] == listing["main_file"]["version"] == version, "Nexus version mismatch"
         assert listing["main_file"]["archive"] == output.name, "Nexus filename mismatch"
-        assert (upload_dir / "DESCRIPTION.md").is_file(), "Nexus Markdown description missing"
+        assert (upload_dir / listing["description_file"]).is_file(), "Nexus description missing"
         shutil.copy2(output, upload_dir / output.name)
         shutil.copy2(ROOT / "CHANGELOG.md", upload_dir / "CHANGELOG.md")
         digest = hashlib.sha256(output.read_bytes()).hexdigest()

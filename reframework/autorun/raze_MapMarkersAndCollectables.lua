@@ -8,6 +8,9 @@ local MOD_NAME = "Map Markers and Collectables by Raze"
 local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
 local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
+local chest_fog = require("raze_MapMarkersAndCollectables.fog_of_war").create(sdk,
+  function(pos) return Vector3f.new(pos.x, pos.y, pos.z) end,
+  function(message) log.warn(MOD_NAME .. ": " .. message) end)
 local object_icon_error
 local object_icons = object_icon_util.create(sdk, function(message)
   object_icon_error = message
@@ -261,6 +264,7 @@ local marker_types =
   ["Chests (S)"] =
   {
     label = "Small Chests",
+    is_chest = true,
     data = json.load_file("raze_MapMarkersAndCollectables/10.json"),
     gimmick_id = 10,
     get_state_callbacks = chest_get_state_callbacks,
@@ -270,6 +274,7 @@ local marker_types =
   ["Chests (M)"] =
   {
     label = "Medium Chests",
+    is_chest = true,
     data = json.load_file("raze_MapMarkersAndCollectables/11.json"),
     gimmick_id = 11,
     get_state_callbacks = chest_get_state_callbacks,
@@ -279,6 +284,7 @@ local marker_types =
   ["Chests (L)"] =
   {
     label = "Large Chests",
+    is_chest = true,
     data = json.load_file("raze_MapMarkersAndCollectables/12.json"),
     gimmick_id = 12,
     get_state_callbacks = chest_get_state_callbacks,
@@ -290,6 +296,7 @@ local marker_types =
   ["Chests (XL)"] =
   {
     label = "Extra Large Chests",
+    is_chest = true,
     tooltip = "Also known as 'sunken chests'. Most of these are only available in post-game.",
     data = json.load_file("raze_MapMarkersAndCollectables/495.json"),
     gimmick_id = 495,
@@ -301,6 +308,7 @@ local marker_types =
   ["Special Chests (S)"] =
   {
     label = "Small Special Chests",
+    is_chest = true,
     data = json.load_file("raze_MapMarkersAndCollectables/692.json"),
     gimmick_id = 692,
     get_state_callbacks = chest_get_state_callbacks,
@@ -310,6 +318,7 @@ local marker_types =
   ["Special Chests (M)"] =
   {
     label = "Medium Special Chests",
+    is_chest = true,
     data = json.load_file("raze_MapMarkersAndCollectables/693.json"),
     gimmick_id = 693,
     get_state_callbacks = chest_get_state_callbacks,
@@ -319,6 +328,7 @@ local marker_types =
   ["Special Chests (L)"] =
   {
     label = "Large Special Chests",
+    is_chest = true,
     data = json.load_file("raze_MapMarkersAndCollectables/694.json"),
     gimmick_id = 694,
     get_state_callbacks = chest_get_state_callbacks,
@@ -440,7 +450,7 @@ re.on_draw_ui(function()
   local collectibles_dirty = false
   local reorder_index = 0
   if imgui.tree_node(MOD_NAME) then
-    imgui.text("v1.2 - Map and minimap markers")
+    imgui.text("v1.3 - Map and minimap markers")
     local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
     if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
     local size_changed, icon_size = imgui.slider_int("Icon size (%)", settings.icon_size, 25, 150)
@@ -457,6 +467,17 @@ re.on_draw_ui(function()
       settings.minimap.enabled = enabled
       minimap_error = nil
       markers_dirty = true
+    end
+    local fog_changed, hide_unexplored = imgui.checkbox("Hide chests in unexplored areas", settings.hide_unexplored_chests)
+    if fog_changed then settings.hide_unexplored_chests = hide_unexplored; markers_dirty = true end
+    if imgui.is_item_hovered() then
+      imgui.begin_tooltip()
+      imgui.set_tooltip("Show regular and special chests only where the map's fog of war has cleared. Applies to both maps.")
+      imgui.end_tooltip()
+    end
+    if settings.hide_unexplored_chests then
+      if settings.fullmap.enabled and chest_fog.errors.fullmap then imgui.text(chest_fog.errors.fullmap) end
+      if settings.minimap.enabled and chest_fog.errors.minimap then imgui.text(chest_fog.errors.minimap) end
     end
     if minimap_renderer ~= nil then
       imgui.text(("Minimap: %d custom icons - %s"):format(minimap_renderer.count, minimap_renderer.status))
@@ -858,6 +879,16 @@ local add_markers = function(this)
     cache_markers = markers
   end
 
+  -- Display range describes the selected world/local map, not its zoom level.
+  -- Check it before querying fog so local masks receive only relevant positions.
+  local in_range = {}
+  for _, marker in ipairs(markers) do
+    if this:isInDispRange(Vector3f.new(marker.pos.x, marker.pos.y, marker.pos.z)) then
+      in_range[#in_range + 1] = marker
+    end
+  end
+  -- Filter after the marker cache so exploration and map-area changes are read afresh.
+  markers = chest_fog:filter(in_range, this, "fullmap", settings.hide_unexplored_chests)
   ensure_icon_capacity(this, "fullmap", 2048)
   local icon_pool, icon_count, icon_limit = get_icon_pool(this)
 
@@ -879,17 +910,6 @@ local add_markers = function(this)
       end
 
       local vec3 = Vector3f.new(marker.pos.x, marker.pos.y, marker.pos.z)
-
-      -- If the marker isn't in the current map display range, don't try to add it.
-      -- Unfortunately, "display range" is not affected by the zoom level of the map, so for the main map screen,
-      -- no matter what zoom level you're at, all makers are "in display range".
-      -- This is only really useful for zone specific maps (ie cities or caves).
-      --
-      -- This is actually called by addMapIconInfoList. Calling it before we call addMapIconInfoList allows for
-      -- avoiding needlessly creating MapIconInfo instances.
-      if this:isInDispRange(vec3) == false then
-        break
-      end
 
       local marker_type  = marker.marker_type
 
@@ -1071,6 +1091,9 @@ if ui020301_t and thread and thread.get_hook_storage then
     local color = uint_t:create_instance():add_ref()
     minimap_renderer = require("raze_MapMarkersAndCollectables.minimap").create({
       settings = settings.minimap, clock = os.clock, get_markers = get_minimap_markers,
+      filter_markers = function(ui, markers)
+        return chest_fog:filter(markers, ui, "minimap", settings.hide_unexplored_chests)
+      end,
       native_type = object_icon_util.native_type,
       get_icon_scale = function() return settings.icon_size / 100 end,
       apply_icon = function(ui, ref, icon_type) object_icons:apply(ui, "minimap", ref, icon_type) end,

@@ -16,6 +16,7 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
   assert(#actual.marker_order == 2)
   assert(actual.object_icons == true)
   assert(actual.icon_size == 50)
+  assert(actual.hide_unexplored_chests == false, "existing settings must keep chests visible through fog")
   assert(actual.fullmap and actual.fullmap.enabled == true,
     "existing settings must keep full-map markers enabled")
   assert(actual.minimap.height_indicators == true and actual.minimap.height_tolerance == 3,
@@ -87,4 +88,10 @@ for _, size in ipairs({25, 50, 100, 150}) do
 end
 for _, size in ipairs({0, 151, '50', 0/0}) do
   assert(settings.normalize({icon_size=size}, names, types, generic).icon_size == 50)
+end
+for _, enabled in ipairs({true, false}) do
+  assert(settings.normalize({hide_unexplored_chests=enabled}, names, types, generic).hide_unexplored_chests == enabled)
+end
+for _, invalid in ipairs({0, 1, 'true', {}}) do
+  assert(settings.normalize({hide_unexplored_chests=invalid}, names, types, generic).hide_unexplored_chests == false)
 end
