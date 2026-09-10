@@ -1,0 +1,1 @@
+Version 1.3 adds separate fog-of-war toggles for chests, Golden Trove Beetles, and Seeker's Tokens on both maps. All default off. Requires REFramework. Install the complete ZIP and restart the game.

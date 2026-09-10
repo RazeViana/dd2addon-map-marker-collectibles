@@ -17,6 +17,8 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
   assert(actual.object_icons == true)
   assert(actual.icon_size == 50)
   assert(actual.hide_unexplored_chests == false, "existing settings must keep chests visible through fog")
+  assert(actual.hide_unexplored_beetles == false and actual.hide_unexplored_tokens == false,
+    "existing settings must keep beetles and tokens visible through fog")
   assert(actual.fullmap and actual.fullmap.enabled == true,
     "existing settings must keep full-map markers enabled")
   assert(actual.minimap.height_indicators == true and actual.minimap.height_tolerance == 3,
@@ -94,4 +96,14 @@ for _, enabled in ipairs({true, false}) do
 end
 for _, invalid in ipairs({0, 1, 'true', {}}) do
   assert(settings.normalize({hide_unexplored_chests=invalid}, names, types, generic).hide_unexplored_chests == false)
+end
+for _, key in ipairs({'hide_unexplored_beetles', 'hide_unexplored_tokens'}) do
+  for _, enabled in ipairs({true, false}) do
+    local normalized = settings.normalize({[key]=enabled, hide_unexplored_chests=true}, names, types, generic)
+    assert(normalized[key] == enabled and normalized.hide_unexplored_chests == true,
+      "new fog preference was lost or changed the existing chest preference")
+  end
+  for _, invalid in ipairs({0, 1, 'true', {}}) do
+    assert(settings.normalize({[key]=invalid}, names, types, generic)[key] == false)
+  end
 end

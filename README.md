@@ -11,7 +11,7 @@ Find Seeker's Tokens, Golden Trove Beetles, and chests more easily in Dragon's D
 - Uses recognizable token, beetle, chest, and special chest symbols.
 - Shows simple names when you hover over full-map markers, such as **Chest (S)** and **Special Chest (L)**.
 - Lets you choose which items to show, including items you have already collected.
-- Optionally hides regular and special chests in unexplored areas on both maps.
+- Independently hides chests, Golden Trove Beetles, or Seeker's Tokens in unexplored areas on both maps.
 - Lets you change marker symbols and colors to suit your preferences.
 - Starts with smaller icons and lets you adjust their size on both maps.
 - Keeps minimap symbols upright as you turn the camera.
@@ -38,7 +38,7 @@ Use the category options to choose what appears on your maps and change its symb
 
 Use **Show on full map** and **Show on minimap** to turn collectible markers on or off independently. Both start enabled. Changing the full-map toggle refreshes an open map and keeps your category, symbol, color, and size choices.
 
-**Hide chests in unexplored areas** hides regular and special chest markers under the map's fog of war on both maps. It starts disabled. Enable it to show chests only as their locations are revealed; your category and Acquired/Unacquired choices still apply. Tokens and beetles keep their usual visibility. If fog data is temporarily unavailable, chest markers stay hidden until it can be read, and the mod's menu shows a message.
+Use **Hide chests in unexplored areas**, **Hide beetles in unexplored areas**, and **Hide Seeker's Tokens in unexplored areas** to choose which collectible types follow the map's fog of war. Each option works independently on both maps and starts disabled. The chest option covers regular and special chests. Enable an option to show that type's markers only as their locations are revealed; your category and Acquired/Unacquired choices still apply. If fog data is temporarily unavailable, markers for the types you selected stay hidden until it can be read, and the mod's menu shows a message.
 
 Under **Minimap settings**, you can change how far away items appear, limit markers above or below you, and choose how many nearby markers to show. Nearby items appear first. Lower the number if your minimap feels crowded.
 

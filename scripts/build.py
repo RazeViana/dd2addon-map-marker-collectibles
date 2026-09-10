@@ -43,6 +43,17 @@ def build():
     assert re.fullmatch(r"\d+\.\d+(?:\.\d+)?", version), "Invalid release version"
     assert f'imgui.text("v{version} - ' in (ROOT / f"reframework/autorun/{PREFIX}.lua").read_text(encoding="utf-8"), "UI version mismatch"
     assert f"**Current version: {version}.**" in (ROOT / "README.md").read_text(encoding="utf-8"), "README version mismatch"
+    output = ROOT / f"dist/Map-Markers-and-Collectables-by-Raze-v{version}.zip"
+    upload_dir = ROOT / "nexus-upload" / version
+    listing = None
+    if upload_dir.is_dir():
+        listing = json.loads((upload_dir / "listing.json").read_text(encoding="utf-8"))
+        assert listing["version"] == listing["main_file"]["version"] == version, "Nexus version mismatch"
+        assert listing["main_file"]["archive"] == output.name, "Nexus filename mismatch"
+        assert (upload_dir / listing["description_file"]).is_file(), "Nexus description missing"
+        file_description = listing["main_file"].get("description")
+        assert (isinstance(file_description, str) and file_description.strip()
+                and len(file_description) <= 250), "Nexus file description must contain 1-250 characters"
     datasets = sorted(DATA.glob("*.json"))
     assert {path.stem for path in datasets} == EXPECTED_FILES, "Missing or unexpected location datasets"
     location_count = 0
@@ -64,7 +75,6 @@ def build():
     files += [ROOT / name for name in RUNTIME_FILES]
     files += datasets
     files += validate_icon_assets()
-    output = ROOT / f"dist/Map-Markers-and-Collectables-by-Raze-v{version}.zip"
     output.parent.mkdir(exist_ok=True)
     entries = [(path, f"docs/{PREFIX}/{path.name}" if path.parent == ROOT
                 and path.name in DOCUMENTATION_FILES else path.relative_to(ROOT).as_posix())
@@ -87,14 +97,10 @@ def build():
         package_manifest = [{"path": name, "bytes": len(package.read(name)),
                              "sha256": hashlib.sha256(package.read(name)).hexdigest()}
                             for name in package.namelist()]
-    upload_dir = ROOT / "nexus-upload" / version
-    if upload_dir.is_dir():
-        listing = json.loads((upload_dir / "listing.json").read_text(encoding="utf-8"))
-        assert listing["version"] == listing["main_file"]["version"] == version, "Nexus version mismatch"
-        assert listing["main_file"]["archive"] == output.name, "Nexus filename mismatch"
-        assert (upload_dir / listing["description_file"]).is_file(), "Nexus description missing"
+    if listing is not None:
         shutil.copy2(output, upload_dir / output.name)
         shutil.copy2(ROOT / "CHANGELOG.md", upload_dir / "CHANGELOG.md")
+        (upload_dir / "FILE-DESCRIPTION.txt").write_text(file_description, encoding="utf-8", newline="\n")
         digest = hashlib.sha256(output.read_bytes()).hexdigest()
         (upload_dir / "SHA256SUMS.txt").write_text(f"{digest}  {output.name}\n", encoding="utf-8")
         (upload_dir / "package-manifest.json").write_text(json.dumps(package_manifest, indent=2) + "\n", encoding="utf-8")

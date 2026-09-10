@@ -2,9 +2,10 @@
 
 ## 1.3 (2026-09-10)
 
-- Add **Hide chests in unexplored areas**, an optional fog-of-war filter for regular and special chest markers on both maps. Defaults off and preserves category and collection-state choices.
-- Update minimap chest visibility as fog clears, including while nearby collectible positions are cached. Hidden chests do not count toward the minimap marker limit.
-- Keep chest markers hidden when fog data is temporarily unavailable, with a status message in the mod menu and automatic recovery once the data is ready.
+- Add independent **Hide chests in unexplored areas**, **Hide beetles in unexplored areas**, and **Hide Seeker's Tokens in unexplored areas** toggles for the full map and minimap. The chest option covers regular and special chests.
+- All three fog options default off and preserve category and Acquired/Unacquired choices. Updating the earlier chest-only 1.3 package preserves its chest preference.
+- Update minimap visibility as fog clears, including while nearby collectible positions are cached. Hidden collectibles do not count toward the minimap marker limit.
+- Keep affected markers hidden when fog data is temporarily unavailable, with a status message in the mod menu and automatic recovery once the data is ready.
 
 ## 1.2 (2026-09-09)
 

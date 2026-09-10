@@ -8,7 +8,7 @@ local MOD_NAME = "Map Markers and Collectables by Raze"
 local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
 local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
-local chest_fog = require("raze_MapMarkersAndCollectables.fog_of_war").create(sdk,
+local fog_visibility = require("raze_MapMarkersAndCollectables.fog_of_war").create(sdk,
   function(pos) return Vector3f.new(pos.x, pos.y, pos.z) end,
   function(message) log.warn(MOD_NAME .. ": " .. message) end)
 local object_icon_error
@@ -228,6 +228,7 @@ local marker_types =
   ["Seeker's Tokens"] =
   {
     label = "Seeker's Tokens",
+    fog_setting = "hide_unexplored_tokens",
     data = json.load_file("raze_MapMarkersAndCollectables/167.json"),
     gimmick_id = 167,
     get_state_callbacks = seeker_token_get_state_callbacks,
@@ -246,6 +247,7 @@ local marker_types =
   ["Golden Trove Beetles"] =
   {
     label = "Golden Trove Beetles",
+    fog_setting = "hide_unexplored_beetles",
     data = json.load_file("raze_MapMarkersAndCollectables/161.json"),
     gimmick_id = 161,
     get_state_callbacks = golden_trove_beetle_get_state_callbacks,
@@ -264,7 +266,7 @@ local marker_types =
   ["Chests (S)"] =
   {
     label = "Small Chests",
-    is_chest = true,
+    fog_setting = "hide_unexplored_chests",
     data = json.load_file("raze_MapMarkersAndCollectables/10.json"),
     gimmick_id = 10,
     get_state_callbacks = chest_get_state_callbacks,
@@ -274,7 +276,7 @@ local marker_types =
   ["Chests (M)"] =
   {
     label = "Medium Chests",
-    is_chest = true,
+    fog_setting = "hide_unexplored_chests",
     data = json.load_file("raze_MapMarkersAndCollectables/11.json"),
     gimmick_id = 11,
     get_state_callbacks = chest_get_state_callbacks,
@@ -284,7 +286,7 @@ local marker_types =
   ["Chests (L)"] =
   {
     label = "Large Chests",
-    is_chest = true,
+    fog_setting = "hide_unexplored_chests",
     data = json.load_file("raze_MapMarkersAndCollectables/12.json"),
     gimmick_id = 12,
     get_state_callbacks = chest_get_state_callbacks,
@@ -296,7 +298,7 @@ local marker_types =
   ["Chests (XL)"] =
   {
     label = "Extra Large Chests",
-    is_chest = true,
+    fog_setting = "hide_unexplored_chests",
     tooltip = "Also known as 'sunken chests'. Most of these are only available in post-game.",
     data = json.load_file("raze_MapMarkersAndCollectables/495.json"),
     gimmick_id = 495,
@@ -308,7 +310,7 @@ local marker_types =
   ["Special Chests (S)"] =
   {
     label = "Small Special Chests",
-    is_chest = true,
+    fog_setting = "hide_unexplored_chests",
     data = json.load_file("raze_MapMarkersAndCollectables/692.json"),
     gimmick_id = 692,
     get_state_callbacks = chest_get_state_callbacks,
@@ -318,7 +320,7 @@ local marker_types =
   ["Special Chests (M)"] =
   {
     label = "Medium Special Chests",
-    is_chest = true,
+    fog_setting = "hide_unexplored_chests",
     data = json.load_file("raze_MapMarkersAndCollectables/693.json"),
     gimmick_id = 693,
     get_state_callbacks = chest_get_state_callbacks,
@@ -328,7 +330,7 @@ local marker_types =
   ["Special Chests (L)"] =
   {
     label = "Large Special Chests",
-    is_chest = true,
+    fog_setting = "hide_unexplored_chests",
     data = json.load_file("raze_MapMarkersAndCollectables/694.json"),
     gimmick_id = 694,
     get_state_callbacks = chest_get_state_callbacks,
@@ -468,16 +470,24 @@ re.on_draw_ui(function()
       minimap_error = nil
       markers_dirty = true
     end
-    local fog_changed, hide_unexplored = imgui.checkbox("Hide chests in unexplored areas", settings.hide_unexplored_chests)
-    if fog_changed then settings.hide_unexplored_chests = hide_unexplored; markers_dirty = true end
-    if imgui.is_item_hovered() then
-      imgui.begin_tooltip()
-      imgui.set_tooltip("Show regular and special chests only where the map's fog of war has cleared. Applies to both maps.")
-      imgui.end_tooltip()
+    local fog_enabled = false
+    for _, control in ipairs({
+      {"hide_unexplored_chests", "Hide chests in unexplored areas", "regular and special chests"},
+      {"hide_unexplored_beetles", "Hide beetles in unexplored areas", "Golden Trove Beetles"},
+      {"hide_unexplored_tokens", "Hide Seeker's Tokens in unexplored areas", "Seeker's Tokens"}
+    }) do
+      local fog_changed, hide_unexplored = imgui.checkbox(control[2], settings[control[1]])
+      if fog_changed then settings[control[1]] = hide_unexplored; markers_dirty = true end
+      fog_enabled = fog_enabled or settings[control[1]]
+      if imgui.is_item_hovered() then
+        imgui.begin_tooltip()
+        imgui.set_tooltip("Show " .. control[3] .. " only where the map's fog of war has cleared. Applies to both maps.")
+        imgui.end_tooltip()
+      end
     end
-    if settings.hide_unexplored_chests then
-      if settings.fullmap.enabled and chest_fog.errors.fullmap then imgui.text(chest_fog.errors.fullmap) end
-      if settings.minimap.enabled and chest_fog.errors.minimap then imgui.text(chest_fog.errors.minimap) end
+    if fog_enabled then
+      if settings.fullmap.enabled and fog_visibility.errors.fullmap then imgui.text(fog_visibility.errors.fullmap) end
+      if settings.minimap.enabled and fog_visibility.errors.minimap then imgui.text(fog_visibility.errors.minimap) end
     end
     if minimap_renderer ~= nil then
       imgui.text(("Minimap: %d custom icons - %s"):format(minimap_renderer.count, minimap_renderer.status))
@@ -888,7 +898,7 @@ local add_markers = function(this)
     end
   end
   -- Filter after the marker cache so exploration and map-area changes are read afresh.
-  markers = chest_fog:filter(in_range, this, "fullmap", settings.hide_unexplored_chests)
+  markers = fog_visibility:filter(in_range, this, "fullmap", settings)
   ensure_icon_capacity(this, "fullmap", 2048)
   local icon_pool, icon_count, icon_limit = get_icon_pool(this)
 
@@ -1092,7 +1102,7 @@ if ui020301_t and thread and thread.get_hook_storage then
     minimap_renderer = require("raze_MapMarkersAndCollectables.minimap").create({
       settings = settings.minimap, clock = os.clock, get_markers = get_minimap_markers,
       filter_markers = function(ui, markers)
-        return chest_fog:filter(markers, ui, "minimap", settings.hide_unexplored_chests)
+        return fog_visibility:filter(markers, ui, "minimap", settings)
       end,
       native_type = object_icon_util.native_type,
       get_icon_scale = function() return settings.icon_size / 100 end,

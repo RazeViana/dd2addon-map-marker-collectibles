@@ -19,7 +19,7 @@ Suggested tags
 User Interface, Quality of Life
 
 Summary
-Find tokens, beetles, and chests on your map and minimap. Optionally hide chests in unexplored areas, show height arrows, and customize which markers appear, their symbols, colors, and size.
+Find tokens, beetles, and chests on your map and minimap. Choose which collectables follow fog of war, show height arrows, and customize which markers appear, their symbols, colors, and size.
 
 Main file category
 Main Files
@@ -33,14 +33,14 @@ Main file version
 Archive to upload
 Map-Markers-and-Collectables-by-Raze-v1.3.zip
 
-Main file description
-Version 1.3 adds an optional fog-of-war toggle for regular and special chests on both maps. Off by default. Includes all 1.2 features and fixes. Requires REFramework. Install the complete ZIP and restart the game.
+Main file description (250 characters maximum; also in FILE-DESCRIPTION.txt)
+Version 1.3 adds separate fog-of-war toggles for chests, Golden Trove Beetles, and Seeker's Tokens on both maps. All default off. Requires REFramework. Install the complete ZIP and restart the game.
 
 Version 1.3 changelog
-- Added Hide chests in unexplored areas for regular and special chests on the full map and minimap.
-- The option is off by default and keeps your category and Acquired/Unacquired choices.
-- Minimap chest markers update as fog clears; hidden chests do not count toward the marker limit.
-- Temporarily unavailable fog data keeps affected chests hidden, with a menu message and automatic recovery.
+- Added independent Hide chests in unexplored areas, Hide beetles in unexplored areas, and Hide Seeker's Tokens in unexplored areas toggles for both maps. The chest option covers regular and special chests.
+- All three options default off and keep your category and Acquired/Unacquired choices. The chest preference from the earlier chest-only 1.3 package is preserved.
+- Minimap visibility updates as fog clears, including with cached locations; hidden collectables do not count toward the marker limit.
+- Temporarily unavailable fog data keeps affected markers hidden, with a menu message and automatic recovery.
 
 Required mod
 REFramework for Dragon's Dogma 2
@@ -53,4 +53,4 @@ Page description
 Copy the contents of DESCRIPTION.txt into the Nexus description editor.
 
 Update instructions
-Close the game, install the complete ZIP, and restart. Keep reframework/data/raze_MapMarkersAndCollectables_settings.json to preserve your settings. Enable Hide chests in unexplored areas in the mod menu if desired.
+Close the game, install the complete ZIP, and restart. Keep reframework/data/raze_MapMarkersAndCollectables_settings.json to preserve your settings. Enable the desired fog options for chests, beetles, and Seeker's Tokens in the mod menu. If you downloaded the earlier chest-only 1.3 package, reinstall this updated ZIP; the added beetle and token options start disabled.

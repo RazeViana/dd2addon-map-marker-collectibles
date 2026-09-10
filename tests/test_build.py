@@ -96,17 +96,33 @@ class PackageTests(unittest.TestCase):
         version = dict(line.split("=", 1) for line in (self.root / "modinfo.ini").read_text().splitlines())["version"]
         upload = self.root / "nexus-upload" / version
         upload.mkdir(parents=True)
-        (upload / "listing.json").write_text(json.dumps({
+        listing = {
             "version": version,
-            "main_file": {"version": version, "archive": self.archive.name},
+            "main_file": {"version": version, "archive": self.archive.name, "description": "x" * 250},
             "description_file": "DESCRIPTION.txt"
-        }), encoding="utf-8")
+        }
+        (upload / "listing.json").write_text(json.dumps(listing), encoding="utf-8")
         (upload / "DESCRIPTION.txt").write_text("Plain-text Nexus description.\n", encoding="utf-8")
         result = subprocess.run([sys.executable, str(self.root / "scripts/build.py")],
                                 cwd=self.root, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual((upload / self.archive.name).read_bytes(), self.archive.read_bytes())
         self.assertTrue((upload / "SHA256SUMS.txt").is_file())
+        self.assertTrue((upload / "FILE-DESCRIPTION.txt").is_file(), "Missing copy-ready file description")
+        self.assertEqual((upload / "FILE-DESCRIPTION.txt").read_text(encoding="utf-8"), "x" * 250)
+        # Invalid descriptions must be rejected before any release output is replaced.
+        outputs = [self.archive, upload / self.archive.name, upload / "FILE-DESCRIPTION.txt",
+                   upload / "SHA256SUMS.txt", upload / "package-manifest.json"]
+        before = {path: path.read_bytes() for path in outputs}
+        for invalid in ("x" * 251, "", "   ", None, 250):
+            with self.subTest(description=repr(invalid)):
+                listing["main_file"]["description"] = invalid
+                (upload / "listing.json").write_text(json.dumps(listing), encoding="utf-8")
+                result = subprocess.run([sys.executable, str(self.root / "scripts/build.py")],
+                                        cwd=self.root, capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0, "Invalid file description was accepted")
+                self.assertIn("250", result.stderr)
+                self.assertEqual({path: path.read_bytes() for path in outputs}, before)
 
 
 if __name__ == "__main__":

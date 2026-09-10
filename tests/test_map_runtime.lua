@@ -465,7 +465,7 @@ method = function(type_name, name)
   if type_name == "app.GuiManager.MapMaskInfo" and name == "isMaskOff(via.vec3)" then
     return function(mask, pos)
       fog_queries = fog_queries + 1
-      assert(mask == fog_mask and pos.x == 1 and pos.z == 1)
+      assert(mask == fog_mask and (pos.x == 1 or pos.x == 2 or pos.x == -1) and pos.z == 1)
       return fog_revealed
     end
   end
@@ -524,6 +524,41 @@ assert(#map.emitted == 1 and map.emitted[1].IconType == 25,
   "disabling fog filtering did not restore the saved chest display")
 callbacks.save()
 assert(saved_settings.hide_unexplored_chests == false)
+-- The two new fog controls refresh both maps and preserve the other preferences.
+saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
+for _, case in ipairs({
+  {category="Golden Trove Beetles", key="hide_unexplored_beetles", label="Hide beetles in unexplored areas", count=1, nearby_count=1},
+  {category="Seeker's Tokens", key="hide_unexplored_tokens", label="Hide Seeker's Tokens in unexplored areas", count=2, nearby_count=3}
+}) do
+  show_category(case.category)
+  fog_revealed = false
+  map:setMapScale()
+  assert(#map.emitted == case.count, "new fog toggle was enabled by default")
+  toggle_map(case.label, true)
+  assert(#map.emitted == 0, "new fog control did not hide " .. case.category)
+  local cached_candidates = minimap_get_markers({x=1,y=0,z=1},180,60)
+  assert(#minimap_options.filter_markers(fog_ui, cached_candidates) == 0,
+    "minimap did not receive new fog preference for " .. case.category)
+  callbacks.save()
+  assert(saved_settings[case.key] == true and saved_settings.hide_unexplored_chests == false,
+    "saving a new fog preference changed chest filtering")
+  fog_revealed = true
+  map:setMapScale()
+  assert(#map.emitted == case.count, "newly revealed items stayed hidden on the full map")
+  assert(#minimap_options.filter_markers(fog_ui, cached_candidates) == case.nearby_count,
+    "newly revealed items stayed hidden in cached minimap candidates")
+  fog_revealed = false
+  -- Other categories still appear when their own fog preference is off.
+  show_category("Chests (S)")
+  map:setMapScale()
+  assert(#map.emitted == 1, "beetle/token fog filtering affected chests")
+  show_category(case.category)
+  map:setMapScale()
+  toggle_map(case.label, false)
+  assert(#map.emitted == case.count, "disabling new fog control did not restore markers")
+  callbacks.save()
+  assert(saved_settings[case.key] == false)
+end
 local stale = map.SelectedIcon
 hooks["app.ui040205.onDestroy"].pre({ [2] = map })
 map.SelectedIcon = stale

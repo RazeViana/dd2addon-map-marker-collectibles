@@ -6,6 +6,7 @@ This folder contains the 1.3 release package and Nexus page materials. Uploading
 
 - [Map-Markers-and-Collectables-by-Raze-v1.3.zip](Map-Markers-and-Collectables-by-Raze-v1.3.zip) - the complete main download.
 - [NEXUS-DETAILS.txt](NEXUS-DETAILS.txt) - copy-ready summary, file description, and version changelog.
+- [FILE-DESCRIPTION.txt](FILE-DESCRIPTION.txt) - copy-ready main-file description, limited to 250 characters.
 - [DESCRIPTION.txt](DESCRIPTION.txt) - complete plain-text Nexus page description.
 - [listing.json](listing.json) - structured upload metadata.
 - [RELEASE-NOTES.md](RELEASE-NOTES.md) - GitHub release announcement and update instructions.
@@ -29,10 +30,10 @@ This folder contains the 1.3 release package and Nexus page materials. Uploading
 
 Use `NEXUS-DETAILS.txt` for the individual form fields and `DESCRIPTION.txt` for the main description editor. Both use plain text. Keep the source credits and the existing source notice in [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md).
 
-The fog toggle starts disabled. After installing, enable **Hide chests in unexplored areas** directly in the mod's menu and enable the chest categories you want to see. Existing settings can be retained. Install the complete ZIP; replacing only the entry-point Lua file omits the new fog module.
+The three fog toggles start disabled. Enable **Hide chests in unexplored areas**, **Hide beetles in unexplored areas**, or **Hide Seeker's Tokens in unexplored areas** directly in the mod's menu and enable the collectible categories you want to see. Existing settings can be retained. This updated 1.3 package preserves the chest preference from the earlier chest-only download. Install the complete ZIP; replacing only the entry-point Lua file omits required modules.
 
-Offline checks pass. The user is handling in-game verification; no fog-edge or native HUD result has been recorded for this release.
+Offline checks pass, and Raze confirmed that the build with all three fog controls works in-game.
 
 ## Rebuilding
 
-Run `python tests/run.py` followed by `python scripts/build.py` with the dependencies documented in [DEVELOPMENT.md](../../docs/DEVELOPMENT.md). The builder refreshes this version's ZIP, changelog, checksum, and manifest and preserves the earlier release packages.
+Run `python tests/run.py` followed by `python scripts/build.py` with the dependencies documented in [DEVELOPMENT.md](../../docs/DEVELOPMENT.md). The builder refreshes this version's ZIP, changelog, file description, checksum, and manifest and preserves earlier versions. Each future release must supply a nonempty `main_file.description` in `listing.json` of at most 250 characters; invalid descriptions are rejected before release outputs are changed.
