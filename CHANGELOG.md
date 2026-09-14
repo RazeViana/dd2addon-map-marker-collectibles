@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4 (2026-09-14)
+
+- Add **Show first Seeker's Token**, enabled by default: a red marker on both maps at the saved first-token location, removed after collecting the Finder's Token. Keep its visibility independent of ordinary Acquired/Unacquired token filters, replace duplicate token markers, and refresh it across pickups and save changes.
+- Add 54 chest locations: 39 small and 15 medium. Reconcile the original list against the fresh extraction: remove one small and one extra-large chest GUID absent from the extracted resources, and correct one extra-large chest position by about 1.31 world units. All remaining chest GUIDs and types match the fresh data; preserve their identities for saved collection tracking.
+- Honor saved chest collection history even when a nearby loaded object reports closed. Previously opened chests remain tracked when installing into an existing save; loading another save clears cached acquisition.
+- Add **Hide unobtainable chests**, enabled by default, using per-location world, quest and environment rules. Add **Reveal Unmoored-only chests early**, disabled by default, without bypassing separate quest or environment conditions. Acquired history remains controlled by each category's acquired setting.
+- Keep unresolved unopened locations hidden with a menu message while progression filtering is enabled. Three existing quest-controlled locations have unresolved activation rules; all 54 additions have supported metadata. Sphinx reward datasets remain retained but are not exposed as a category.
+- Add distinct small, large and sunken chest artwork, optional crown artwork, category color defaults, and independent acquired/unacquired artwork selectors. Preserve saved symbols, colors, visibility and ordering; retain native atlas patterns.
+- Raise collectible markers above ordinary full-map game markers to address overlaps such as Dragon's Gaze Wakestone shard icons covering Seeker's Tokens at smaller icon sizes. Keep the chosen marker size and position, and restore the original drawing priority when slots are reused or scripts reset.
+- Make **Hide chests in unexplored areas** apply only on outdoor maps. Regular and special chests ignore fog on cave and city local maps, then follow the saved option again outdoors. Category and Acquired/Unacquired choices still apply on both maps; beetle and token fog options remain independent.
+
 ## 1.3 (2026-09-10)
 
 - Add independent **Hide chests in unexplored areas**, **Hide beetles in unexplored areas**, and **Hide Seeker's Tokens in unexplored areas** toggles for the full map and minimap. The chest option covers regular and special chests.

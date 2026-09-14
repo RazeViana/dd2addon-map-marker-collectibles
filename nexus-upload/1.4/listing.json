@@ -1,0 +1,35 @@
+{
+  "title": "Map Markers and Collectables by Raze",
+  "game": "Dragon's Dogma 2",
+  "game_domain": "dragonsdogma2",
+  "version": "1.4",
+  "author": "Raze",
+  "category": "User Interface",
+  "suggested_tags": ["User Interface", "Quality of Life"],
+  "summary": "Find tokens, beetles and chests on both maps. Track your first token, filter chests by progression, reveal Unmoored locations when ready, and customize marker artwork, colours, size and height arrows.",
+  "required_mods": [
+    {
+      "name": "REFramework",
+      "url": "https://www.nexusmods.com/dragonsdogma2/mods/8",
+      "notes": "Required. Install REFramework for Dragon's Dogma 2 before this mod."
+    }
+  ],
+  "main_file": {
+    "category": "Main Files",
+    "name": "Map Markers and Collectables by Raze",
+    "version": "1.4",
+    "archive": "Map-Markers-and-Collectables-by-Raze-v1.4.zip",
+    "description": "v1.4: refreshed chest data, saved collection tracking, automatic progression/Unmoored filtering, customizable chest icons and colors, a red first-token marker, and map overlap/cave fog fixes. Requires REFramework. Install the complete ZIP."
+  },
+  "donation_points": false,
+  "publication_status": "See THIRD_PARTY_NOTICES.md for source credits and publication permissions",
+  "permission_confirmed": false,
+  "permission_checked_on": "2026-09-06",
+  "source_notice": "../../THIRD_PARTY_NOTICES.md",
+  "description_file": "DESCRIPTION.txt",
+  "file_description_file": "FILE-DESCRIPTION.txt",
+  "logo_file": "images/logo.png",
+  "banner_file": "images/banner.png",
+  "release_notes_file": "RELEASE-NOTES.md",
+  "upload_details_file": "NEXUS-DETAILS.txt"
+}

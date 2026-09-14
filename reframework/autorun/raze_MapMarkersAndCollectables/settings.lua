@@ -1,4 +1,5 @@
 local M = {}
+local icon_styles = require('raze_MapMarkersAndCollectables.object_icons')
 
 function M.load(api, filename)
   local ok, value = pcall(api.load_file, filename)
@@ -25,6 +26,9 @@ function M.normalize(loaded, names, marker_types, generic)
     minimap = { enabled = true, radius = 180, height = 60, max_markers = 24,
       height_indicators = true, height_tolerance = 3 } }
   result.object_icons = loaded.object_icons ~= false
+  result.show_first_seeker_token = loaded.show_first_seeker_token ~= false
+  result.hide_unavailable_chests = loaded.hide_unavailable_chests ~= false
+  result.reveal_unmoored_chests = loaded.reveal_unmoored_chests == true
   for _, key in ipairs({"hide_unexplored_chests", "hide_unexplored_beetles", "hide_unexplored_tokens"}) do
     result[key] = loaded[key] == true
   end
@@ -61,6 +65,10 @@ function M.normalize(loaded, names, marker_types, generic)
     for key, default in pairs(defaults) do
       marker[key] = default
       if valid_value(key, previous[key], default) then marker[key] = previous[key] end
+    end
+    for _, prefix in ipairs({'unacquired', 'acquired'}) do
+      local key = prefix .. '_icon_style'
+      marker[key] = icon_styles.valid_style(previous[key]) and previous[key] or 'default'
     end
     marker.unacquired_icon_color_gui = M.argb_to_abgr(marker.unacquired_icon_color)
     marker.acquired_icon_color_gui = M.argb_to_abgr(marker.acquired_icon_color)

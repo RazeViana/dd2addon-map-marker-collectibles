@@ -1,8 +1,18 @@
 local M = {}
 
-local function should_filter(marker, settings)
+local function is_local_map(ui, kind)
+  if not ui then return false end
+  -- Use the native displayed-map mode: local-area IDs alone do not tell us
+  -- whether the full map/minimap is currently showing the field or a local map.
+  if kind == "fullmap" then return ui.IsFieldMap == false end
+  if kind == "minimap" then return ui.IsDispField == false end
+  return false
+end
+
+local function should_filter(marker, settings, show_local_chests)
   local key = marker.marker_type and marker.marker_type.fog_setting
   return key ~= nil and settings[key] == true
+    and not (key == "hide_unexplored_chests" and show_local_chests)
 end
 
 function M.create(api, vector, report_error)
@@ -15,9 +25,10 @@ function M.create(api, vector, report_error)
   end
 
   function self:filter(markers, ui, kind, settings)
+    local show_local_chests = settings.hide_unexplored_chests == true and is_local_map(ui, kind)
     local has_filtered_markers = false
     for _, marker in ipairs(markers) do
-      if should_filter(marker, settings) then has_filtered_markers = true; break end
+      if should_filter(marker, settings, show_local_chests) then has_filtered_markers = true; break end
     end
     if not has_filtered_markers then set_error(kind, nil); return markers end
 
@@ -41,7 +52,7 @@ function M.create(api, vector, report_error)
 
     local result, failure = {}, not ok and tostring(mask) or nil
     for _, marker in ipairs(markers) do
-      if not should_filter(marker, settings) then
+      if not should_filter(marker, settings, show_local_chests) then
         result[#result + 1] = marker
       elseif ok then
         -- Unknown visibility stays hidden. Never call a setter or change saved fog.

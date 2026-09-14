@@ -8,17 +8,58 @@ import shutil
 import uuid
 from zipfile import ZipFile, ZIP_DEFLATED
 from icon_assets import validate as validate_icon_assets
+from update_chest_data import digest, reconstruct_original
 
 ROOT = Path(__file__).resolve().parents[1]
 PREFIX = "raze_MapMarkersAndCollectables"
 DATA = ROOT / "reframework/data" / PREFIX
 EXPECTED_FILES = {"10", "11", "12", "13", "161", "167", "465", "495", "653", "692", "693", "694"}
+CHEST_METADATA = "chest-availability.json"
 # Only player-facing runtime files belong in the release, even if debug scripts are staged nearby.
 RUNTIME_FILES = [f"reframework/autorun/{PREFIX}.lua"] + [
     f"reframework/autorun/{PREFIX}/{module}.lua"
-    for module in ("fog_of_war", "minimap", "nearby", "object_icons", "settings", "sprite_pool")
+    for module in ("chest_availability", "chest_game_state", "first_token", "fog_of_war", "minimap", "nearby", "object_icons", "settings", "sprite_pool")
 ]
 DOCUMENTATION_FILES = ("README.md", "CHANGELOG.md", "THIRD_PARTY_NOTICES.md")
+
+
+def validate_chest_provenance(dataset, expected):
+    locations = dataset['locations']
+    assert len(locations) == expected['fresh_count'], 'Chest count differs from verified fresh data'
+    assert digest(sorted(locations)) == expected['fresh_guids_sha256'], 'Chest GUIDs differ from verified fresh data'
+    if 'base_locations_sha256' in expected:
+        added = dataset.get('supplemental_source', {}).get('added_guids', [])
+        assert len(added) == len(set(added)) == expected['added_count']
+        original = reconstruct_original(locations, added, expected)
+        assert len(original) == expected['base_count'] and digest(original) == expected['base_locations_sha256'], 'Original chest provenance changed'
+
+
+def validate_chest_metadata(metadata, locations_by_type):
+    assert metadata.get('schema_version') == 1, 'Unsupported chest availability schema'
+    expected = {}
+    for kind, locations in locations_by_type.items():
+        for guid in locations:
+            assert guid not in expected, f'Duplicate chest GUID across types: {guid}'
+            expected[guid] = int(kind)
+    records = metadata.get('chests')
+    assert isinstance(records, dict) and records.keys() == expected.keys(), 'Chest availability coverage mismatch'
+    for guid, record in records.items():
+        assert record.get('gimmick_id') == expected[guid], f'Wrong chest type in availability: {guid}'
+        variants = record.get('variants')
+        assert isinstance(variants, list), f'Missing placement variants: {guid}'
+        if not variants:
+            assert isinstance(record.get('unresolved'), str) and record['unresolved'], f'Unexplained missing availability: {guid}'
+        for rule in variants:
+            assert rule.get('world') in ('any', 'normal', 'unmoored'), f'Unknown chest world: {guid}'
+            assert rule.get('quest_mode', 'and') in ('and', 'or'), f'Unknown quest combination: {guid}'
+            assert isinstance(rule.get('quests', []), list)
+            for quest in rule.get('quests', []):
+                assert type(quest.get('id')) is int and 0 < quest['id'] <= 2147483647
+                assert type(quest.get('finish')) is bool
+            if 'event_flag' in rule:
+                assert rule['event_flag'] in (8, 32, 64), f'Unsupported chest event flag: {guid}'
+            if 'unsupported' in rule:
+                assert isinstance(rule['unsupported'], str) and rule['unsupported']
 
 
 def validate_package_paths(names):
@@ -54,26 +95,41 @@ def build():
         file_description = listing["main_file"].get("description")
         assert (isinstance(file_description, str) and file_description.strip()
                 and len(file_description) <= 250), "Nexus file description must contain 1-250 characters"
-    datasets = sorted(DATA.glob("*.json"))
-    assert {path.stem for path in datasets} == EXPECTED_FILES, "Missing or unexpected location datasets"
+    data_files = sorted(DATA.glob("*.json"))
+    assert {path.name for path in data_files} == {name + '.json' for name in EXPECTED_FILES} | {CHEST_METADATA}, "Missing or unexpected data files"
+    datasets = [path for path in data_files if path.name != CHEST_METADATA]
     location_count = 0
+    chest_locations = {}
     catalog = json.loads((ROOT / "scripts/dataset-manifest.json").read_text(encoding="utf-8"))
     assert set(catalog["files"]) == {path.name for path in datasets}, "Dataset manifest mismatch"
     for path in datasets:
         raw = path.read_bytes()
         expected = catalog["files"][path.name]
         assert hashlib.sha256(raw).hexdigest() == expected["sha256"], f"Dataset changed: {path.name}"
-        locations = json.loads(raw)["locations"]
+        dataset = json.loads(raw)
+        locations = dataset["locations"]
         canonical = json.dumps(locations, sort_keys=True, separators=(",", ":")).encode("utf-8")
         assert hashlib.sha256(canonical).hexdigest() == expected["locations_sha256"], f"Locations changed: {path.name}"
         assert len(locations) == expected["count"], f"Location count changed: {path.name}"
+        if path.stem not in ('161', '167'):
+            chest_locations[int(path.stem)] = locations
+            validate_chest_provenance(dataset, expected)
         for key, position in locations.items():
             assert str(uuid.UUID(key)) == key, f"Invalid GUID in {path.name}"
             assert all(type(position[axis]) in (int, float) and math.isfinite(position[axis]) for axis in ("x", "y", "z"))
         location_count += len(locations)
+    metadata_path = DATA / CHEST_METADATA
+    metadata_raw = metadata_path.read_bytes()
+    metadata_manifest = catalog['chest_availability']
+    assert metadata_manifest['filename'] == CHEST_METADATA
+    assert hashlib.sha256(metadata_raw).hexdigest() == metadata_manifest['sha256'], 'Chest availability data changed'
+    chest_metadata = json.loads(metadata_raw)
+    validate_chest_metadata(chest_metadata, chest_locations)
+    assert len(chest_metadata['chests']) == metadata_manifest['count']
     files = [ROOT / "modinfo.ini", ROOT / "README.md", ROOT / "CHANGELOG.md", ROOT / "THIRD_PARTY_NOTICES.md"]
     files += [ROOT / name for name in RUNTIME_FILES]
     files += datasets
+    files += [metadata_path]
     files += validate_icon_assets()
     output.parent.mkdir(exist_ok=True)
     entries = [(path, f"docs/{PREFIX}/{path.name}" if path.parent == ROOT
@@ -104,7 +160,7 @@ def build():
         digest = hashlib.sha256(output.read_bytes()).hexdigest()
         (upload_dir / "SHA256SUMS.txt").write_text(f"{digest}  {output.name}\n", encoding="utf-8")
         (upload_dir / "package-manifest.json").write_text(json.dumps(package_manifest, indent=2) + "\n", encoding="utf-8")
-    print(f"Validated {len(datasets)} datasets with {location_count} unchanged locations")
+    print(f"Validated {len(datasets)} datasets with {location_count} manifest-verified locations and chest availability metadata")
     print(f"Built {output} ({len(files)} files, {output.stat().st_size:,} bytes)")
 
 

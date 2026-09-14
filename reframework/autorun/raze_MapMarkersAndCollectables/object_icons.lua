@@ -1,12 +1,35 @@
 -- Extended atlases preserve native patterns and add object symbols and minimap arrows.
 local M = {}
+M.styles = {
+  { key = 'default', label = 'Follow global icon style' },
+  { key = 'small', label = 'Small chest', icon = 80 },
+  { key = 'medium', label = 'Medium chest', icon = 78 },
+  { key = 'large', label = 'Large chest', icon = 81 },
+  { key = 'sunken', label = 'Sunken chest', icon = 82 },
+  { key = 'special', label = 'Special chest', icon = 79 },
+  { key = 'sphinx', label = 'Sphinx chest', icon = 83 },
+  { key = 'native', label = 'Game symbol' },
+}
+local style_by_key = {}
+for _, style in ipairs(M.styles) do style_by_key[style.key] = style end
+
+function M.valid_style(value)
+  return type(value) == 'string' and style_by_key[value] ~= nil
+end
+
+function M.resolve_type(marker_type, marker_settings, prefix, use_objects)
+  local style = style_by_key[marker_settings[prefix .. '_icon_style']] or style_by_key.default
+  if style.icon then return style.icon end
+  if style.key == 'native' or not use_objects then return marker_settings[prefix .. '_icon_type'] end
+  return marker_type.object_icon
+end
 local original_paths = {
   fullmap = 'Gui/ui01/Common/map/UVS_map_01.uvs',
   minimap = 'Gui/ui01/Common/map/UVS_map_03.uvs'
 }
 
 function M.native_type(icon_type)
-  return icon_type >= 76 and icon_type <= 79 and 31 or icon_type
+  return icon_type >= 76 and icon_type <= 83 and 31 or icon_type
 end
 
 function M.create(api, warn)

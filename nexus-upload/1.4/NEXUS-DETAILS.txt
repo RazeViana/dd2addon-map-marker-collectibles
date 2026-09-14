@@ -1,0 +1,60 @@
+NEXUS MODS UPLOAD DETAILS - VERSION 1.4
+
+Mod name
+Map Markers and Collectables by Raze
+
+Game
+Dragon's Dogma 2
+
+Author
+Raze
+
+Version
+1.4
+
+Category
+User Interface
+
+Suggested tags
+User Interface, Quality of Life
+
+Summary
+Find tokens, beetles and chests on both maps. Track your first token, filter chests by progression, reveal Unmoored locations when ready, and customize marker artwork, colours, size and height arrows.
+
+Main file category
+Main Files
+
+Main file name
+Map Markers and Collectables by Raze
+
+Main file version
+1.4
+
+Archive to upload
+Map-Markers-and-Collectables-by-Raze-v1.4.zip
+
+Main file description (250 characters maximum; also in FILE-DESCRIPTION.txt)
+v1.4: refreshed chest data, saved collection tracking, automatic progression/Unmoored filtering, customizable chest icons and colors, a red first-token marker, and map overlap/cave fog fixes. Requires REFramework. Install the complete ZIP.
+
+Version 1.4 changelog
+- Add a red first Seeker's Token marker on both maps, removed after Finder's Token collection. Its separate visibility toggle starts enabled.
+- Add 54 chest locations, remove two unsupported original entries, and correct one extra-large chest position. All remaining chest GUIDs/types match the fresh extraction.
+- Honor saved chest collection history, including chests opened before installing the mod.
+- Add Hide unobtainable chests, enabled by default, and Reveal Unmoored-only chests early, disabled by default. Separate quest and environment requirements still apply.
+- Keep three quest-controlled placements with unresolved activation rules hidden while unopened when progression filtering is enabled. Sphinx reward datasets are retained but not exposed as a category.
+- Add distinct chest artwork, category colour defaults, and separate acquired/unacquired appearance choices. Preserve existing settings.
+- Raise collectible markers above ordinary full-map game icons to address overlapping Dragon's Gaze markers.
+- Apply chest fog filtering outdoors, showing chests on cave/city local maps and restoring the saved outdoor preference on leaving. Other filters remain active.
+
+Required mod
+REFramework for Dragon's Dogma 2
+https://www.nexusmods.com/dragonsdogma2/mods/8
+
+Donation Points
+Disabled under the recorded source terms.
+
+Page description
+Copy DESCRIPTION.txt into the Nexus description editor.
+
+Update instructions
+Close the game, install the complete ZIP and restart. Keep reframework/data/raze_MapMarkersAndCollectables_settings.json to retain preferences. Enable the desired chest categories. Hide unobtainable chests and Show first Seeker's Token start enabled; Reveal Unmoored-only chests early starts disabled. Existing category, appearance and fog choices are kept.

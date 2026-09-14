@@ -9,13 +9,15 @@ TEXTURE = "raze/mapmarkers/markers.tex"
 HEIGHT_TEXTURE = "raze/mapmarkers/height-arrows.tex"
 LAYOUT = ROOT / "assets/icons/native-atlas-layout.json"
 PATTERN = struct.Struct("<Q4f2i")
+OBJECT_COUNT = 8
 
 
 def atlas_bytes(layout, height_arrows=False):
     textures = layout["textures"] + [TEXTURE]
-    sequences = layout["sequences"] + [[4, len(layout["patterns"])]]
+    sequences = layout["sequences"] + [[OBJECT_COUNT, len(layout["patterns"])]]
     patterns = layout["patterns"] + [
-        [0, i / 4, 0, (i + 1) / 4, 1, len(layout["textures"]), -1] for i in range(4)
+        [0, i / OBJECT_COUNT, 0, (i + 1) / OBJECT_COUNT, 1, len(layout["textures"]), -1]
+        for i in range(OBJECT_COUNT)
     ]
     if height_arrows:
         sequences += [[2, len(patterns)]]
@@ -39,7 +41,7 @@ def atlas_bytes(layout, height_arrows=False):
 def build():
     from PIL import Image
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    for name, expected_width in (("markers", 512), ("height-arrows", 256)):
+    for name, expected_width in (("markers", OBJECT_COUNT * 128), ("height-arrows", 256)):
         image = Image.open(ROOT / f"assets/icons/{name}.png").convert("RGBA")
         width, height = image.size
         assert (width, height) == (expected_width, 128)
@@ -59,7 +61,7 @@ def validate():
         arrows = name == "minimap"
         magic, textures, sequences, patterns, _, _, tex, seq, pat, strings = struct.unpack_from("<6I4Q", data)
         assert magic == 0x5556532E and textures == 3 + arrows and sequences == 3 + arrows
-        assert patterns == len(layout["patterns"]) + 4 + 2 * arrows
+        assert patterns == len(layout["patterns"]) + OBJECT_COUNT + 2 * arrows
         assert 56 <= tex < seq < pat < strings < len(data)
         # Every native UV and sequence remains intact, including empty atlas cells.
         for i, expected in enumerate(layout["patterns"]):
@@ -69,14 +71,14 @@ def validate():
         for i, expected in enumerate(layout["textures"] + [TEXTURE] + ([HEIGHT_TEXTURE] if arrows else [])):
             offset = struct.unpack_from("<Q", data, tex + i * 40 + 8)[0]
             assert data[strings + offset * 2:].decode("utf-16le").split("\0")[0] == expected
-        for i in range(4):
-            assert PATTERN.unpack_from(data, pat + (len(layout["patterns"]) + i) * 32) == (0, i/4, 0, (i+1)/4, 1, 2, -1)
-        assert struct.unpack_from("<2I", data, seq + 2 * 8) == (4, len(layout["patterns"]))
+        for i in range(OBJECT_COUNT):
+            assert PATTERN.unpack_from(data, pat + (len(layout["patterns"]) + i) * 32) == (0, i/OBJECT_COUNT, 0, (i+1)/OBJECT_COUNT, 1, 2, -1)
+        assert struct.unpack_from("<2I", data, seq + 2 * 8) == (OBJECT_COUNT, len(layout["patterns"]))
         if arrows:
-            assert struct.unpack_from("<2I", data, seq + 3 * 8) == (2, len(layout["patterns"]) + 4)
+            assert struct.unpack_from("<2I", data, seq + 3 * 8) == (2, len(layout["patterns"]) + OBJECT_COUNT)
             for i in range(2):
                 assert PATTERN.unpack_from(data, pat + (patterns - 2 + i) * 32) == (0, i/2, 0, (i+1)/2, 1, 3, -1)
-    for name, width in (("markers", 512), ("height-arrows", 256)):
+    for name, width in (("markers", OBJECT_COUNT * 128), ("height-arrows", 256)):
         texture = (OUTPUT / f"{name}.tex.251211553").read_bytes()
         assert struct.unpack_from("<IIHH", texture) == (0x00584554, 251211553, width, 128)
         assert struct.unpack_from("<QII", texture, 40) == (56, width * 4, width * 128 * 4)

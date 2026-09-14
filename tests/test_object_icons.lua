@@ -1,5 +1,7 @@
 local icons = require('raze_MapMarkersAndCollectables.object_icons')
 assert(icons.native_type(76) == 31 and icons.native_type(79) == 31)
+assert(icons.native_type(80) == 31 and icons.native_type(83) == 31,
+  'new chest artwork must use a safe native fallback')
 assert(icons.native_type(25) == 25)
 local loads, warnings = {}, {}
 local function holder(path)
@@ -33,6 +35,11 @@ assert(renderer:apply(full, 'fullmap', a, 76))
 assert(a.Sprite.sequence == 2 and a.Sprite.pattern == 0)
 assert(renderer:apply(full, 'fullmap', b, 79))
 assert(b.Sprite.pattern == 3 and #loads == 1, 'atlas loaded for every marker')
+for icon_type = 80, 83 do
+  local extra = ref()
+  assert(renderer:apply(full, 'fullmap', extra, icon_type))
+  assert(extra.Sprite.sequence == 2 and extra.Sprite.pattern == icon_type - 76)
+end
 assert(not renderer:apply(full, 'fullmap', c, 25))
 assert(c.Sprite.sequence == 1 and c.Sprite.pattern == 31, 'game symbol changed')
 assert(renderer:apply(mini, 'minimap', c, 77))

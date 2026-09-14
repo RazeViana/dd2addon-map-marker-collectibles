@@ -15,6 +15,9 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
   assert(actual.markers.Chests.unacquired_show == false)
   assert(#actual.marker_order == 2)
   assert(actual.object_icons == true)
+  assert(actual.show_first_seeker_token == true, 'first-token marker must default on')
+  assert(actual.hide_unavailable_chests == true and actual.reveal_unmoored_chests == false,
+    'new installs must hide progression-locked chests without revealing Unmoored placements early')
   assert(actual.icon_size == 50)
   assert(actual.hide_unexplored_chests == false, "existing settings must keep chests visible through fog")
   assert(actual.hide_unexplored_beetles == false and actual.hide_unexplored_tokens == false,
@@ -23,6 +26,16 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
     "existing settings must keep full-map markers enabled")
   assert(actual.minimap.height_indicators == true and actual.minimap.height_tolerance == 3,
     "height indicators must default on with a small level-height tolerance")
+end
+assert(settings.normalize({show_first_seeker_token=false}, names, types, generic).show_first_seeker_token == false)
+assert(settings.normalize({show_first_seeker_token='false'}, names, types, generic).show_first_seeker_token == true)
+for _, value in ipairs({true, false}) do
+  local got = settings.normalize({hide_unavailable_chests=value,reveal_unmoored_chests=value}, names, types, generic)
+  assert(got.hide_unavailable_chests==value and got.reveal_unmoored_chests==value)
+end
+for _, value in ipairs({'false',0,1,{}}) do
+  local got = settings.normalize({hide_unavailable_chests=value,reveal_unmoored_chests=value}, names, types, generic)
+  assert(got.hide_unavailable_chests==true and got.reveal_unmoored_chests==false)
 end
 local actual = settings.normalize({ marker_order = { "Chests", "Chests", "Deleted" }, markers = {
   Tokens = { unacquired_show = false, acquired_show = "true", unacquired_icon_type = 999,

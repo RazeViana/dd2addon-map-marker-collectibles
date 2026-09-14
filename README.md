@@ -2,18 +2,24 @@
 
 Find Seeker's Tokens, Golden Trove Beetles, and chests more easily in Dragon's Dogma 2. This mod marks their locations on your full map and shows nearby items on your minimap while you explore.
 
-**Current version: 1.3.**
+**Current version: 1.4.**
+
+Released September 14, 2026. Download the complete ZIP from the [v1.4 release](https://github.com/RazeViana/dd2addon-map-marker-collectibles/releases/tag/v1.4).
 
 ## What it does
 
 - Shows tokens, beetles, and different types of chests on both maps.
 - Lets you turn full-map and minimap markers on or off independently.
-- Uses recognizable token, beetle, chest, and special chest symbols.
+- Uses recognizable token and beetle symbols, with distinct artwork for small, medium, large, sunken and special chests.
 - Shows simple names when you hover over full-map markers, such as **Chest (S)** and **Special Chest (L)**.
 - Lets you choose which items to show, including items you have already collected.
-- Independently hides chests, Golden Trove Beetles, or Seeker's Tokens in unexplored areas on both maps.
+- Refreshes chest data with 54 additions, removes two unsupported originals, and corrects one position while preserving retained collection IDs.
+- Marks your first collected Seeker's Token in red until you collect the Finder's Token.
+- Hides unopened chests blocked by current world, quest and environment requirements by default, with an option to reveal Unmoored-only placements early.
+- Independently hides chests, Golden Trove Beetles, or Seeker's Tokens in unexplored areas on both maps, with chests ignoring fog on cave and city local maps.
 - Lets you change marker symbols and colors to suit your preferences.
 - Starts with smaller icons and lets you adjust their size on both maps.
+- Gives collectible markers priority over ordinary full-map game icons when they overlap.
 - Keeps minimap symbols upright as you turn the camera.
 - Shows minimap arrows for collectibles above or below you, with an adjustable height tolerance.
 - Gives you more room for markers on both maps.
@@ -26,7 +32,7 @@ Tokens and beetles are shown by default. Turn on chest categories in the mod's m
 You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8). Install it first.
 
 1. Close the game and disable any other mod that adds collectable markers, so you do not see duplicates.
-2. Install `Map-Markers-and-Collectables-by-Raze-v1.3.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
+2. Install `Map-Markers-and-Collectables-by-Raze-v1.4.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
 3. Start the game. In the REFramework menu, open **Script Generated UI > Map Markers and Collectables by Raze**.
 4. Choose the items you want to see, then explore with your full map or minimap.
 
@@ -34,11 +40,25 @@ You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdog
 
 Use the category options to choose what appears on your maps and change its symbol or color. **Unacquired** means items you have not collected; **Acquired** means items you have already collected.
 
-**Use object icons** gives tokens, beetles, chests, and special chests their own symbols. Turn it off to use your saved game symbols and choose others in each category. Your colors and category choices are kept. Chest labels use **S**, **M**, **L**, and **XL** for small, medium, large, and extra large.
+**Use object icons** sets the default artwork. Inside a category's **Unacquired Settings** or **Acquired Settings**, use **Artwork** to follow that default, choose a chest design, or choose **Game symbol** and set its **Icon Type**. Each state has its own color and reset button. Category overrides work with the global object-icon setting either on or off. Your existing colors, game symbols and category choices are kept.
+
+New category color defaults are copper for small, silver for medium, gold for large, blue for extra-large/sunken, and purple for special chests. Acquired markers use a dimmer version. Existing saved colors take precedence; use a category's reset button to apply its new defaults. The crown-style Sphinx artwork is an optional symbol, not an additional Sphinx reward category.
+
+Chest categories contain 637 small, 232 medium, 63 large, 82 extra-large/sunken, and six special chests split by size. Every listed chest matches the fresh game-data extraction. Two unsupported original locations were removed and one extra-large chest position was corrected. Current progression and collection state determine how many appear.
+
+**Hide unobtainable chests** starts enabled. It filters unopened chests using their world, quest and environment conditions. **Reveal Unmoored-only chests early** starts disabled: normally those locations appear automatically in the Unmoored World. Enable it to preview recorded Unmoored-only placements early; separate quest and environment requirements still apply. Disable **Hide unobtainable chests** to see every location allowed by your category and fog settings.
+
+Availability is checked per chest, independently of its size or artwork. Acquired markers follow the category's **Acquired** setting even when that location is currently unavailable. Three quest-controlled chest locations have unresolved availability and remain hidden while unopened with progression filtering on; the menu reports unresolved checks. Their placements exist in the fresh data, but their activation rules need further verification. The retained Sphinx reward datasets are not exposed as a category because their seal conditions are not yet verified.
 
 Use **Show on full map** and **Show on minimap** to turn collectible markers on or off independently. Both start enabled. Changing the full-map toggle refreshes an open map and keeps your category, symbol, color, and size choices.
 
-Use **Hide chests in unexplored areas**, **Hide beetles in unexplored areas**, and **Hide Seeker's Tokens in unexplored areas** to choose which collectible types follow the map's fog of war. Each option works independently on both maps and starts disabled. The chest option covers regular and special chests. Enable an option to show that type's markers only as their locations are revealed; your category and Acquired/Unacquired choices still apply. If fog data is temporarily unavailable, markers for the types you selected stay hidden until it can be read, and the mod's menu shows a message.
+**Show first Seeker's Token** starts enabled. After your first Seeker's Token pickup, its location is marked in red on both maps to help you return for the Finder's Token. The red marker disappears after you collect the Finder's Token. It reads the game's saved first-token and pickup state, including when installed later in a playthrough. It has its own visibility toggle and remains available when ordinary acquired tokens are hidden. It follows your token artwork, icon size, fog and map settings; minimap distance and height limits still apply.
+
+Use **Hide chests in unexplored areas**, **Hide beetles in unexplored areas**, and **Hide Seeker's Tokens in unexplored areas** to choose which collectible types follow the map's fog of war. Each option works independently on both maps and starts disabled. Enable an option to show that type's markers only as their locations are revealed; your category and Acquired/Unacquired choices still apply.
+
+The chest option covers regular and special chests on outdoor maps. Chests ignore fog on cave and city local maps, then follow your saved option again when the map returns outdoors. Your enabled chest categories, progression rules and Acquired/Unacquired choices still apply. Beetles and tokens continue to follow their own fog options on all maps.
+
+If fog data is temporarily unavailable, markers that require a fog check stay hidden until it can be read, and the mod's menu shows a message. Chests on cave and city local maps do not require that fog data.
 
 Under **Minimap settings**, you can change how far away items appear, limit markers above or below you, and choose how many nearby markers to show. Nearby items appear first. Lower the number if your minimap feels crowded.
 
@@ -48,7 +68,7 @@ Use **Icon size (%)** to resize this mod's markers on both maps. The default is 
 
 ## Need help?
 
-If markers are missing, make sure the category is enabled and **Show on full map** or **Show on minimap** is turned on for that map. For minimap markers, also check that the game's minimap is visible. There may be no matching items close enough to you.
+If markers are missing, make sure the category is enabled and **Show on full map** or **Show on minimap** is turned on for that map. Check **Hide unobtainable chests** and the separate fog options. For minimap markers, also check that the game's minimap is visible. There may be no matching items close enough to you.
 
 Collection status is read from the loaded game's records, including items collected before you installed the mod. Keep **Acquired** turned off in each category to hide collected items. No separate pickup history or save conversion is required.
 

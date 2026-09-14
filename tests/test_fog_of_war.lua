@@ -34,7 +34,7 @@ local markers = {
   {key="hidden", marker_type=chest_type, pos={x=2,y=3,z=-4}},
   {key="token", marker_type=token_type, pos={x=2,y=3,z=-4}}
 }
-local ui = { LocalAreaNow = 5 }
+local ui = { LocalAreaNow = 5, IsFieldMap = true, IsDispField = true }
 assert(filter:filter(markers, ui, "fullmap", {}) == markers and calls == 0,
   "disabled fog filter still accessed game state")
 local result = filter:filter(markers, ui, "fullmap", chest_settings)
@@ -88,3 +88,48 @@ end
 local before = calls
 assert(filter:filter(groups, ui, "minimap", {}) == groups and calls == before and not filter.errors.minimap,
   "disabling all fog controls kept a stale error or queried the game")
+
+-- Chests bypass fog on cave/city local maps, then follow the saved preference
+-- again outdoors. The displayed map mode, not a guessed local-area ID, controls this.
+for _, kind in ipairs({"fullmap", "minimap"}) do
+  local mode = kind == "fullmap" and "IsFieldMap" or "IsDispField"
+  local local_ui = { LocalAreaNow = 8, [mode] = false }
+  local only_chests = { groups[1] }
+  available = false
+  filter.errors[kind] = "Previous outdoor fog error"
+  before = calls
+  assert(filter:filter(only_chests, local_ui, kind, chest_settings) == only_chests,
+    "local-map chest still required fog data: " .. kind)
+  assert(calls == before and not filter.errors[kind], "chest bypass queried fog or kept a stale error")
+  assert(chest_settings.hide_unexplored_chests == true, "local-map bypass changed the saved toggle")
+
+  for _, area in ipairs({5, 8}) do
+    local_ui.LocalAreaNow = area
+    for _, ready in ipairs({true, false}) do
+      available = ready
+      local all_enabled = {hide_unexplored_chests=true,hide_unexplored_tokens=true,hide_unexplored_beetles=true}
+      local local_result = filter:filter(groups, local_ui, kind, all_enabled)
+      assert(#local_result == 1 and local_result[1].key == "chest",
+        "local-map chest bypass changed token or beetle fog filtering")
+      assert((filter.errors[kind] ~= nil) == (not ready), "other fog errors were lost or invented")
+    end
+  end
+
+  -- Same cached candidates, including entering a cave and returning outside.
+  available = true
+  local_ui.LocalAreaNow = 5
+  for _, field in ipairs({true, false, true, false, true}) do
+    local_ui[mode] = field
+    local transitioned = filter:filter(groups, local_ui, kind, chest_settings)
+    assert(#transitioned == (field and 2 or 3), "map transition retained stale chest visibility")
+    assert(#groups == 3 and groups[1].key == "chest", "transition modified cached marker candidates")
+  end
+  -- Missing mode information never silently disables the outdoor fog preference.
+  local_ui[mode] = nil
+  assert(#filter:filter(groups, local_ui, kind, chest_settings) == 2,
+    "unknown map mode bypassed chest fog")
+  local_ui[mode] = false
+  before = calls
+  assert(filter:filter(groups, local_ui, kind, {}) == groups and calls == before,
+    "disabled fog controls changed local-map behavior")
+end

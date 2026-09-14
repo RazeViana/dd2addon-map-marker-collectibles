@@ -8,6 +8,9 @@ local MOD_NAME = "Map Markers and Collectables by Raze"
 local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
 local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
+local chest_availability = require("raze_MapMarkersAndCollectables.chest_availability").create(
+  require("raze_MapMarkersAndCollectables.chest_game_state").create(sdk),
+  settings_util.load(json, "raze_MapMarkersAndCollectables/chest-availability.json"))
 local fog_visibility = require("raze_MapMarkersAndCollectables.fog_of_war").create(sdk,
   function(pos) return Vector3f.new(pos.x, pos.y, pos.z) end,
   function(message) log.warn(MOD_NAME .. ": " .. message) end)
@@ -208,8 +211,10 @@ local chest_get_state_callbacks =
   -- nearby
   function(args)
     local gimmick = args.gimmick_map[args.collectible_id:ToString()]
-    if gimmick ~= nil then
-      return gimmick:get_IsOpenedFreeBit()
+    -- A new opening is conclusive; a closed loaded object must not override
+    -- acquisition already recorded in the save before the mod was installed.
+    if gimmick ~= nil and gimmick:get_IsOpenedFreeBit() == true then
+      return true
     end
     return nil
   end,
@@ -222,6 +227,14 @@ local chest_get_state_callbacks =
     return nil
   end,
 }
+
+local function chest_defaults(color)
+  local dimmed = 0xA0000000
+  for shift = 0, 16, 8 do dimmed = dimmed | ((((color >> shift) & 0xFF) // 2) << shift) end
+  return { unacquired_icon_type = 25, acquired_icon_type = 25,
+    unacquired_icon_color = color, acquired_icon_color = dimmed,
+    unacquired_show = false, acquired_show = false }
+end
 
 local marker_types =
 {
@@ -271,7 +284,8 @@ local marker_types =
     gimmick_id = 10,
     get_state_callbacks = chest_get_state_callbacks,
     name = "Chest (S)",
-    object_icon = 78,
+    object_icon = 80,
+    settings_default = chest_defaults(0xFF6CA4DC),
   },
   ["Chests (M)"] =
   {
@@ -282,6 +296,7 @@ local marker_types =
     get_state_callbacks = chest_get_state_callbacks,
     name = "Chest (M)",
     object_icon = 78,
+    settings_default = chest_defaults(0xFFE0CFBA),
   },
   ["Chests (L)"] =
   {
@@ -291,7 +306,8 @@ local marker_types =
     gimmick_id = 12,
     get_state_callbacks = chest_get_state_callbacks,
     name = "Chest (L)",
-    object_icon = 78,
+    object_icon = 81,
+    settings_default = chest_defaults(0xFF6FD6FF),
   },
   -- 13, Sphinx's opulent chest
   -- 465, Chest (L), sealed by Sphinx
@@ -299,12 +315,13 @@ local marker_types =
   {
     label = "Extra Large Chests",
     fog_setting = "hide_unexplored_chests",
-    tooltip = "Also known as 'sunken chests'. Most of these are only available in post-game.",
+    tooltip = "Also known as 'sunken chests'. Progression requirements are checked per location; chest size alone does not determine availability.",
     data = json.load_file("raze_MapMarkersAndCollectables/495.json"),
     gimmick_id = 495,
     get_state_callbacks = chest_get_state_callbacks,
     name = "Chest (XL)",
-    object_icon = 78,
+    object_icon = 82,
+    settings_default = chest_defaults(0xFFFFC780),
   },
   -- 653, Sphinx's opulent chest
   ["Special Chests (S)"] =
@@ -316,6 +333,7 @@ local marker_types =
     get_state_callbacks = chest_get_state_callbacks,
     name = "Special Chest (S)",
     object_icon = 79,
+    settings_default = chest_defaults(0xFFFF9DDB),
   },
   ["Special Chests (M)"] =
   {
@@ -326,6 +344,7 @@ local marker_types =
     get_state_callbacks = chest_get_state_callbacks,
     name = "Special Chest (M)",
     object_icon = 79,
+    settings_default = chest_defaults(0xFFFF9DDB),
   },
   ["Special Chests (L)"] =
   {
@@ -336,6 +355,7 @@ local marker_types =
     get_state_callbacks = chest_get_state_callbacks,
     name = "Special Chest (L)",
     object_icon = 79,
+    settings_default = chest_defaults(0xFFFF9DDB),
   },
 }
 -- also used as default ordering
@@ -367,6 +387,13 @@ local settings_default_generic =
 
 local argb_to_abgr = settings_util.argb_to_abgr
 local settings = settings_util.normalize(loaded_settings, marker_type_names, marker_types, settings_default_generic)
+local token_type = marker_types["Seeker's Tokens"]
+local first_token = require("raze_MapMarkersAndCollectables.first_token").create(sdk,
+  type(token_type.data) == "table" and token_type.data.locations)
+local function with_first_token(markers)
+  return first_token:overlay(markers, settings.show_first_seeker_token,
+    object_icon_util.resolve_type(token_type, settings.markers["Seeker's Tokens"], "unacquired", settings.object_icons))
+end
 local settings_message = nil
 
 local save_settings = function()
@@ -394,6 +421,8 @@ local show_warning = false
 local cache_acquired = {}
 local cache_collectibles = nil
 local cache_markers = nil
+local availability_signature, next_availability_refresh = nil, 0
+local first_token_signature
 local minimap_renderer = nil
 local minimap_error = nil
 
@@ -412,8 +441,20 @@ local draw_marker_type_settings = function(setting_prefix, marker_type, marker_s
   local icon_type_key = setting_prefix .. "_icon_type"
   local icon_color_key = setting_prefix .. "_icon_color"
   local icon_color_gui_key = setting_prefix .. "_icon_color_gui"
+  local icon_style_key = setting_prefix .. "_icon_style"
   local dirty = nil
-  if not settings.object_icons then
+  local labels, selected = {}, 1
+  for i, style in ipairs(object_icon_util.styles) do
+    labels[i] = style.label
+    if style.key == marker_settings[icon_style_key] then selected = i end
+  end
+  local changed, choice = imgui.combo("Artwork", selected, labels)
+  if changed and object_icon_util.styles[choice] then
+    marker_settings[icon_style_key] = object_icon_util.styles[choice].key
+    dirty = true
+  end
+  if marker_settings[icon_style_key] == "native"
+      or (marker_settings[icon_style_key] == "default" and not settings.object_icons) then
     local changed, new_value = imgui.drag_int("Icon Type", marker_settings[icon_type_key], 1, 0, 75)
     if changed then
       marker_settings[icon_type_key] = new_value
@@ -436,11 +477,10 @@ local draw_marker_type_settings = function(setting_prefix, marker_type, marker_s
     else
       settings_default = marker_type.settings_default
     end
-    for key, value in pairs(settings_default) do
-      marker_settings[icon_type_key] = settings_default[icon_type_key]
-      marker_settings[icon_color_key] = settings_default[icon_color_key]
-      marker_settings[icon_color_gui_key] = argb_to_abgr(settings_default[icon_color_key])
-    end
+    marker_settings[icon_style_key] = "default"
+    marker_settings[icon_type_key] = settings_default[icon_type_key]
+    marker_settings[icon_color_key] = settings_default[icon_color_key]
+    marker_settings[icon_color_gui_key] = argb_to_abgr(settings_default[icon_color_key])
     dirty = true
   end
   return dirty
@@ -452,13 +492,39 @@ re.on_draw_ui(function()
   local collectibles_dirty = false
   local reorder_index = 0
   if imgui.tree_node(MOD_NAME) then
-    imgui.text("v1.3 - Map and minimap markers")
+    imgui.text("v1.4 - Map and minimap markers")
     local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
     if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
+    if imgui.is_item_hovered() then
+      imgui.set_tooltip("Default artwork for categories using 'Follow global icon style'. Category overrides are set below.")
+    end
     local size_changed, icon_size = imgui.slider_int("Icon size (%)", settings.icon_size, 25, 150)
     if size_changed then settings.icon_size = icon_size; markers_dirty = true end
     if object_icon_error then imgui.text(object_icon_error) end
     if settings_message ~= nil then imgui.text(settings_message) end
+    local first_changed, show_first = imgui.checkbox("Show first Seeker's Token", settings.show_first_seeker_token)
+    if first_changed then settings.show_first_seeker_token = show_first; markers_dirty = true end
+    if imgui.is_item_hovered() then
+      imgui.set_tooltip("Mark your first collected Seeker's Token in red until you collect the Finder's Token. Independent of Acquired/Unacquired visibility; follows token artwork, fog and map settings.")
+    end
+    if settings.show_first_seeker_token and first_token.error then imgui.text(first_token.error) end
+    local progression_changed, hide_unavailable = imgui.checkbox("Hide unobtainable chests", settings.hide_unavailable_chests)
+    if progression_changed then settings.hide_unavailable_chests = hide_unavailable; markers_dirty = true end
+    if imgui.is_item_hovered() then
+      imgui.set_tooltip("Hide unopened chests blocked by their world, quest or environment conditions. Unresolved availability stays hidden. Collected-chest history follows each category's Acquired setting.")
+    end
+    local unmoored_changed, reveal_unmoored = imgui.checkbox("Reveal Unmoored-only chests early", settings.reveal_unmoored_chests)
+    if unmoored_changed then settings.reveal_unmoored_chests = reveal_unmoored; markers_dirty = true end
+    if imgui.is_item_hovered() then
+      imgui.set_tooltip("Reveal recorded Unmoored-only placements before entering that world. Other quest and environment conditions still apply. Turn off Hide unobtainable chests to display every location.")
+    end
+    if settings.hide_unavailable_chests then
+      for _, kind in ipairs({"fullmap", "minimap"}) do
+        if settings[kind].enabled and chest_availability.errors[kind] then
+          imgui.text(chest_availability.errors[kind])
+        end
+      end
+    end
     local fullmap_changed, show_fullmap = imgui.checkbox("Show on full map", settings.fullmap.enabled)
     if fullmap_changed then
       settings.fullmap.enabled = show_fullmap
@@ -481,7 +547,11 @@ re.on_draw_ui(function()
       fog_enabled = fog_enabled or settings[control[1]]
       if imgui.is_item_hovered() then
         imgui.begin_tooltip()
-        imgui.set_tooltip("Show " .. control[3] .. " only where the map's fog of war has cleared. Applies to both maps.")
+        local tooltip = "Show " .. control[3] .. " only where the map's fog of war has cleared. Applies to both maps."
+        if control[1] == "hide_unexplored_chests" then
+          tooltip = tooltip .. " Chests ignore fog on cave and city local maps; outdoor maps follow this option again. Category and Acquired/Unacquired choices still apply."
+        end
+        imgui.set_tooltip(tooltip)
         imgui.end_tooltip()
       end
     end
@@ -745,19 +815,16 @@ local get_markers = function(collectibles)
       for _, collectible in ipairs(marker_collectibles) do
         repeat
           local marker_settings = collectible.marker_settings
-          local icon_type
           local icon_color
           if collectible.acquired == true then
             if marker_settings.acquired_show == false then
               break
             end
-            icon_type = marker_settings.acquired_icon_type
             icon_color = marker_settings.acquired_icon_color
           else
             if marker_settings.unacquired_show == false then
               break
             end
-            icon_type = marker_settings.unacquired_icon_type
             icon_color = marker_settings.unacquired_icon_color
           end
 
@@ -767,7 +834,9 @@ local get_markers = function(collectibles)
               id = collectible.id,
               pos = collectible.pos,
               marker_type = collectible.marker_type,
-              icon_type = settings.object_icons and collectible.marker_type.object_icon or icon_type,
+              acquired = collectible.acquired == true,
+              icon_type = object_icon_util.resolve_type(collectible.marker_type, marker_settings,
+                collectible.acquired == true and "acquired" or "unacquired", settings.object_icons),
               icon_color = icon_color,
             })
         until true
@@ -788,6 +857,7 @@ local icon_pools =
 -- 130 infos vs 32 panels, so everything looked over the limit forever.
 local get_icon_pool = function(this)
   local used = {}
+  local native_refs = {}
   for i = 1, #icon_pools do
     used[i] = 0
   end
@@ -798,6 +868,7 @@ local get_icon_pool = function(this)
       for j = 1, #icon_pools do
         if info[icon_pools[j].ref] ~= nil then
           used[j] = used[j] + 1
+          native_refs[#native_refs + 1] = info[icon_pools[j].ref]
         end
       end
     end
@@ -813,19 +884,31 @@ local get_icon_pool = function(this)
       pool, pool_used, pool_limit = icon_pools[i], used[i], limit
     end
   end
-  return pool, pool_used, pool_limit
+  return pool, pool_used, pool_limit, native_refs
 end
 
-local fullmap_sizes = {}
-local function restore_fullmap_sizes()
-  for _, saved in ipairs(fullmap_sizes) do saved.ref:set_Scale(saved.scale) end
-  fullmap_sizes = {}
+local fullmap_styles, fullmap_native_refs = {}, {}
+local function restore_fullmap_styles()
+  for _, saved in ipairs(fullmap_styles) do
+    saved.ref:set_Scale(saved.scale)
+    saved.ref:set_Prio(saved.priority)
+  end
+  fullmap_styles, fullmap_native_refs = {}, {}
 end
-local function apply_fullmap_sizes(this)
+local function apply_fullmap_styles(this)
+  if #fullmap_styles == 0 then return end
   -- Slot scales can belong to an earlier zoom, especially when slots are reused.
   -- Use the map's current icon scale for every custom marker; snapshots are only for restoration.
   local scale = this.IconScale * settings.icon_size / 100
-  for _, saved in ipairs(fullmap_sizes) do saved.ref:set_Scale(scale) end
+  -- Adding icons last does not override native drawing priority (e.g. Dragon's Gaze).
+  -- Only native refs captured before our additions determine the foreground priority,
+  -- so reapplying after native updates cannot increase it on every frame.
+  local priority = 0
+  for _, ref in ipairs(fullmap_native_refs) do priority = math.max(priority, ref:get_Prio()) end
+  for _, saved in ipairs(fullmap_styles) do
+    saved.ref:set_Scale(scale)
+    saved.ref:set_Prio(priority + 1)
+  end
 end
 
 local add_markers = function(this)
@@ -889,6 +972,10 @@ local add_markers = function(this)
     cache_markers = markers
   end
 
+  -- The first-token marker follows current saved state even while ordinary markers are cached.
+  markers, first_token_signature = with_first_token(markers)
+  -- Progression applies after the marker cache, independently of fog and category settings.
+  markers, availability_signature = chest_availability:filter(markers, settings, "fullmap")
   -- Display range describes the selected world/local map, not its zoom level.
   -- Check it before querying fog so local masks receive only relevant positions.
   local in_range = {}
@@ -900,7 +987,8 @@ local add_markers = function(this)
   -- Filter after the marker cache so exploration and map-area changes are read afresh.
   markers = fog_visibility:filter(in_range, this, "fullmap", settings)
   ensure_icon_capacity(this, "fullmap", 2048)
-  local icon_pool, icon_count, icon_limit = get_icon_pool(this)
+  local icon_pool, icon_count, icon_limit, native_refs = get_icon_pool(this)
+  fullmap_native_refs = native_refs
 
   -- passed in as ref to the pool's add function
   local icon_index = icon_count
@@ -961,7 +1049,8 @@ local add_markers = function(this)
       -- no ref means no color, icon still shows though
       local map_icon_ref = ui_icon[icon_pool.ref]
       if map_icon_ref ~= nil then
-        fullmap_sizes[#fullmap_sizes + 1] = { ref = map_icon_ref, scale = map_icon_ref:get_Scale() }
+        fullmap_styles[#fullmap_styles + 1] = {
+          ref = map_icon_ref, scale = map_icon_ref:get_Scale(), priority = map_icon_ref:get_Prio() }
         object_icons:apply(this, "fullmap", map_icon_ref, marker.icon_type)
         icon_color_obj:write_dword(uint_t_value_offset, marker.icon_color)
         map_icon_ref:set_Color(icon_color_obj:get_address() + uint_t_value_offset)
@@ -984,6 +1073,10 @@ sdk.hook(
     show_warning = false
     cache_collectibles = nil
     cache_markers = nil
+    chest_availability:reset()
+    first_token:reset()
+    first_token_signature = nil
+    availability_signature, next_availability_refresh = nil, 0
     if minimap_renderer then minimap_renderer:invalidate() end
   end,
   function(retval)
@@ -1011,7 +1104,7 @@ sdk.hook(
   function(args)
     sprite_pools:destroy(sdk.to_managed_object(args[2]), "fullmap")
     object_icons:destroy(sdk.to_managed_object(args[2]), "fullmap")
-    fullmap_sizes = {}
+    fullmap_styles, fullmap_native_refs = {}, {}
     hover_labels = {}
     ui_map = nil
   end,
@@ -1034,6 +1127,18 @@ sdk.hook(ui040205_t:get_method("setupIconName"),
 sdk.hook(
   ui040205_t:get_method("update"),
   function(args)
+    if settings.fullmap.enabled and cache_markers ~= nil
+        and os.clock() >= next_availability_refresh then
+      next_availability_refresh = os.clock() + 1
+      local candidates, first_signature = with_first_token(cache_markers)
+      local _, signature = chest_availability:filter(candidates, settings, "fullmap")
+      if first_token_signature ~= nil and first_signature ~= first_token_signature then
+        -- Re-read ordinary acquisition too, so a freshly collected first token cannot return green.
+        cache_collectibles, cache_markers = nil, nil
+        want_update = true
+      end
+      if availability_signature ~= nil and signature ~= availability_signature then want_update = true end
+    end
     if want_update == false then
       return
     end
@@ -1046,12 +1151,12 @@ sdk.hook(
   end
 )
 
--- Native updates can rewrite sprite scale; apply an absolute size to our own refs only.
+-- Native updates can rewrite scale and priority; reapply only to our own refs.
 local scale_map
 sdk.hook(ui040205_t:get_method("updateMapIcon"),
   function(args) scale_map = sdk.to_managed_object(args[2]) end,
   function(retval)
-    if scale_map == ui_map then apply_fullmap_sizes(scale_map) end
+    if scale_map == ui_map then apply_fullmap_styles(scale_map) end
     return retval
   end)
 
@@ -1060,7 +1165,7 @@ sdk.hook(
   function(args)
     ui_map = sdk.to_managed_object(args[2])
     -- Restore borrowed state before native setup can reuse these slots for game icons.
-    restore_fullmap_sizes()
+    restore_fullmap_styles()
     object_icons:clear(ui_map, "fullmap")
   end,
   function(retval)
@@ -1068,7 +1173,7 @@ sdk.hook(
     if this ~= nil then
       add_markers(this)
       this:updateMapIcon()
-      apply_fullmap_sizes(this)
+      apply_fullmap_styles(this)
     end
     return retval
   end
@@ -1102,6 +1207,8 @@ if ui020301_t and thread and thread.get_hook_storage then
     minimap_renderer = require("raze_MapMarkersAndCollectables.minimap").create({
       settings = settings.minimap, clock = os.clock, get_markers = get_minimap_markers,
       filter_markers = function(ui, markers)
+        markers = with_first_token(markers)
+        markers = chest_availability:filter(markers, settings, "minimap")
         return fog_visibility:filter(markers, ui, "minimap", settings)
       end,
       native_type = object_icon_util.native_type,
@@ -1155,8 +1262,10 @@ end
 
 if re.on_script_reset then
   re.on_script_reset(function()
+    chest_availability:reset()
+    first_token:reset()
     if minimap_renderer then pcall(minimap_renderer.clear, minimap_renderer) end
-    pcall(restore_fullmap_sizes)
+    pcall(restore_fullmap_styles)
     pcall(object_icons.restore, object_icons)
   end)
 end

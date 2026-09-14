@@ -1,0 +1,1 @@
+v1.4: refreshed chest data, saved collection tracking, automatic progression/Unmoored filtering, customizable chest icons and colors, a red first-token marker, and map overlap/cave fog fixes. Requires REFramework. Install the complete ZIP.

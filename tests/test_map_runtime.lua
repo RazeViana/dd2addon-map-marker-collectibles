@@ -4,6 +4,14 @@ local hooks, callbacks, objects, next_address = {}, {}, {}, 1000
 local messages, writes, ids, toggled = {}, {}, {}, false
 local settings_reads = {}
 local managers = {}
+local chest_metadata = {schema_version=1, chests={}}
+local chest_guids = {}
+for _, kind in ipairs({10,11,12,495,692,693,694}) do
+  local key = kind == 10 and '00000004-0000-0000-0000-000000000000'
+    or string.format('%08x-0000-0000-0000-000000000000', kind + 1000)
+  chest_guids[kind] = key
+  chest_metadata.chests[key] = {gimmick_id=kind, variants={{world='any',quests={}}}}
+end
 local gimmicks_by_type, saved_keys, saved_records = {}, {}, {}
 local minimap_get_markers, minimap_options
 local minimap_module = require("raze_MapMarkersAndCollectables.minimap")
@@ -31,6 +39,16 @@ local function box()
   function value:ToString() return self.key .. "_0" end
   return value
 end
+local function priority_ref(priority)
+  return { priority = priority,
+    get_Prio = function(self) return self.priority end,
+    set_Prio = function(self, value) self.priority = value end }
+end
+-- A native marker at a token's position can have a higher drawing priority
+-- than the unused sprite slot borrowed for the token.
+local native_marker = priority_ref(40)
+native_marker.position = { x = 1, y = 0, z = 1 }
+local native_panel = priority_ref(55)
 local map = {
   MapIconSpriteSet = { atlas = { get_ResourcePath = function() return 'Gui/ui01/Common/map/UVS_map_01.uvs' end,
       add_ref = function(self) return self end },
@@ -38,7 +56,7 @@ local map = {
     set_UVSequence = function(self, value) self.atlas = value end },
   MapIcon = { get_Length = function() return 1 end },
   MapIconSprite = { get_Length = function() return 3 end },
-  MapIconInfoList = list({ { IconSprite = {} } }),
+  MapIconInfoList = list({ { IconSprite = native_marker }, { Icon = native_panel } }),
   emitted = {}, refreshes = 0, NowScale = 1, IconScale = 1,
   isInDispRange = function(_, pos) return pos.x > 0 end,
   get_Valid = function() return true end,
@@ -48,19 +66,26 @@ function map:setMapScale()
   local previous = self.emitted
   hooks["app.ui040205.setupMapIcon"].pre({ [2] = self })
   for _, info in ipairs(previous) do
-    local ref = info.ui_icon.IconSprite
+    local ref = info.ui_icon.IconSprite or info.ui_icon.Icon
     assert(ref.scale == ref.initial_scale, 'borrowed scale was not restored before native setup')
-    assert(ref.Sprite.sequence == 1, 'borrowed UV sequence was not restored before native setup')
+    assert(ref:get_Prio() == ref.initial_priority, 'borrowed priority was not restored before native setup')
+    if ref.Sprite then assert(ref.Sprite.sequence == 1, 'borrowed UV sequence was not restored before native setup') end
     -- Native setup may reuse old custom slots for unrelated game icons.
-    ref.scale, ref.Sprite.sequence, ref.Sprite.pattern = 2, 0, 3
+    ref.scale = 2
+    if ref.Sprite then ref.Sprite.sequence, ref.Sprite.pattern = 0, 3 end
+    ref:set_Prio(73)
   end
   self.emitted = {}
-  self.MapIconInfoList = list({ { IconSprite = {} } })
+  self.MapIconInfoList = list({ { IconSprite = native_marker }, { Icon = native_panel } })
   hooks["app.ui040205.setupMapIcon"].post(91)
   for _, info in ipairs(previous) do
-    local ref = info.ui_icon.IconSprite
-    assert(ref.scale == 2 and ref.Sprite.sequence == 0 and ref.Sprite.pattern == 3,
-      'custom cleanup overwrote a reused native slot')
+    local ref = info.ui_icon.IconSprite or info.ui_icon.Icon
+    assert(ref.scale == 2, 'custom cleanup overwrote a reused native scale')
+    if ref.Sprite then
+      assert(ref.Sprite.sequence == 0 and ref.Sprite.pattern == 3,
+        'custom cleanup overwrote a reused native sprite')
+    end
+    assert(ref:get_Prio() == 73, 'custom cleanup overwrote a reused native priority')
   end
 end
 local function method(type_name, name)
@@ -92,6 +117,9 @@ local function method(type_name, name)
       })
       local slot_scale = self.slot_scales and self.slot_scales[#self.emitted] or 1
       ui_icon.IconSprite = { scale = slot_scale, initial_scale = slot_scale,
+        priority = 5, initial_priority = 5,
+        get_Prio = function(self) return self.priority end,
+        set_Prio = function(self, value) self.priority = value end,
         get_Scale = function(self) return self.scale end,
         set_Scale = function(self, value) self.scale = value end,
         set_Color = function(_, color_pointer)
@@ -102,6 +130,10 @@ local function method(type_name, name)
         set_UVSequenceNo = function(self, value) self.sequence = value end,
         get_UVPatternNo = function(self) return self.pattern end,
         set_UVPatternNo = function(self, value) self.pattern = value end }
+      if name == 'addMapIconInfoList' then
+        ui_icon.Icon = ui_icon.IconSprite
+        ui_icon.Icon.Sprite, ui_icon.IconSprite = nil, nil
+      end
       info.ui_icon = ui_icon
       return ui_icon
     end
@@ -137,9 +169,11 @@ Vector3f = { new = function(x, y, z) return { x = x, y = y, z = z } end }
 log = { info = function(message) messages[#messages + 1] = message end }
 log.warn, log.error, log.debug = log.info, log.info, log.info
 re = { on_config_save = function(callback) callbacks.save = callback end,
+  on_script_reset = function(callback) callbacks.reset = callback end,
   on_draw_ui = function(callback) callbacks.ui = callback end }
 json = {
   load_file = function(path)
+    if path == 'raze_MapMarkersAndCollectables/chest-availability.json' then return chest_metadata end
     if path:match("_settings.json$") then
       settings_reads[#settings_reads + 1] = path
       return { markers = { ["Golden Trove Beetles"] = { unacquired_show = false } } }
@@ -152,7 +186,8 @@ json = {
       } }
     end
     assert(path:match("^raze_MapMarkersAndCollectables/%d+.json$"))
-    return { locations = { ["00000004-0000-0000-0000-000000000000"] = { x = 1, y = 0, z = 1 } } }
+    local kind = tonumber(path:match('/(%d+)%.json$'))
+    return { locations = { [chest_guids[kind] or "00000004-0000-0000-0000-000000000000"] = { x = 1, y = 0, z = 1 } } }
   end,
   dump_file = function(path, value) writes[path] = value; return true end
 }
@@ -217,6 +252,14 @@ assert(map.emitted[1].color == 0xFF00CC00)
 assert(map.emitted[1].IconType == 31 and map.emitted[1].ui_icon.IconSprite.Sprite.pattern == 0,
   'token did not use the token artwork')
 assert(map.emitted[1].ui_icon.IconSprite.scale == 0.5, 'full-map icon was not halved')
+for _, info in ipairs(map.emitted) do
+  assert(info.ui_icon.IconSprite:get_Prio() > native_marker:get_Prio(),
+    'overlapping native marker still draws above the half-size token')
+  assert(info.Pos.x == 1 or info.Pos.x == 2, 'ordering moved a token away from its location')
+  assert(info.ui_icon.IconSprite:get_Prio() > native_panel:get_Prio(),
+    'native panel marker still has priority over the token')
+end
+assert(native_marker:get_Prio() == 40, 'collectible ordering changed a native marker priority')
 local size_hook = hooks['app.ui040205.updateMapIcon']
 size_hook.pre({[2]=map}); size_hook.post(91)
 size_hook.pre({[2]=map}); size_hook.post(91)
@@ -229,20 +272,28 @@ for _, info in ipairs(map.emitted) do
   assert(math.abs(info.ui_icon.IconSprite.scale - 0.4) < 1e-6,
     'same token artwork has different sizes after reusing slots at a new zoom')
 end
-local native_ref = { scale = 1.7, set_Scale = function(self, value) self.scale = value end }
-map.MapIconInfoList = list({ { IconSprite = native_ref }, map.emitted[1].ui_icon, map.emitted[2].ui_icon })
+local native_ref = native_panel
+native_ref.scale, native_ref.set_Scale = 1.7, function(self, value) self.scale = value end
+map.MapIconInfoList = list({ { IconSprite = native_marker, Icon = native_ref },
+  map.emitted[1].ui_icon, map.emitted[2].ui_icon })
 for _, zoom in ipairs({ { 1.2, 0.6 }, { 0.6, 0.3 }, { 0.8, 0.4 } }) do
   map.IconScale = zoom[1]
   for frame = 1, 3 do
     size_hook.pre({ [2] = map })
     -- Simulate native scale writes for only one of the two custom slots.
     map.emitted[1].ui_icon.IconSprite.scale = map.IconScale
+    native_marker:set_Prio(60 + frame)
+    map.emitted[1].ui_icon.IconSprite:set_Prio(5)
     assert(size_hook.post(91) == 91)
     for _, info in ipairs(map.emitted) do
       assert(math.abs(info.ui_icon.IconSprite.scale - zoom[2]) < 1e-6,
         'custom sizes did not follow zoom consistently or accumulated across frames')
+      assert(info.ui_icon.IconSprite:get_Prio() == native_marker:get_Prio() + 1,
+        'custom priority was not reapplied after native updates or accumulated across frames')
     end
     assert(native_ref.scale == 1.7, 'zoom sizing changed a native marker')
+    assert(native_ref:get_Prio() == 55 and native_marker:get_Prio() == 60 + frame,
+      'custom ordering changed native panel or sprite priority')
   end
 end
 map.slot_scales, map.IconScale = nil, 1
@@ -286,8 +337,8 @@ for category, label in pairs({
   map:setMapScale()
   assert(#map.emitted > 0, "missing category: " .. category)
   for _, emitted in ipairs(map.emitted) do
-    local expected = category == "Seeker's Tokens" and 0 or category == 'Golden Trove Beetles' and 1
-      or category:find('Special', 1, true) and 3 or 2
+    local expected = ({["Seeker's Tokens"]=0, ["Golden Trove Beetles"]=1,
+      ["Chests (S)"]=4, ["Chests (M)"]=2, ["Chests (L)"]=5, ["Chests (XL)"]=6})[category] or 3
     assert(emitted.IconType == 31 and emitted.ui_icon.IconSprite.Sprite.sequence == 2
       and emitted.ui_icon.IconSprite.Sprite.pattern == expected, 'wrong object artwork for ' .. category)
     map.SelectedIcon = emitted.ui_icon
@@ -362,8 +413,64 @@ show_category("Chests (S)")
 save_context(beetle_guid, "app.GmItemContext", { get_IsPick = function() return true end })
 map:setMapScale()
 assert(#map.emitted == 0, 'previously opened chest appeared with no live object')
+-- Installing after a chest was opened must also classify it as acquired while
+-- its area is unloaded, before a nearby pickup or a live refresh has occurred.
+local chest_settings = saved_settings.markers["Chests (S)"]
+chest_settings.unacquired_show, chest_settings.acquired_show = false, true
+hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
+map:setMapScale()
+assert(#map.emitted == 1 and map.emitted[1].UniqId.key == beetle_guid,
+  'late installation did not classify the saved chest as acquired')
+chest_settings.unacquired_show, chest_settings.acquired_show = true, false
+local live_chest_opened = false
+gimmicks_by_type[10] = {{
+  get_UniqId = function() return { ToString = function() return beetle_guid .. "_0" end } end,
+  get_IsOpenedFreeBit = function() return live_chest_opened end
+}}
+assert(#minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 0,
+  'loaded closed chest overrode saved acquisition during a nearby refresh')
+hooks["app.ui040205..ctor"].pre({ [2] = map })
+hooks["app.ui040205..ctor"].post(91)
+map:setMapScale()
+assert(#map.emitted == 0, 'nearby refresh resurrected a saved chest on the full map')
+chest_settings.unacquired_show, chest_settings.acquired_show = false, true
+hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
+map:setMapScale()
+assert(#map.emitted == 1 and #minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 1,
+  'saved acquisition was lost from the acquired-only chest view')
+-- An older save or a new cycle can make this GUID unacquired again. The native
+-- context reset must discard the prior positive cache for both map surfaces.
 saved_keys, saved_records = {}, {}
+save_context(beetle_guid, "app.GmItemContext", { get_IsPick = function() return false end })
+chest_settings.unacquired_show, chest_settings.acquired_show = true, false
+hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
+map:setMapScale()
+assert(#map.emitted == 1 and #minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 1,
+  'reloaded chest inherited acquisition from the previous save')
+-- A new opening is immediately conclusive even if the saved context still lags.
+live_chest_opened = true
+assert(#minimap_get_markers({ x = 1, y = 0, z = 1 }, 180, 60) == 0,
+  'fresh chest opening was ignored while saved acquisition lagged')
+hooks["app.ui040205..ctor"].pre({ [2] = map })
+hooks["app.ui040205..ctor"].post(91)
+map:setMapScale()
+assert(#map.emitted == 0, 'fresh chest opening was lost from the full map')
+assert(lock_count == 0, 'chest state refresh leaked the context read lock')
+saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
 show_category("Special Chests (L)")
+map:setMapScale()
+-- Category artwork must reach both map renderers independently of the global style.
+saved_settings.markers["Special Chests (L)"].unacquired_icon_style = "large"
+saved_settings.object_icons = false
+hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
+map:setMapScale()
+assert(map.emitted[1].ui_icon.IconSprite.Sprite.pattern == 5,
+  'full map ignored the category artwork override')
+assert(minimap_get_markers({x=1,y=0,z=1},180,60)[1].icon_type == 81,
+  'minimap ignored the category artwork override')
+saved_settings.markers["Special Chests (L)"].unacquired_icon_style = "default"
+saved_settings.object_icons = true
+hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
 map:setMapScale()
 -- Switching to game symbols retains the saved choice and forces a map refresh.
 local old_checkbox = imgui.checkbox
@@ -392,10 +499,51 @@ local function toggle_map(label, enabled)
   assert(found, "missing visibility control: " .. label)
   hooks["app.ui040205.update"].pre({ [2] = map })
 end
+-- Progression filters cached markers on both surfaces, without changing acquired history.
+local is_unmoored = false
+managers['app.MainFlowManager'] = {get_IsBackStage=function() return is_unmoored end}
+saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
+show_category('Chests (S)')
+local small_rule = chest_metadata.chests[chest_guids[10]].variants[1]
+small_rule.world = 'unmoored'
+map:setMapScale()
+assert(#map.emitted==0, 'unobtainable chest was shown before the Unmoored World')
+local cached_progression_markers = minimap_get_markers({x=1,y=0,z=1},180,60)
+assert(#minimap_options.filter_markers({},cached_progression_markers)==0,
+  'minimap did not apply progression to cached candidates')
+is_unmoored = true
+-- The regular UI update must notice progression changes without a zoom/reopen.
+local original_clock = os.clock
+os.clock = function() return original_clock() + 2 end
+hooks['app.ui040205.update'].pre({[2]=map})
+os.clock = original_clock
+assert(#map.emitted==1 and #minimap_options.filter_markers({},cached_progression_markers)==1,
+  'world transition did not reveal cached chest markers')
+is_unmoored = false
+toggle_map('Reveal Unmoored-only chests early', true)
+assert(#map.emitted==1 and #minimap_options.filter_markers({},cached_progression_markers)==1)
+toggle_map('Reveal Unmoored-only chests early', false)
+assert(#map.emitted==0)
+toggle_map('Hide unobtainable chests', false)
+assert(#map.emitted==1, 'availability display override did not refresh the map')
+toggle_map('Hide unobtainable chests', true)
+assert(#map.emitted==0)
+callbacks.save()
+assert(saved_settings.hide_unavailable_chests and not saved_settings.reveal_unmoored_chests)
+save_context(beetle_guid, 'app.GmItemContext', {get_IsPick=function() return true end})
+saved_settings.markers['Chests (S)'].unacquired_show = false
+saved_settings.markers['Chests (S)'].acquired_show = true
+hooks['app.ContextDatabase.clearAllContextsImpl'].pre({})
+map:setMapScale()
+assert(#map.emitted==1, 'progression hiding suppressed the acquired-only view')
+small_rule.world = 'any'
+saved_keys, saved_records = {}, {}
+show_category('Special Chests (L)')
+map:setMapScale()
 local hidden_icon = map.emitted[1].ui_icon
 toggle_map("Show on full map", false)
 assert(#map.emitted == 0, "disabling the full map left custom markers visible")
-assert(map.MapIconInfoList:get_Count() == 1, "disabling custom markers removed native map entries")
+assert(map.MapIconInfoList:get_Count() == 2, "disabling custom markers removed native map entries")
 map.SelectedIcon, map.TxtName.message = hidden_icon, "Native text"
 hover_hook.pre({ [2] = map }); hover_hook.post(91)
 assert(map.TxtName.message == "Native text", "disabled full map retained a custom hover label")
@@ -476,7 +624,8 @@ managers["app.GuiManager"] = { getMaskInfo = function(_, area)
   return fog_mask
 end }
 map.LocalAreaNow = 17
-local fog_ui = { LocalAreaNow = 17 }
+map.IsFieldMap = true
+local fog_ui = { LocalAreaNow = 17, IsDispField = true }
 toggle_map("Hide chests in unexplored areas", true)
 assert(#map.emitted == 0, "enabling fog filtering left a special chest visible")
 assert(#minimap_options.filter_markers(fog_ui, minimap_get_markers({x=1,y=0,z=1},180,60)) == 0,
@@ -496,6 +645,30 @@ for _, category in ipairs({"Chests (S)", "Chests (M)", "Chests (L)", "Chests (XL
   fog_revealed = false
   map:setMapScale()
   assert(#map.emitted == 0, "fog did not hide " .. category)
+  local cached_chests = minimap_get_markers({x=1,y=0,z=1},180,60)
+  assert(#cached_chests == 1, "local-map test did not isolate the selected chest category")
+  -- The full map and minimap can display different modes. Each must apply its
+  -- own mode to the same cached candidates when entering/leaving a local map.
+  map.IsFieldMap = false
+  local queries_before_local_map = fog_queries
+  map:setMapScale()
+  assert(#map.emitted == 1 and fog_queries == queries_before_local_map,
+    "local full map still filtered " .. category .. " through fog")
+  assert(#minimap_options.filter_markers(fog_ui, cached_chests) == 0,
+    "local full map incorrectly disabled outdoor minimap fog")
+  fog_ui.IsDispField = false
+  queries_before_local_map = fog_queries
+  assert(#minimap_options.filter_markers(fog_ui, cached_chests) == 1
+    and fog_queries == queries_before_local_map, "local minimap still queried chest fog")
+  map.IsFieldMap = true
+  map:setMapScale()
+  assert(#map.emitted == 0, "returning to the outdoor full map left a cached chest visible")
+  assert(#minimap_options.filter_markers(fog_ui, cached_chests) == 1,
+    "outdoor full map incorrectly enabled fog on a local minimap")
+  fog_ui.IsDispField = true
+  assert(#minimap_options.filter_markers(fog_ui, cached_chests) == 0,
+    "returning to the outdoor minimap left a cached chest visible")
+  assert(saved_settings.hide_unexplored_chests == true, "map transition changed the chest preference")
   fog_revealed = true
   -- Neither the collectible cache nor the marker cache is invalidated here.
   map:setMapScale()
@@ -512,10 +685,19 @@ save_context(beetle_guid, "app.GmItemContext", { get_IsPick = function() return 
 fog_revealed = true
 map:setMapScale()
 assert(#map.emitted == 0, "revealed fog overrode acquired-chest visibility")
+map.IsFieldMap, fog_ui.IsDispField = false, false
+map:setMapScale()
+assert(#map.emitted == 0, "local-map bypass revealed an acquired chest")
+assert(#minimap_get_markers({x=1,y=0,z=1},180,60) == 0,
+  "local minimap bypass revealed an acquired chest")
 saved_settings.markers["Chests (S)"].acquired_show = true
 hooks["app.ContextDatabase.clearAllContextsImpl"].pre({})
 map:setMapScale()
 assert(#map.emitted == 1)
+fog_revealed = false
+map:setMapScale()
+assert(#map.emitted == 1, "local-map bypass did not retain the acquired-only choice")
+map.IsFieldMap, fog_ui.IsDispField = true, true
 fog_revealed = false
 map:setMapScale()
 assert(#map.emitted == 0, "acquired-only chest bypassed fog filtering")
@@ -559,6 +741,112 @@ for _, case in ipairs({
   callbacks.save()
   assert(saved_settings[case.key] == false)
 end
+-- First-token guidance is independent of ordinary acquisition/category visibility.
+do
+  show_category("Seeker's Tokens")
+  saved_settings.object_icons = true
+  saved_settings.markers["Seeker's Tokens"].unacquired_icon_style = 'default'
+  local proof = box()
+  proof.key = '00000001-0000-0000-0000-000000000000'
+  local first_empty, finder_collected = true, false
+  proof.isEmpty = function() return first_empty end
+  managers['app.GimmickManager'] = { get_FirstSeekerProof = function() return proof end,
+    isGimmickFlag = function(_, flag) assert(flag == 18); return finder_collected end }
+  map:setMapScale()
+  assert(#map.emitted == 2 and map.emitted[1].color ~= 0xFF0000FF,
+    'first-token marker appeared before any token was collected')
+  local cached = minimap_get_markers({x=1,y=0,z=1},180,60)
+  first_empty = false
+  save_context(proof.key, 'app.GimmickContext', {isOnFreeBit=function(_, bit) assert(bit == 16); return true end})
+  local real_clock, tick = os.clock, os.clock() + 20
+  os.clock = function() return tick end
+  hooks['app.ui040205.update'].pre({[2]=map})
+  assert(#map.emitted == 2 and map.emitted[1].color == 0xFF0000FF,
+    'first pickup did not refresh the cached full map with one red marker')
+  assert(map.emitted[1].UniqId == proof and map.emitted[1].Pos.x == 1)
+  assert(map.emitted[1].ui_icon.IconSprite.Sprite.pattern == 0)
+  map.SelectedIcon = map.emitted[1].ui_icon
+  hover_hook.pre({[2]=map}); hover_hook.post(91)
+  assert(map.TxtName.message == "First Seeker's Token")
+  local mini = minimap_options.filter_markers(fog_ui, cached)
+  assert(#mini == 3 and mini[1].icon_color == 0xFF0000FF,
+    'cached minimap candidates did not replace the original token with red guidance')
+  for _, marker in ipairs(mini) do assert(marker.key ~= proof.key, 'duplicate original token') end
+  saved_settings.markers["Seeker's Tokens"].unacquired_show = false
+  hooks['app.ContextDatabase.clearAllContextsImpl'].pre({})
+  map:setMapScale()
+  assert(#map.emitted == 1 and map.emitted[1].color == 0xFF0000FF,
+    'ordinary token category visibility hid the special marker')
+  toggle_map("Show first Seeker's Token", false)
+  assert(#map.emitted == 0 and saved_settings.show_first_seeker_token == false)
+  toggle_map("Show first Seeker's Token", true)
+  assert(#map.emitted == 1)
+  toggle_map("Hide Seeker's Tokens in unexplored areas", true)
+  assert(#map.emitted == 0 and #minimap_options.filter_markers(fog_ui, {}) == 0)
+  toggle_map("Hide Seeker's Tokens in unexplored areas", false)
+  assert(#map.emitted == 1)
+  finder_collected, tick = true, tick + 2
+  hooks['app.ui040205.update'].pre({[2]=map})
+  assert(#map.emitted == 0, 'Finder pickup left the first-token marker on the open map')
+  assert(#minimap_options.filter_markers(fog_ui, {}) == 0,
+    'Finder pickup left a minimap guidance marker')
+  -- A different save/current-playthrough proof replaces the location instead of retaining history.
+  finder_collected, proof.key = false, '00000002-0000-0000-0000-000000000000'
+  hooks['app.ContextDatabase.clearAllContextsImpl'].pre({})
+  map:setMapScale()
+  assert(#map.emitted == 1 and map.emitted[1].Pos.x == 2 and map.emitted[1].color == 0xFF0000FF)
+  saved_settings.object_icons = false
+  saved_settings.markers["Seeker's Tokens"].unacquired_icon_type = 25
+  map:setMapScale()
+  assert(map.emitted[1].IconType == 25 and map.emitted[1].color == 0xFF0000FF)
+  callbacks.save()
+  assert(saved_settings.show_first_seeker_token == true)
+  os.clock = real_clock
+  managers['app.GimmickManager'] = {}
+  saved_keys, saved_records = {}, {}
+  hooks['app.ContextDatabase.clearAllContextsImpl'].pre({})
+end
+-- The fallback panel pool uses the same native priority API. Game symbols,
+-- map toggles, and script resets must keep the same ordering/restoration rules.
+saved_settings.icon_size = 50
+saved_settings.object_icons = false
+map.MapIcon = { get_Length = function() return 3 end }
+map.MapIconSprite = { get_Length = function() return 1 end }
+show_category("Seeker's Tokens")
+map:setMapScale()
+assert(#map.emitted == 2 and map.emitted[1].ui_icon.Icon, 'panel fallback was not exercised')
+for _, info in ipairs(map.emitted) do
+  local ref = info.ui_icon.Icon
+  assert(ref.scale == 0.5 and ref:get_Prio() > native_marker:get_Prio()
+    and ref:get_Prio() > native_panel:get_Prio(), 'panel token was not raised at the chosen size')
+end
+toggle_map("Show on full map", false)
+toggle_map("Show on full map", true)
+local reset_refs = {}
+for _, info in ipairs(map.emitted) do reset_refs[#reset_refs + 1] = info.ui_icon.Icon end
+callbacks.reset()
+for _, ref in ipairs(reset_refs) do
+  assert(ref.scale == ref.initial_scale and ref:get_Prio() == ref.initial_priority,
+    'script reset did not restore a borrowed panel')
+  ref:set_Prio(29)
+end
+size_hook.pre({ [2] = map }); size_hook.post(91)
+for _, ref in ipairs(reset_refs) do
+  assert(ref:get_Prio() == 29, 'script reset left stale priority overrides')
+  ref:set_Prio(ref.initial_priority)
+end
+-- Return to sprites and verify script-reset cleanup for their priorities too.
+map.MapIcon = { get_Length = function() return 1 end }
+map.MapIconSprite = { get_Length = function() return 3 end }
+map:setMapScale()
+reset_refs = {}
+for _, info in ipairs(map.emitted) do reset_refs[#reset_refs + 1] = info.ui_icon.IconSprite end
+callbacks.reset()
+for _, ref in ipairs(reset_refs) do
+  assert(ref.scale == ref.initial_scale and ref:get_Prio() == ref.initial_priority,
+    'script reset did not restore a borrowed sprite')
+end
+map:setMapScale()
 local stale = map.SelectedIcon
 hooks["app.ui040205.onDestroy"].pre({ [2] = map })
 map.SelectedIcon = stale
