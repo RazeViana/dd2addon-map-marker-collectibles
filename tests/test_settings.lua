@@ -29,6 +29,18 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
 end
 assert(settings.normalize({show_first_seeker_token=false}, names, types, generic).show_first_seeker_token == false)
 assert(settings.normalize({show_first_seeker_token='false'}, names, types, generic).show_first_seeker_token == true)
+assert(settings.normalize({}, names, types, generic).show_first_token_after_collection == false,
+  'existing installations must keep automatic Finder pickup hiding by default')
+for _, enabled in ipairs({true, false}) do
+  local normalized = settings.normalize({show_first_token_after_collection=enabled,
+    show_first_seeker_token=false}, names, types, generic)
+  assert(normalized.show_first_token_after_collection == enabled and normalized.show_first_seeker_token == false,
+    'show-after-collection preference must survive normalization independently of the main toggle')
+end
+for _, invalid in ipairs({'true', 1, 0, {}}) do
+  assert(settings.normalize({show_first_token_after_collection=invalid}, names, types, generic)
+    .show_first_token_after_collection == false, 'invalid values must not force a historical marker')
+end
 for _, value in ipairs({true, false}) do
   local got = settings.normalize({hide_unavailable_chests=value,reveal_unmoored_chests=value}, names, types, generic)
   assert(got.hide_unavailable_chests==value and got.reveal_unmoored_chests==value)

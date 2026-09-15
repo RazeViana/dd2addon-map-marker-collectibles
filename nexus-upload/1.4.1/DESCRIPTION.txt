@@ -1,0 +1,93 @@
+Map Markers and Collectables by Raze
+Version 1.4.1
+
+Find Seeker's Tokens, Golden Trove Beetles and chests on your full map, with nearby items also appearing on your minimap.
+
+What's new in 1.4.1
+
+- Fix the first Seeker's Token marker disappearing when the Sphinx riddle begins, before the Finder's Token is collected.
+- Read the game's saved first-token location and Finder pickup state, including when installing into an existing playthrough. No fresh save is required.
+- Add Show after Finder's Token collection, disabled by default, to keep the red first-token location visible after collecting or handing in the Finder's Token.
+- Save the new preference and refresh it on both maps. The main first-token switch, token fog and map settings, and minimap distance and height limits still apply.
+
+Also included from 1.4
+
+- Refreshed chest locations: 54 additions, two unsupported original entries removed, and one extra-large chest position corrected. All 1,020 chests in the displayed categories match the fresh game-data extraction.
+- Saved collection tracking keeps previously opened chests tracked even when installing later in a save.
+- Automatic progression filtering for chests, including Unmoored-only locations, with an option to reveal those locations early.
+- Distinct chest artwork and category colour defaults, with customizable symbols and colours for acquired and unacquired items.
+- A red marker at your first collected Seeker's Token, with automatic removal after Finder's Token collection by default.
+- Collectible markers draw above ordinary full-map game icons, addressing overlaps such as Dragon's Gaze hiding token markers.
+- Chest fog filtering resumes outdoors after showing chests on cave and city local maps.
+
+Getting started
+
+Install REFramework for Dragon's Dogma 2 first:
+https://www.nexusmods.com/dragonsdogma2/mods/8
+
+1) Close the game and disable other collectable-marker mods to avoid duplicate markers.
+2) Install the complete downloaded ZIP with Fluffy Mod Manager. For manual installation, copy both the reframework and natives folders into your game folder alongside DD2.exe.
+3) Restart the game and open REFramework > Script Generated UI > Map Markers and Collectables by Raze.
+4) Choose what you want to see. Tokens and beetles start enabled; enable chest categories to show chests too.
+
+Choosing your markers
+
+Unacquired means items you have not collected. Acquired means items you have already collected, including before installing the mod. Keep Acquired turned off to hide collected items.
+
+Chest categories contain 637 small, 232 medium, 63 large, 82 extra-large/sunken and six special chests split by size. Hover over a full-map marker to see its name.
+
+Use object icons sets the default artwork. Inside each category's Unacquired Settings or Acquired Settings, use Artwork to follow the global setting, choose a chest design, or choose Game symbol and set its Icon Type. Each state has its own colour and reset button. Your saved appearance choices take precedence over new defaults.
+
+New chest colours are copper for small, silver for medium, gold for large, blue for extra-large/sunken and purple for special chests. Acquired markers use dimmer colours. The optional crown artwork is a symbol choice, not an extra Sphinx reward category.
+
+Chest progression and the Unmoored World
+
+Hide unobtainable chests starts enabled. Unopened chests appear according to their recorded world, quest and environment conditions. Acquired markers still follow each category's Acquired setting.
+
+Reveal Unmoored-only chests early starts disabled. Normally those locations appear automatically in the Unmoored World. Enable this option to preview their locations early; separate quest and environment requirements still apply. Disable Hide unobtainable chests to show every recorded location allowed by your category and fog settings.
+
+Three quest-controlled chest placements have unresolved activation rules and stay hidden while unopened with progression filtering enabled. The menu reports unresolved checks. Their placements exist in the fresh data, but their activation rules need further verification. The retained Sphinx reward datasets are not exposed as a category because their seal conditions are not yet verified.
+
+First Seeker's Token
+
+Show first Seeker's Token starts enabled. A red marker identifies the current playthrough's saved first-token location on both maps, including when the mod is installed later in a save. No fresh save is required, and starting the Sphinx riddle does not hide it. By default, the marker disappears after Finder's Token collection. You can turn it off separately from ordinary token markers.
+
+Enable Show after Finder's Token collection beneath this control to retain the location after collection or hand-in. This extra option starts disabled and requires Show first Seeker's Token to remain enabled. Both preferences are saved.
+
+The red marker remains available when ordinary acquired tokens are hidden. It follows token artwork, icon size, fog and map settings, plus minimap distance and height limits. It identifies the location before the riddle starts; it does not mean the Finder's Token has already spawned.
+
+Maps, fog and minimap settings
+
+Show on full map and Show on minimap control the maps independently. Both start enabled.
+
+Hide chests in unexplored areas, Hide beetles in unexplored areas and Hide Seeker's Tokens in unexplored areas are independent options and start disabled. Enable any combination to reveal those markers as you explore. Existing preferences are preserved when updating.
+
+Chest fog filtering applies outdoors. Chests ignore fog on cave and city local maps, then follow your saved fog preference again outdoors. Category, progression and collection filters still apply. Beetles and tokens keep their own fog behaviour on all maps.
+
+If required fog or progression data is temporarily unavailable, affected markers stay hidden and the menu shows a message. Checks recover when the data becomes available. Hidden items do not consume the minimap marker limit.
+
+Under Minimap settings, change the search radius, maximum height difference and number of nearby markers. Nearby items appear first. Minimap icons and height arrows stay upright as you turn the camera.
+
+Show height indicators adds an arrow above a marker for a higher item, or below it for a lower item. Height tolerance defaults to 3 world units and can be adjusted from 0 to 30. Arrows indicate relative height, not a route to the item. Items beyond Maximum height difference stay hidden, and item icons take priority over arrows on a crowded minimap.
+
+Icon size (%) changes markers on both maps. It starts at 50% and can be adjusted from 25% to 150%.
+
+Updating or removing the mod
+
+Install the complete new ZIP and restart the game. This update includes runtime modules, data and artwork. Keep reframework/data/raze_MapMarkersAndCollectables_settings.json to preserve your choices.
+
+To remove the mod, close the game and disable it in Fluffy Mod Manager. For manual removal, delete this mod's entry-point Lua file and its folders under reframework/autorun, reframework/data, natives/stm/raze/mapmarkers and docs/raze_MapMarkersAndCollectables. Leave REFramework installed if other mods need it. Complete removal paths are in the included README.
+
+If you used development diagnostics, remove reframework/autorun/raze_MapMarkersAndCollectables_Diagnostics.lua separately. It is not included in this release.
+
+Need help?
+
+Check the item category, map visibility, progression and fog settings if a marker is missing. On the minimap, also check distance and height limits. Restart after updating and include any error message when reporting a problem. Other mods that change map markers may conflict.
+
+Credits
+
+Raze: this adaptation, minimap support, marker features, settings and improvements.
+gibbed: Arisen's Almanac, the original full-map code and collectable locations.
+https://www.nexusmods.com/dragonsdogma2/mods/194
+
+Full source credits and notices are included in docs/raze_MapMarkersAndCollectables/THIRD_PARTY_NOTICES.md in the download.

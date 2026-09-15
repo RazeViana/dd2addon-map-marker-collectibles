@@ -748,10 +748,15 @@ do
   saved_settings.markers["Seeker's Tokens"].unacquired_icon_style = 'default'
   local proof = box()
   proof.key = '00000001-0000-0000-0000-000000000000'
-  local first_empty, finder_collected = true, false
+  local first_empty, finder_collected, finder_spawned = true, false, false
   proof.isEmpty = function() return first_empty end
   managers['app.GimmickManager'] = { get_FirstSeekerProof = function() return proof end,
-    isGimmickFlag = function(_, flag) assert(flag == 18); return finder_collected end }
+    isGimmickFlag = function(_, flag)
+      if flag == 18 then return finder_spawned end
+      if flag == 40 then return true end
+      if flag == 122 then return finder_collected end
+      error('unexpected gimmick flag ' .. tostring(flag))
+    end }
   map:setMapScale()
   assert(#map.emitted == 2 and map.emitted[1].color ~= 0xFF0000FF,
     'first-token marker appeared before any token was collected')
@@ -772,6 +777,14 @@ do
   assert(#mini == 3 and mini[1].icon_color == 0xFF0000FF,
     'cached minimap candidates did not replace the original token with red guidance')
   for _, marker in ipairs(mini) do assert(marker.key ~= proof.key, 'duplicate original token') end
+  -- The Sphinx turns on the item's display flag before the Finder is collected.
+  finder_spawned, tick = true, tick + 2
+  hooks['app.ui040205.update'].pre({[2]=map})
+  assert(#map.emitted == 2 and map.emitted[1].color == 0xFF0000FF,
+    'starting the Sphinx riddle hid the red marker on the full map')
+  mini = minimap_options.filter_markers(fog_ui, cached)
+  assert(#mini == 3 and mini[1].icon_color == 0xFF0000FF,
+    'starting the Sphinx riddle hid the red marker on the minimap')
   saved_settings.markers["Seeker's Tokens"].unacquired_show = false
   hooks['app.ContextDatabase.clearAllContextsImpl'].pre({})
   map:setMapScale()
@@ -790,6 +803,33 @@ do
   assert(#map.emitted == 0, 'Finder pickup left the first-token marker on the open map')
   assert(#minimap_options.filter_markers(fog_ui, {}) == 0,
     'Finder pickup left a minimap guidance marker')
+  finder_spawned, tick = false, tick + 2
+  hooks['app.ui040205.update'].pre({[2]=map})
+  assert(#map.emitted == 0 and #minimap_options.filter_markers(fog_ui, {}) == 0,
+    'clearing the Finder display flag revived a collected marker')
+  toggle_map("Show after Finder's Token collection", true)
+  assert(#map.emitted == 1 and map.emitted[1].color == 0xFF0000FF,
+    'show-after-collection did not restore the red full-map marker immediately')
+  mini = minimap_options.filter_markers(fog_ui, cached)
+  assert(mini[1].icon_color == 0xFF0000FF and mini[1].pos.x == 1,
+    'show-after-collection did not restore the cached minimap marker')
+  callbacks.save()
+  assert(saved_settings.show_first_token_after_collection == true,
+    'show-after-collection preference was not saved')
+  toggle_map("Show first Seeker's Token", false)
+  assert(#map.emitted == 0 and #minimap_options.filter_markers(fog_ui, {}) == 0,
+    'historical marker ignored the main visibility toggle')
+  toggle_map("Show first Seeker's Token", true)
+  assert(#map.emitted == 1, 'historical preference was lost when the main toggle changed')
+  toggle_map("Hide Seeker's Tokens in unexplored areas", true)
+  assert(#map.emitted == 0 and #minimap_options.filter_markers(fog_ui, {}) == 0,
+    'historical marker ignored token fog preferences')
+  toggle_map("Hide Seeker's Tokens in unexplored areas", false)
+  toggle_map("Show after Finder's Token collection", false)
+  assert(#map.emitted == 0 and #minimap_options.filter_markers(fog_ui, {}) == 0,
+    'turning show-after-collection off left a completed marker visible')
+  callbacks.save()
+  assert(saved_settings.show_first_token_after_collection == false)
   -- A different save/current-playthrough proof replaces the location instead of retaining history.
   finder_collected, proof.key = false, '00000002-0000-0000-0000-000000000000'
   hooks['app.ContextDatabase.clearAllContextsImpl'].pre({})

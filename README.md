@@ -2,9 +2,9 @@
 
 Find Seeker's Tokens, Golden Trove Beetles, and chests more easily in Dragon's Dogma 2. This mod marks their locations on your full map and shows nearby items on your minimap while you explore.
 
-**Current version: 1.4.**
+**Current version: 1.4.1.**
 
-Released September 14, 2026. Download the complete ZIP from the [v1.4 release](https://github.com/RazeViana/dd2addon-map-marker-collectibles/releases/tag/v1.4).
+Version 1.4.1 prepared September 15, 2026. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.4.1.zip` package.
 
 ## What it does
 
@@ -14,7 +14,7 @@ Released September 14, 2026. Download the complete ZIP from the [v1.4 release](h
 - Shows simple names when you hover over full-map markers, such as **Chest (S)** and **Special Chest (L)**.
 - Lets you choose which items to show, including items you have already collected.
 - Refreshes chest data with 54 additions, removes two unsupported originals, and corrects one position while preserving retained collection IDs.
-- Marks your first collected Seeker's Token in red until you collect the Finder's Token.
+- Marks your first collected Seeker's Token in red, with an option to keep its location visible after Finder's Token collection.
 - Hides unopened chests blocked by current world, quest and environment requirements by default, with an option to reveal Unmoored-only placements early.
 - Independently hides chests, Golden Trove Beetles, or Seeker's Tokens in unexplored areas on both maps, with chests ignoring fog on cave and city local maps.
 - Lets you change marker symbols and colors to suit your preferences.
@@ -32,7 +32,7 @@ Tokens and beetles are shown by default. Turn on chest categories in the mod's m
 You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8). Install it first.
 
 1. Close the game and disable any other mod that adds collectable markers, so you do not see duplicates.
-2. Install `Map-Markers-and-Collectables-by-Raze-v1.4.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
+2. Install `Map-Markers-and-Collectables-by-Raze-v1.4.1.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
 3. Start the game. In the REFramework menu, open **Script Generated UI > Map Markers and Collectables by Raze**.
 4. Choose the items you want to see, then explore with your full map or minimap.
 
@@ -52,7 +52,7 @@ Availability is checked per chest, independently of its size or artwork. Acquire
 
 Use **Show on full map** and **Show on minimap** to turn collectible markers on or off independently. Both start enabled. Changing the full-map toggle refreshes an open map and keeps your category, symbol, color, and size choices.
 
-**Show first Seeker's Token** starts enabled. After your first Seeker's Token pickup, its location is marked in red on both maps to help you return for the Finder's Token. The red marker disappears after you collect the Finder's Token. It reads the game's saved first-token and pickup state, including when installed later in a playthrough. It has its own visibility toggle and remains available when ordinary acquired tokens are hidden. It follows your token artwork, icon size, fog and map settings; minimap distance and height limits still apply.
+**Show first Seeker's Token** starts enabled. After your first Seeker's Token pickup, its location is marked in red on both maps to help you return for the Finder's Token. By default, the red marker disappears after you collect the Finder's Token. Enable **Show after Finder's Token collection** beneath this control to keep the saved location visible after collection or hand-in; this extra option starts disabled and requires **Show first Seeker's Token** to remain enabled. It reads the current playthrough's saved first-token and pickup state, including when installed later in a playthrough. No fresh save is required. Starting the Sphinx riddle does not hide the marker. It has its own visibility toggle and remains available when ordinary acquired tokens are hidden. It follows your token artwork, icon size, fog and map settings; minimap distance and height limits still apply.
 
 Use **Hide chests in unexplored areas**, **Hide beetles in unexplored areas**, and **Hide Seeker's Tokens in unexplored areas** to choose which collectible types follow the map's fog of war. Each option works independently on both maps and starts disabled. Enable an option to show that type's markers only as their locations are revealed; your category and Acquired/Unacquired choices still apply.
 

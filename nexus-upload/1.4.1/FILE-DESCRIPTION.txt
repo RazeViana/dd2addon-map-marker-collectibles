@@ -1,0 +1,1 @@
+v1.4.1 fixes the first Seeker's Token marker during the Sphinx riddle and adds an option to keep its location visible after Finder's Token collection. Supports existing saves. Full package; requires REFramework.

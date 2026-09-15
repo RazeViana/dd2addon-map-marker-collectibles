@@ -27,6 +27,7 @@ function M.normalize(loaded, names, marker_types, generic)
       height_indicators = true, height_tolerance = 3 } }
   result.object_icons = loaded.object_icons ~= false
   result.show_first_seeker_token = loaded.show_first_seeker_token ~= false
+  result.show_first_token_after_collection = loaded.show_first_token_after_collection == true
   result.hide_unavailable_chests = loaded.hide_unavailable_chests ~= false
   result.reveal_unmoored_chests = loaded.reveal_unmoored_chests == true
   for _, key in ipairs({"hide_unexplored_chests", "hide_unexplored_beetles", "hide_unexplored_tokens"}) do

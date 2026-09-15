@@ -392,7 +392,8 @@ local first_token = require("raze_MapMarkersAndCollectables.first_token").create
   type(token_type.data) == "table" and token_type.data.locations)
 local function with_first_token(markers)
   return first_token:overlay(markers, settings.show_first_seeker_token,
-    object_icon_util.resolve_type(token_type, settings.markers["Seeker's Tokens"], "unacquired", settings.object_icons))
+    object_icon_util.resolve_type(token_type, settings.markers["Seeker's Tokens"], "unacquired", settings.object_icons),
+    settings.show_first_token_after_collection)
 end
 local settings_message = nil
 
@@ -492,7 +493,7 @@ re.on_draw_ui(function()
   local collectibles_dirty = false
   local reorder_index = 0
   if imgui.tree_node(MOD_NAME) then
-    imgui.text("v1.4 - Map and minimap markers")
+    imgui.text("v1.4.1 - Map and minimap markers")
     local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
     if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
     if imgui.is_item_hovered() then
@@ -505,7 +506,14 @@ re.on_draw_ui(function()
     local first_changed, show_first = imgui.checkbox("Show first Seeker's Token", settings.show_first_seeker_token)
     if first_changed then settings.show_first_seeker_token = show_first; markers_dirty = true end
     if imgui.is_item_hovered() then
-      imgui.set_tooltip("Mark your first collected Seeker's Token in red until you collect the Finder's Token. Independent of Acquired/Unacquired visibility; follows token artwork, fog and map settings.")
+      imgui.set_tooltip("Mark your first collected Seeker's Token in red. By default, it disappears after Finder's Token collection; enable the option below to keep it visible. Independent of Acquired/Unacquired visibility; follows token artwork, fog and map settings.")
+    end
+    if settings.show_first_seeker_token then
+      local history_changed, show_history = imgui.checkbox("Show after Finder's Token collection", settings.show_first_token_after_collection)
+      if history_changed then settings.show_first_token_after_collection = show_history; markers_dirty = true end
+      if imgui.is_item_hovered() then
+        imgui.set_tooltip("Keep the red first-token location visible even after collecting or handing in the Finder's Token. Uses the current playthrough's saved location; still follows token fog and map settings.")
+      end
     end
     if settings.show_first_seeker_token and first_token.error then imgui.text(first_token.error) end
     local progression_changed, hide_unavailable = imgui.checkbox("Hide unobtainable chests", settings.hide_unavailable_chests)

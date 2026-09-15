@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.1 (2026-09-15)
+
+- Fix the first Seeker's Token marker disappearing when the Sphinx riddle begins, before the Finder's Token is collected.
+- Read the game's saved first-token location and Finder pickup state, including when installing into an existing playthrough. No fresh save is required.
+- Add **Show after Finder's Token collection**, disabled by default, to keep the red first-token location visible after collecting or handing in the Finder's Token.
+- Save the new preference and refresh it on both maps. The main first-token switch, token fog and map settings, and minimap distance and height limits still apply.
+
 ## 1.4 (2026-09-14)
 
 - Add **Show first Seeker's Token**, enabled by default: a red marker on both maps at the saved first-token location, removed after collecting the Finder's Token. Keep its visibility independent of ordinary Acquired/Unacquired token filters, replace duplicate token markers, and refresh it across pickups and save changes.
