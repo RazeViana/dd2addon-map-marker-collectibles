@@ -69,7 +69,8 @@ function M.normalize(loaded, names, marker_types, generic)
     end
     for _, prefix in ipairs({'unacquired', 'acquired'}) do
       local key = prefix .. '_icon_style'
-      marker[key] = icon_styles.valid_style(previous[key]) and previous[key] or 'default'
+      local default = icon_styles.valid_style(defaults[key]) and defaults[key] or 'default'
+      marker[key] = icon_styles.valid_style(previous[key]) and previous[key] or default
     end
     marker.unacquired_icon_color_gui = M.argb_to_abgr(marker.unacquired_icon_color)
     marker.acquired_icon_color_gui = M.argb_to_abgr(marker.acquired_icon_color)

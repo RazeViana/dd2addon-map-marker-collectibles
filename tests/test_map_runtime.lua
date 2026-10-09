@@ -14,6 +14,16 @@ for _, kind in ipairs({10,11,12,495,692,693,694}) do
 end
 local gimmicks_by_type, saved_keys, saved_records = {}, {}, {}
 local dlc_data, dlc_guids, queried_gimmicks = {}, {}, {}
+local steam_initialized, dlc_installed = true, true
+local drawn_categories = {}
+local drawn_checkboxes, drawn_text = {}, {}
+local dlc_module = require('raze_MapMarkersAndCollectables.dlc_collectibles')
+local create_coin_callbacks, ducat_diagnostics = dlc_module.coin_callbacks, nil
+dlc_module.coin_callbacks = function(...)
+  local callbacks, diagnostics = create_coin_callbacks(...)
+  ducat_diagnostics = diagnostics
+  return callbacks, diagnostics
+end
 local dlc_metadata={schema_version=1,records={}}
 for _, kind in ipairs({755,757,758,795,826,885,894}) do
   local guid=string.format('%08x-0000-0000-0000-000000000000',kind+9000)
@@ -155,6 +165,17 @@ sdk = {
     return { get_ResourcePath = function() return path end, add_ref = function(self) return self end }
   end } end,
   find_type_definition = function(name)
+    if name == 'via.Steam' then
+      return {get_method=function(_, member)
+        return {call=function(_, receiver, app_id)
+          assert(receiver == nil)
+          if member == 'get_Supported' then return true end
+          if member == 'get_Initialized' then return steam_initialized end
+          assert(member == 'isInstalledDlc(System.UInt64)' and app_id == 2593290)
+          return dlc_installed
+        end}
+      end}
+    end
     return { get_field = function(_, field)
       if name=='app.Gm83_169' and field=='FreeBitGet' then
         return {is_static=function() return true end,get_data=function() return 64 end}
@@ -193,7 +214,9 @@ json = {
     if path:match("_settings.json$") then
       settings_reads[#settings_reads + 1] = path
       return { markers = { ["Golden Trove Beetles"] = { unacquired_show = false },
-        ['Norgan Ducats']={unacquired_show=false} }, quests={enabled=false} }
+        ['Norgan Ducats']={unacquired_show=false},['Norgan Chests']={unacquired_show=false},
+        ['Norgan Rare Chests']={unacquired_show=false},['Lost Rites Chests']={unacquired_show=false}
+      }, quests={enabled=false} }
     end
     if path == "raze_MapMarkersAndCollectables/167.json" then
       return { locations = {
@@ -211,14 +234,15 @@ json = {
 }
 imgui = {
   tree_node = function(label) return label == "Map Markers and Collectables by Raze" end,
-  tree_pop = function() end, text = function() end, text_colored = function() end,
-  push_id = function(id) ids[#ids + 1] = id end,
+  tree_pop = function() end, text = function(message) drawn_text[message]=true end, text_colored = function() end,
+  push_id = function(id) ids[#ids + 1] = id; drawn_categories[id]=true end,
   pop_id = function() table.remove(ids) end,
   push_style_color = function() end, pop_style_color = function() end,
   arrow_button = function() return false end, same_line = function() end,
   slider_int = function(_, value) return false, value end,
   is_item_hovered = function() return false end, button = function() return false end,
-  checkbox = function(_, value)
+  checkbox = function(label, value)
+    drawn_checkboxes[label]=true
     if not toggled and ids[1] == "Seeker's Tokens" and ids[2] == "Show Unacquired" then
       toggled = true; return true, false
     end
@@ -948,6 +972,39 @@ assert(#minimap_options.filter_markers({},nearby_trials)==3)
 trial_opened=false
 assert(#minimap_get_markers({x=1,y=0,z=1},180,60)==4,
   'renewed trial chest remained permanently cached as acquired')
+-- Base-game owners never query/render DLC content, even with saved DLC choices enabled.
+ducat_picked = false
+dlc_installed = false
+queried_gimmicks = {}
+show_category('Norgan Ducats'); map:setMapScale()
+assert(#map.emitted == 0 and #minimap_get_markers({x=1,y=0,z=1},180,60) == 0
+  and next(queried_gimmicks) == nil, 'DLC marker queries reached a non-owner')
+drawn_categories = {}
+drawn_checkboxes, drawn_text = {}, {}
+ducat_diagnostics.error = 'Ducat history fixture warning'
+callbacks.ui()
+for _, name in ipairs({'Norgan Ducats','Norgan Chests','Norgan Rare Chests','Lost Rites Chests'}) do
+  assert(not drawn_categories[name], 'non-owner was offered unavailable DLC controls')
+end
+assert(not drawn_checkboxes['Hide Norgan Ducats in unexplored areas'],
+  'non-owner was offered the DLC fog control')
+assert(not drawn_text['Ducat history fixture warning'], 'non-owner saw a stale DLC warning')
+ducat_diagnostics.error = nil
+show_category("Seeker's Tokens"); map:setMapScale()
+assert(#map.emitted > 0 and #minimap_get_markers({x=1,y=0,z=1},180,60) > 0
+  and queried_gimmicks[167], 'base-game markers stopped when DLC was absent')
+dlc_installed = true
+steam_initialized = false
+queried_gimmicks = {}
+show_category('Norgan Ducats'); map:setMapScale()
+assert(#map.emitted == 0 and next(queried_gimmicks) == nil,
+  'uninitialized DLC access queried expansion content')
+steam_initialized = true
+map:setMapScale()
+assert(#map.emitted == 1, 'cached base-only map did not recover when DLC access initialized')
+dlc_installed = false
+map:setMapScale()
+assert(#map.emitted == 0, 'cached DLC marker survived loss of DLC access')
 callbacks.save()
 assert(saved_settings.quests and saved_settings.quests.enabled==false,
   'stable-line testing discarded separate quest-development preferences')

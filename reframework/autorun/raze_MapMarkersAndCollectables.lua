@@ -9,6 +9,7 @@ local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
 local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
 local dlc_collectibles = require("raze_MapMarkersAndCollectables.dlc_collectibles")
+local dlc_access = dlc_collectibles.create_access(sdk)
 local chest_availability = require("raze_MapMarkersAndCollectables.chest_availability").create(
   require("raze_MapMarkersAndCollectables.chest_game_state").create(sdk),
   dlc_collectibles.availability_catalog(
@@ -438,6 +439,17 @@ local minimap_renderer = nil
 local minimap_error = nil
 
 local want_update = false
+local dlc_available
+local function refresh_dlc_access()
+  local available = dlc_access:available()
+  if available ~= dlc_available then
+    dlc_available = available
+    cache_collectibles, cache_markers = nil, nil
+    if minimap_renderer then minimap_renderer:invalidate() end
+    want_update = true
+  end
+  return available
+end
 
 local marker_label = "Open the map!"
 local update_marker_count = function(game_count, script_count, remaining_count, total_count, pool_label)
@@ -488,7 +500,7 @@ local draw_marker_type_settings = function(setting_prefix, marker_type, marker_s
     else
       settings_default = marker_type.settings_default
     end
-    marker_settings[icon_style_key] = "default"
+    marker_settings[icon_style_key] = settings_default[icon_style_key] or "default"
     marker_settings[icon_type_key] = settings_default[icon_type_key]
     marker_settings[icon_color_key] = settings_default[icon_color_key]
     marker_settings[icon_color_gui_key] = argb_to_abgr(settings_default[icon_color_key])
@@ -503,6 +515,7 @@ re.on_draw_ui(function()
   local collectibles_dirty = false
   local reorder_index = 0
   if imgui.tree_node(MOD_NAME) then
+    local has_dlc = refresh_dlc_access()
     imgui.text("v1.5 - Map and minimap markers")
     local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
     if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
@@ -544,7 +557,7 @@ re.on_draw_ui(function()
       end
     end
     local fullmap_changed, show_fullmap = imgui.checkbox("Show on full map", settings.fullmap.enabled)
-    if ducat_diagnostics.error then imgui.text(ducat_diagnostics.error) end
+    if has_dlc and ducat_diagnostics.error then imgui.text(ducat_diagnostics.error) end
     if fullmap_changed then
       settings.fullmap.enabled = show_fullmap
       markers_dirty = true
@@ -562,17 +575,19 @@ re.on_draw_ui(function()
       {"hide_unexplored_tokens", "Hide Seeker's Tokens in unexplored areas", "Seeker's Tokens"},
       {"hide_unexplored_ducats", "Hide Norgan Ducats in unexplored areas", "Norgan Ducats"}
     }) do
-      local fog_changed, hide_unexplored = imgui.checkbox(control[2], settings[control[1]])
-      if fog_changed then settings[control[1]] = hide_unexplored; markers_dirty = true end
-      fog_enabled = fog_enabled or settings[control[1]]
-      if imgui.is_item_hovered() then
-        imgui.begin_tooltip()
-        local tooltip = "Show " .. control[3] .. " only where the map's fog of war has cleared. Applies to both maps."
-        if control[1] == "hide_unexplored_chests" then
-          tooltip = tooltip .. " Chests ignore fog on cave and city local maps; outdoor maps follow this option again. Category and Acquired/Unacquired choices still apply."
+      if control[1] ~= "hide_unexplored_ducats" or has_dlc then
+        local fog_changed, hide_unexplored = imgui.checkbox(control[2], settings[control[1]])
+        if fog_changed then settings[control[1]] = hide_unexplored; markers_dirty = true end
+        fog_enabled = fog_enabled or settings[control[1]]
+        if imgui.is_item_hovered() then
+          imgui.begin_tooltip()
+          local tooltip = "Show " .. control[3] .. " only where the map's fog of war has cleared. Applies to both maps."
+          if control[1] == "hide_unexplored_chests" then
+            tooltip = tooltip .. " Chests ignore fog on cave and city local maps; outdoor maps follow this option again. Category and Acquired/Unacquired choices still apply."
+          end
+          imgui.set_tooltip(tooltip)
+          imgui.end_tooltip()
         end
-        imgui.set_tooltip(tooltip)
-        imgui.end_tooltip()
       end
     end
     if fog_enabled then
@@ -618,97 +633,99 @@ re.on_draw_ui(function()
     end
     for key_index, marker_type_name in ipairs(settings.marker_order) do
       local marker_type = marker_types[marker_type_name]
-      local marker_settings = settings.markers[marker_type_name]
-      imgui.push_id(marker_type_name)
-      if imgui.arrow_button("#Move Up", 2) then
-        reorder_index = -key_index
-      end
-      imgui.same_line()
-      if imgui.arrow_button("#Move Down", 3) then
-        reorder_index = key_index
-      end
-      imgui.same_line()
-      imgui.push_id("Show Unacquired")
-      imgui.push_style_color(18, marker_settings.unacquired_icon_color)
-      local changed, new_value = imgui.checkbox("", marker_settings.unacquired_show)
-      imgui.pop_style_color()
-      if imgui.is_item_hovered() then
-        imgui.begin_tooltip()
-        if marker_settings.unacquired_show then
-          imgui.set_tooltip("Show unacquired " .. marker_type.label)
-        else
-          imgui.set_tooltip("Hide unacquired " .. marker_type.label)
+      if not marker_type.requires_dlc or has_dlc then
+        local marker_settings = settings.markers[marker_type_name]
+        imgui.push_id(marker_type_name)
+        if imgui.arrow_button("#Move Up", 2) then
+          reorder_index = -key_index
         end
-        imgui.end_tooltip()
-      end
-      if changed then
-        if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
-          collectibles_dirty = true
-        else
-          markers_dirty = true
+        imgui.same_line()
+        if imgui.arrow_button("#Move Down", 3) then
+          reorder_index = key_index
         end
-        marker_settings.unacquired_show = new_value
-      end
-      imgui.pop_id()
-      imgui.same_line()
-      imgui.push_id("Show Acquired")
-      imgui.push_style_color(18, marker_settings.acquired_icon_color)
-      local changed, new_value = imgui.checkbox("", marker_settings.acquired_show)
-      imgui.pop_style_color()
-      if imgui.is_item_hovered() then
-        imgui.begin_tooltip()
-        if marker_settings.acquired_show then
-          imgui.set_tooltip("Show acquired " .. marker_type.label)
-        else
-          imgui.set_tooltip("Hide acquired " .. marker_type.label)
-        end
-        imgui.end_tooltip()
-      end
-      if changed then
-        if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
-          collectibles_dirty = true
-        else
-          markers_dirty = true
-        end
-        marker_settings.acquired_show = new_value
-      end
-      imgui.pop_id()
-      imgui.same_line()
-      local tree_node
-      if type(marker_type.data) ~= "table" or type(marker_type.data.locations) ~= "table" then
-        imgui.push_style_color(0, 0xFF0000FF)
-        tree_node = imgui.tree_node(marker_type.label .. " (data file missing!)")
+        imgui.same_line()
+        imgui.push_id("Show Unacquired")
+        imgui.push_style_color(18, marker_settings.unacquired_icon_color)
+        local changed, new_value = imgui.checkbox("", marker_settings.unacquired_show)
         imgui.pop_style_color()
-      else
-        tree_node = imgui.tree_node(marker_type.label)
-      end
-      if marker_type.tooltip ~= nil and imgui.is_item_hovered() then
-        imgui.begin_tooltip()
-        imgui.set_tooltip(marker_type.tooltip)
-        imgui.end_tooltip()
-      end
-      if tree_node then
-        if imgui.tree_node("Unacquired Settings") then
-          local changed = draw_marker_type_settings("unacquired", marker_type, marker_settings)
-          if changed == true then
-            markers_dirty = true
-          elseif changed == false then
+        if imgui.is_item_hovered() then
+          imgui.begin_tooltip()
+          if marker_settings.unacquired_show then
+            imgui.set_tooltip("Show unacquired " .. marker_type.label)
+          else
+            imgui.set_tooltip("Hide unacquired " .. marker_type.label)
+          end
+          imgui.end_tooltip()
+        end
+        if changed then
+          if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
             collectibles_dirty = true
+          else
+            markers_dirty = true
+          end
+          marker_settings.unacquired_show = new_value
+        end
+        imgui.pop_id()
+        imgui.same_line()
+        imgui.push_id("Show Acquired")
+        imgui.push_style_color(18, marker_settings.acquired_icon_color)
+        local changed, new_value = imgui.checkbox("", marker_settings.acquired_show)
+        imgui.pop_style_color()
+        if imgui.is_item_hovered() then
+          imgui.begin_tooltip()
+          if marker_settings.acquired_show then
+            imgui.set_tooltip("Show acquired " .. marker_type.label)
+          else
+            imgui.set_tooltip("Hide acquired " .. marker_type.label)
+          end
+          imgui.end_tooltip()
+        end
+        if changed then
+          if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
+            collectibles_dirty = true
+          else
+            markers_dirty = true
+          end
+          marker_settings.acquired_show = new_value
+        end
+        imgui.pop_id()
+        imgui.same_line()
+        local tree_node
+        if type(marker_type.data) ~= "table" or type(marker_type.data.locations) ~= "table" then
+          imgui.push_style_color(0, 0xFF0000FF)
+          tree_node = imgui.tree_node(marker_type.label .. " (data file missing!)")
+          imgui.pop_style_color()
+        else
+          tree_node = imgui.tree_node(marker_type.label)
+        end
+        if marker_type.tooltip ~= nil and imgui.is_item_hovered() then
+          imgui.begin_tooltip()
+          imgui.set_tooltip(marker_type.tooltip)
+          imgui.end_tooltip()
+        end
+        if tree_node then
+          if imgui.tree_node("Unacquired Settings") then
+            local changed = draw_marker_type_settings("unacquired", marker_type, marker_settings)
+            if changed == true then
+              markers_dirty = true
+            elseif changed == false then
+              collectibles_dirty = true
+            end
+            imgui.tree_pop()
+          end
+          if imgui.tree_node("Acquired Settings") then
+            local changed = draw_marker_type_settings("acquired", marker_type, marker_settings)
+            if changed == true then
+              markers_dirty = true
+            elseif changed == false then
+              collectibles_dirty = true
+            end
+            imgui.tree_pop()
           end
           imgui.tree_pop()
         end
-        if imgui.tree_node("Acquired Settings") then
-          local changed = draw_marker_type_settings("acquired", marker_type, marker_settings)
-          if changed == true then
-            markers_dirty = true
-          elseif changed == false then
-            collectibles_dirty = true
-          end
-          imgui.tree_pop()
-        end
-        imgui.tree_pop()
+        imgui.pop_id()
       end
-      imgui.pop_id()
     end
     --[[
     if imgui.tree_node("Advanced Settings") then
@@ -763,6 +780,7 @@ local get_collectibles = function(all_args, include_position)
   for _, marker_type_name in ipairs(settings.marker_order) do
     repeat
       local marker_type = marker_types[marker_type_name]
+      if marker_type.requires_dlc and all_args.dlc_available ~= true then break end
       if type(marker_type.data) ~= "table" or type(marker_type.data.locations) ~= "table" then
         break
       end
@@ -955,6 +973,7 @@ local add_markers = function(this)
   if generate_manager == nil or gimmick_manager == nil or context_dbms == nil then return end
   local context_db = context_dbms:get_CurrentDB()
   if context_db == nil or context_db.Lock == nil or context_db.IndexCreator == nil then return end
+  local has_dlc = refresh_dlc_access()
 
   -- scratchpad for ref pointer arguments
   local pointer_obj = intptr_t:create_instance():add_ref()
@@ -966,6 +985,7 @@ local add_markers = function(this)
   all_args.context_dbms = context_dbms
   all_args.context_db = context_db
   all_args.pointer_obj = pointer_obj
+  all_args.dlc_available = has_dlc
 
   -- get all markers that should be possibly shown on the map
 
@@ -1153,6 +1173,7 @@ sdk.hook(ui040205_t:get_method("setupIconName"),
 sdk.hook(
   ui040205_t:get_method("update"),
   function(args)
+    if settings.fullmap.enabled then refresh_dlc_access() end
     if settings.fullmap.enabled and cache_markers ~= nil
         and os.clock() >= next_availability_refresh then
       next_availability_refresh = os.clock() + 1
@@ -1215,7 +1236,8 @@ local function get_minimap_markers(origin, radius, height)
   local db = context_dbms:get_CurrentDB()
   if not db or not db.Lock or not db.IndexCreator then return {} end
   local args = { generate_manager = generate_manager, gimmick_manager = gimmick_manager,
-    context_dbms = context_dbms, context_db = db, pointer_obj = intptr_t:create_instance():add_ref(), live_refresh = true }
+    context_dbms = context_dbms, context_db = db, pointer_obj = intptr_t:create_instance():add_ref(),
+    live_refresh = true, dlc_available = refresh_dlc_access() }
   db.Lock:readLock()
   local ok, result = pcall(get_collectibles, args, function(pos)
     return nearby.in_range(pos, origin, radius, height)

@@ -5,8 +5,9 @@ Author: Raze
 Category: User Interface
 Donation Points: Disabled
 Archive: Map-Markers-and-Collectables-by-Raze-v1.5.zip
+Dark Arisen: Optional; base-game features work without the DLC
 
 Main-file description (209 characters):
-v1.5 test patch adds Norgan Ducats, chest artwork and verified DLC placements, preserves the new native map symbol, and includes v1.4.1 fixes. Trial activation remains limited; requires compatible REFramework.
+Title Update 4.0 support with optional Dark Arisen markers: 140 Norgan Ducats, 389 chests and new artwork enabled by default. Works without the DLC. Trial markers stay guarded. Requires compatible REFramework.
 
-Use DESCRIPTION.txt for the page, RELEASE-NOTES.md for release notes, CHANGELOG.md for history, and FILE-DESCRIPTION.txt for the file description. The existing gameplay image predates this patch and does not demonstrate DLC features.
+Use DESCRIPTION.txt for the compact page description, RELEASE-NOTES.md for release notes, CHANGELOG.md for history, and FILE-DESCRIPTION.txt for the file description. The existing gameplay image predates this patch and does not demonstrate DLC features.

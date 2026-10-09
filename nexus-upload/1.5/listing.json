@@ -9,7 +9,7 @@
     "User Interface",
     "Quality of Life"
   ],
-  "summary": "Track tokens, beetles, chests and Norgan Ducats on both maps, with new Dark Arisen artwork, collectible fog controls and progression filters.",
+  "summary": "Map and minimap markers for tokens, beetles and chests, plus optional Dark Arisen collectibles with new artwork enabled by default. DLC not required.",
   "required_mods": [
     {
       "name": "REFramework",
@@ -22,7 +22,7 @@
     "name": "Map Markers and Collectables by Raze",
     "version": "1.5",
     "archive": "Map-Markers-and-Collectables-by-Raze-v1.5.zip",
-    "description": "v1.5 test patch adds Norgan Ducats, chest artwork and verified DLC placements, preserves the new native map symbol, and includes v1.4.1 fixes. Trial activation remains limited; requires compatible REFramework."
+    "description": "Title Update 4.0 support with optional Dark Arisen markers: 140 Norgan Ducats, 389 chests and new artwork enabled by default. Works without the DLC. Trial markers stay guarded. Requires compatible REFramework."
   },
   "donation_points": false,
   "publication_status": "Unpublished test patch; native DLC acceptance pending. See THIRD_PARTY_NOTICES.md for source terms.",

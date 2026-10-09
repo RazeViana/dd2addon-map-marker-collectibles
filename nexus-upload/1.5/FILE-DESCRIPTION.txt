@@ -1,1 +1,1 @@
-v1.5 test patch adds Norgan Ducats, chest artwork and verified DLC placements, preserves the new native map symbol, and includes v1.4.1 fixes. Trial activation remains limited; requires compatible REFramework.
+Title Update 4.0 support with optional Dark Arisen markers: 140 Norgan Ducats, 389 chests and new artwork enabled by default. Works without the DLC. Trial markers stay guarded. Requires compatible REFramework.

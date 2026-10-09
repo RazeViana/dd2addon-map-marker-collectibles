@@ -3,6 +3,8 @@
 ## 1.5 (test patch, 2026-10-09)
 
 - Add 140 Norgan Ducat and 389 Norgan chest placements from the installed Dark Arisen DLC, with separate ordinary/rare categories and three new object icons.
+- Enable uncollected DLC categories and their new artwork by default, including when the legacy global preference uses game symbols. Retain saved appearance/visibility choices and restore category artwork when resetting its appearance.
+- Keep the DLC optional: gate expansion controls and collectible queries on Steam ownership/installation, retain DLC preferences when absent, and refresh map caches when access becomes available or is lost.
 - Preserve the native map symbol appended by Title Update 4.0 on both maps. Retain the original eight custom designs and all earlier native atlas entries.
 - Add an independent Ducat fog setting. Read its native static pickup flag instead of assuming the Seeker's Token bit, and report unavailable history reads.
 - Retain 185 fixed Lost Rites chest placements in one category, with acquisition refreshed instead of permanently cached. Hide unopened trial placements until activation rules are verified; explicit progression-filter overrides can preview them.

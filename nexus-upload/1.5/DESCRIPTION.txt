@@ -1,27 +1,19 @@
-Map Markers and Collectables by Raze
-Version 1.5 - Dark Arisen test patch
+DARK ARISEN SUPPORT - TITLE UPDATE 4.0
+Adds 140 Norgan Ducats and 389 Norgan chests with three new icon designs. Uncollected DLC markers and their artwork are enabled by default.
 
-Find Seeker's Tokens, Golden Trove Beetles, chests and Norgan Ducats on your full map and minimap. Choose which categories appear and customize their symbols, colors and size.
+The DLC is optional. All base-game features work without it; expansion controls and markers activate only when Dark Arisen is owned and installed. Saved choices are preserved.
 
-Dark Arisen additions
-140 Norgan Ducat placements and 389 Norgan chests, with separate ordinary and rare categories.
-New Norgan chest, rare-chest and Ducat artwork. The new native map symbol from Title Update 4.0 is preserved.
-185 fixed Lost Rites chest placements are retained in one category. Their trial activation and renewal are unverified, so unopened markers remain hidden with progression filtering enabled. Six Norgan rare chests with unresolved quest-variable requirements also remain hidden. Turning off Hide unobtainable chests previews positions without confirming availability.
-All 1,350 earlier locations still match the updated game data. Random monster drops and appraised relic contents are outside fixed-location coverage.
+MAP MARKERS AND COLLECTABLES BY RAZE
+Find Seeker's Tokens, Golden Trove Beetles and chests on your full map and minimap. Customize categories, artwork, colors and size; show collected items, use separate fog filters and track your first Seeker's Token. Progression filtering hides unavailable chests.
 
-Your choices
-Norgan Ducats start enabled, with their own Hide Norgan Ducats in unexplored areas switch. Chest categories start disabled. Existing choices, colors, artwork and collection IDs are kept.
-Ducat history reads the game's native pickup flag. If that read is unavailable, the menu reports the limitation and previously collected Ducats can remain visible. Confirmed nearby pickups and native never-generate records still hide acquired coins.
-Full-map and minimap switches, independent collectible fog options, half-size default icons, size controls, height arrows and progression filters remain available.
-The red first-token marker follows the current save and includes the 1.4.1 Finder pickup correction and optional Show after Finder's Token collection control.
+INSTALL
+Requires a compatible REFramework: https://www.nexusmods.com/dragonsdogma2/mods/8
+Close DD2 and install the complete v1.5 ZIP with Fluffy Mod Manager, or copy both reframework and natives beside DD2.exe. Keep your settings JSON. Open REFramework > Script Generated UI > Map Markers and Collectables by Raze.
 
-Install
-Use a REFramework build compatible with your installed game update.
-Close the game, disable other collectible-marker overlays, and install the complete Map-Markers-and-Collectables-by-Raze-v1.5.zip with Fluffy Mod Manager. For manual installation, copy both reframework and natives beside DD2.exe.
-Keep reframework/data/raze_MapMarkersAndCollectables_settings.json when updating. Open REFramework > Script Generated UI > Map Markers and Collectables by Raze after restarting.
+COVERAGE
+Fixed DLC placements only; random drops and appraised relics are outside coverage. The 185 Lost Rites chest positions and six unresolved Norgan rare chests stay guarded while unopened. Disabling Hide unobtainable chests previews them without confirming availability.
 
-Test status
-This is an unpublished test package based on the stable 1.4.1 line. The separate 2.0 quest development build is preserved. Automated runtime, placement, provenance, atlas and packaging checks passed. Existing-save loading and full-map/minimap markers passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC routing, pickup/hand-in, save reload and trial renewal remain pending. This package does not fix an incompatible REFramework or graphics injector.
+Unpublished test patch: DLC routing, pickup/hand-in, save reload and trial renewal still need live checks.
 
-Credits
-Mod adaptation and added features by Raze. Original source and dataset credits are retained in the included THIRD_PARTY_NOTICES.md. Donation Points remain disabled under the recorded source terms.
+CREDITS
+Adaptation and added features by Raze. Original credits and source terms remain in THIRD_PARTY_NOTICES.md. Donation Points disabled.

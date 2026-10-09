@@ -12,6 +12,10 @@ Ducat collection uses protected reflection to read the static `app.Gm83_169.Free
 
 The current native atlas has 85 full-map and 82 minimap patterns. Preserve its new pattern and every old native prefix. The object texture has eleven 128-pixel tiles; the original eight remain in order and the three Norgan designs occupy IDs 84–86. Saved quest-development preferences are retained when this stable patch is temporarily tested over 2.0, but the quest overlay is not included.
 
+Dark Arisen is optional. `dlc_collectibles.create_access` guards static `via.Steam.get_Supported`, `get_Initialized` and `isInstalledDlc(System.UInt64)` calls for App ID 2593290. Missing bindings, initialization, errors or false ownership/installation reads disable only expansion controls and collection queries for that pass. Native method definitions are cached after resolution; negative results are retried. Access changes invalidate map/minimap caches. DLC category definitions and saved preferences remain available for a later installation. Both custom UVS sources came from the updated base PAK, so their native prefix does not require mounting the DLC archive.
+
+Uncollected expansion categories start enabled, with explicit `norgan`, `norgan_rare` or `norgan_ducat` artwork defaults for both acquisition states. Collected markers remain off initially. Normalization and appearance reset honor these category defaults while preserving valid saved overrides. Automated coverage exercises non-owner collection/UI paths, late initialization, access loss, new defaults and saved choices.
+
 On 2026-10-09, Raze confirmed that an existing save loads with v1.5 and that markers appear on the full map and minimap on Title Update 4.0. The test used REFramework d1461375aee4ec3f313170f8eaad12064eb542d9 after disabling an incompatible neural-rendering addon. Native DLC routing, pickup/hand-in, save reload and trial renewal still require in-game acceptance. Offline checks do not establish compatibility of REFramework or other graphics injectors with Title Update 4.0.
 
 ## Runtime
