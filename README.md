@@ -1,10 +1,22 @@
 # Map Markers and Collectables by Raze
 
-Find Seeker's Tokens, Golden Trove Beetles, and chests more easily in Dragon's Dogma 2. This mod marks their locations on your full map and shows nearby items on your minimap while you explore.
+Find Seeker's Tokens, Golden Trove Beetles, chests, and Dark Arisen collectibles in Dragon's Dogma 2. This mod marks their locations on your full map and shows nearby items on your minimap while you explore.
 
-**Current version: 1.4.1.**
+**Current version: 1.5.**
 
-Version 1.4.1 prepared September 15, 2026. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.4.1.zip` package.
+Version 1.5 is an unpublished Dark Arisen test patch prepared October 9, 2026. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.5.zip` package. DLC native acceptance checks are pending; see the supported scope below.
+
+## Dark Arisen additions
+
+- Add 140 Norgan Ducat placements and 389 Norgan chests, split into 267 ordinary and 122 rare chests.
+- Add separate Norgan Ducat, chest and rare-chest artwork while preserving the new native map symbol added in Title Update 4.0.
+- Retain 185 fixed Lost Rites chest placements in one category. Their trial activation and renewal are not yet verified, so unopened markers stay hidden with progression filtering enabled. Disable **Hide unobtainable chests** to preview their recorded positions; a preview does not mean the chest is currently available.
+- Keep six Norgan rare chests with unresolved quest-variable requirements hidden while unopened with progression filtering enabled. The other 383 Norgan chest records have supported normal-world placement rules.
+- Keep existing category choices, colors, artwork, collection GUIDs and first-token guidance. All 1,350 original bundled locations match the updated game's placement data.
+
+Norgan Ducats start enabled and have their own **Hide Norgan Ducats in unexplored areas** control. Chest categories start disabled. Ducat history uses the game's current pickup flag; if it cannot be read, the menu reports the limitation and previously collected Ducats can remain visible. Nearby confirmed pickups and native never-generate records still hide acquired coins.
+
+These are fixed placements extracted from the installed DLC. Random monster drops and appraised relic contents are not fixed collectible destinations. Native DLC map routing, pickup/hand-in, save reload, and trial renewal still need in-game validation. This patch follows the stable 1.4.1 line; the separate 2.0 quest development build is preserved.
 
 ## What it does
 
@@ -32,7 +44,7 @@ Tokens and beetles are shown by default. Turn on chest categories in the mod's m
 You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8). Install it first.
 
 1. Close the game and disable any other mod that adds collectable markers, so you do not see duplicates.
-2. Install `Map-Markers-and-Collectables-by-Raze-v1.4.1.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
+2. Install `Map-Markers-and-Collectables-by-Raze-v1.5.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
 3. Start the game. In the REFramework menu, open **Script Generated UI > Map Markers and Collectables by Raze**.
 4. Choose the items you want to see, then explore with your full map or minimap.
 

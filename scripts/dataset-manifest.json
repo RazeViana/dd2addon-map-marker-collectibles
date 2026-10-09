@@ -132,11 +132,65 @@
       "added_count": 0,
       "fresh_count": 1,
       "fresh_guids_sha256": "a08ce64b7c2c4ec87088c9c23f15635829847d9e24018ce8d7db77f239ff2d9f"
+    },
+    "826.json": {
+      "sha256": "7c86339b4afd3b6f8204bb82ed8e8a88e824b7d600c4c5891567483c4353ffdb",
+      "locations_sha256": "be53fc6a4780fd93402a3514d8c0dcaadf049b9624313d9a260fb26215931bc5",
+      "count": 267,
+      "fresh_count": 267,
+      "fresh_guids_sha256": "1807fb71f0d481fc2b3c9b2d3771b0bed593bfab63e0ad5816e326108a8a4bec"
+    },
+    "885.json": {
+      "sha256": "bac17b7c1e5ae3321ea29e916ccb19db8161b3c92921dfd6acb594cb3efedf76",
+      "locations_sha256": "67dfd0354a90cccef35be237eddf85d63eb18f340ee1f226d5aafb33872b8457",
+      "count": 122,
+      "fresh_count": 122,
+      "fresh_guids_sha256": "a2fb6f9641a3267b807e32431038567db6666711619fb962aa0673ea76651d08"
+    },
+    "894.json": {
+      "sha256": "c26e5433523286858ddf2407f33fb8d9dfafea085cbaffab9d43790909c781c1",
+      "locations_sha256": "da93746433924b505db6e645555a065e91720afced365e495b2da591eefc1b8c",
+      "count": 140,
+      "fresh_count": 140,
+      "fresh_guids_sha256": "686a6b4f83b758bbde0a3c7f7c8153310ddd76d28dfeec7648c9969300253ab9"
+    },
+    "755.json": {
+      "sha256": "9647e6510214d6d1b9315b43bfabf963d45acd50d5892ec42e5f134bc9196f40",
+      "locations_sha256": "cc08d3e944d7b7e748a96c4b5cad4d3e34f482091e8e89661ceeb6294f46d443",
+      "count": 119,
+      "fresh_count": 119,
+      "fresh_guids_sha256": "33d85dd61e6d1d66f7c6826d34760cce308010f77db8828518b44e68bb14d60c"
+    },
+    "757.json": {
+      "sha256": "b4d583ccea069764d28db465c6c35ddb43328e8655a728580ef68edb761b6365",
+      "locations_sha256": "2a7e3c4319ee913ebe6d0b9fc379b1bb92da0e524f5d94757676850ad5ef9681",
+      "count": 47,
+      "fresh_count": 47,
+      "fresh_guids_sha256": "59e54f2f5946f09591f0188d32b54d27d531f5a5547af37787b736b8b7561c80"
+    },
+    "758.json": {
+      "sha256": "63ab5880eafd10fe9ec38f8ea03ba682975b18ae0bd96da19d774f696e64c6e6",
+      "locations_sha256": "7f8033853e9efec0a7e180c1a2775f020139c64e3daa39899ef59f49759a9942",
+      "count": 10,
+      "fresh_count": 10,
+      "fresh_guids_sha256": "d848fa7ded76d96469aac4e94f599679669497a149a68949fa0b7b5b0fdec641"
+    },
+    "795.json": {
+      "sha256": "0c111f96bfd7cdb63942e1c635f442a366dcc81ccbc77c476eefa9038f9e059f",
+      "locations_sha256": "a1120334c27f12ed2534f528ed9c66af516200564545837cb503ac2c8d3dd79c",
+      "count": 9,
+      "fresh_count": 9,
+      "fresh_guids_sha256": "1967c3d4743261e1be9f18b52597a86db3735a240839d27b89c9edd8811b1538"
     }
   },
   "chest_availability": {
     "filename": "chest-availability.json",
     "sha256": "2a2edbb52f84f20a247f1d890cd3b85a42970d7dd575b14a08cc15de8b6f5ca6",
     "count": 1032
+  },
+  "dlc_availability": {
+    "filename": "dlc-availability.json",
+    "sha256": "f718f0b50b65af85d59e83442d26844d335ad3d9e78250d5fc41d2d840b82678",
+    "count": 714
   }
 }

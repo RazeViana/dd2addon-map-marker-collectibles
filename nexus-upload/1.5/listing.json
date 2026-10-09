@@ -1,0 +1,38 @@
+{
+  "title": "Map Markers and Collectables by Raze",
+  "game": "Dragon's Dogma 2",
+  "game_domain": "dragonsdogma2",
+  "version": "1.5",
+  "author": "Raze",
+  "category": "User Interface",
+  "suggested_tags": [
+    "User Interface",
+    "Quality of Life"
+  ],
+  "summary": "Track tokens, beetles, chests and Norgan Ducats on both maps, with new Dark Arisen artwork, collectible fog controls and progression filters.",
+  "required_mods": [
+    {
+      "name": "REFramework",
+      "url": "https://www.nexusmods.com/dragonsdogma2/mods/8",
+      "notes": "Required. Use a REFramework build compatible with the installed game update; this package does not include REFramework."
+    }
+  ],
+  "main_file": {
+    "category": "Main Files",
+    "name": "Map Markers and Collectables by Raze",
+    "version": "1.5",
+    "archive": "Map-Markers-and-Collectables-by-Raze-v1.5.zip",
+    "description": "v1.5 test patch adds Norgan Ducats, chest artwork and verified DLC placements, preserves the new native map symbol, and includes v1.4.1 fixes. Trial activation remains limited; requires compatible REFramework."
+  },
+  "donation_points": false,
+  "publication_status": "Unpublished test patch; native DLC acceptance pending. See THIRD_PARTY_NOTICES.md for source terms.",
+  "permission_confirmed": false,
+  "permission_checked_on": "2026-09-06",
+  "source_notice": "../../THIRD_PARTY_NOTICES.md",
+  "description_file": "DESCRIPTION.txt",
+  "file_description_file": "FILE-DESCRIPTION.txt",
+  "logo_file": "images/logo.png",
+  "banner_file": "images/banner.png",
+  "release_notes_file": "RELEASE-NOTES.md",
+  "upload_details_file": "NEXUS-DETAILS.txt"
+}

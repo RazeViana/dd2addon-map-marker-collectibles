@@ -2,6 +2,9 @@ local icons = require('raze_MapMarkersAndCollectables.object_icons')
 assert(icons.native_type(76) == 31 and icons.native_type(79) == 31)
 assert(icons.native_type(80) == 31 and icons.native_type(83) == 31,
   'new chest artwork must use a safe native fallback')
+for icon_type = 84, 86 do
+  assert(icons.native_type(icon_type) == 31, 'DLC artwork needs a safe native fallback')
+end
 assert(icons.native_type(25) == 25)
 local loads, warnings = {}, {}
 local function holder(path)
@@ -39,6 +42,12 @@ for icon_type = 80, 83 do
   local extra = ref()
   assert(renderer:apply(full, 'fullmap', extra, icon_type))
   assert(extra.Sprite.sequence == 2 and extra.Sprite.pattern == icon_type - 76)
+end
+for icon_type = 84, 86 do
+  local extra = ref()
+  assert(renderer:apply(full, 'fullmap', extra, icon_type))
+  assert(extra.Sprite.sequence == 2 and extra.Sprite.pattern == icon_type - 76,
+    'DLC artwork changed the established object-icon tile order')
 end
 assert(not renderer:apply(full, 'fullmap', c, 25))
 assert(c.Sprite.sequence == 1 and c.Sprite.pattern == 31, 'game symbol changed')

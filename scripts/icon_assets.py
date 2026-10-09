@@ -1,5 +1,6 @@
 """Build and validate the additive icon atlases for the current DD2 PC format."""
 import json
+import math
 from pathlib import Path
 import struct
 
@@ -9,7 +10,7 @@ TEXTURE = "raze/mapmarkers/markers.tex"
 HEIGHT_TEXTURE = "raze/mapmarkers/height-arrows.tex"
 LAYOUT = ROOT / "assets/icons/native-atlas-layout.json"
 PATTERN = struct.Struct("<Q4f2i")
-OBJECT_COUNT = 8
+OBJECT_COUNT = 11
 
 
 def atlas_bytes(layout, height_arrows=False):
@@ -72,7 +73,10 @@ def validate():
             offset = struct.unpack_from("<Q", data, tex + i * 40 + 8)[0]
             assert data[strings + offset * 2:].decode("utf-16le").split("\0")[0] == expected
         for i in range(OBJECT_COUNT):
-            assert PATTERN.unpack_from(data, pat + (len(layout["patterns"]) + i) * 32) == (0, i/OBJECT_COUNT, 0, (i+1)/OBJECT_COUNT, 1, 2, -1)
+            pattern = PATTERN.unpack_from(data, pat + (len(layout["patterns"]) + i) * 32)
+            assert pattern[0] == 0 and pattern[5:] == (2, -1)
+            assert all(math.isclose(actual, expected, abs_tol=1e-7) for actual, expected in
+                       zip(pattern[1:5], (i / OBJECT_COUNT, 0, (i + 1) / OBJECT_COUNT, 1)))
         assert struct.unpack_from("<2I", data, seq + 2 * 8) == (OBJECT_COUNT, len(layout["patterns"]))
         if arrows:
             assert struct.unpack_from("<2I", data, seq + 3 * 8) == (2, len(layout["patterns"]) + OBJECT_COUNT)

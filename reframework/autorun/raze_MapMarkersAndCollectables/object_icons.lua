@@ -8,6 +8,9 @@ M.styles = {
   { key = 'sunken', label = 'Sunken chest', icon = 82 },
   { key = 'special', label = 'Special chest', icon = 79 },
   { key = 'sphinx', label = 'Sphinx chest', icon = 83 },
+  { key = 'norgan', label = 'Norgan chest', icon = 84 },
+  { key = 'norgan_rare', label = 'Norgan rare chest', icon = 85 },
+  { key = 'norgan_ducat', label = 'Norgan Ducat', icon = 86 },
   { key = 'native', label = 'Game symbol' },
 }
 local style_by_key = {}
@@ -29,7 +32,7 @@ local original_paths = {
 }
 
 function M.native_type(icon_type)
-  return icon_type >= 76 and icon_type <= 83 and 31 or icon_type
+  return icon_type >= 76 and icon_type <= 86 and 31 or icon_type
 end
 
 function M.create(api, warn)

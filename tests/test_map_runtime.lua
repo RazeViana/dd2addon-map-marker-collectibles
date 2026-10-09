@@ -13,6 +13,15 @@ for _, kind in ipairs({10,11,12,495,692,693,694}) do
   chest_metadata.chests[key] = {gimmick_id=kind, variants={{world='any',quests={}}}}
 end
 local gimmicks_by_type, saved_keys, saved_records = {}, {}, {}
+local dlc_data, dlc_guids, queried_gimmicks = {}, {}, {}
+local dlc_metadata={schema_version=1,records={}}
+for _, kind in ipairs({755,757,758,795,826,885,894}) do
+  local guid=string.format('%08x-0000-0000-0000-000000000000',kind+9000)
+  dlc_guids[kind]=guid
+  dlc_data[kind]={locations={[guid]={x=1,y=0,z=1}}}
+  dlc_metadata.records[guid]={gimmick_id=kind,variants={{world='normal',quests={}}}}
+  if kind<800 then dlc_metadata.records[guid].variants[1].unsupported='Trial activation unverified' end
+end
 local minimap_get_markers, minimap_options
 local minimap_module = require("raze_MapMarkersAndCollectables.minimap")
 local create_minimap = minimap_module.create
@@ -90,7 +99,7 @@ function map:setMapScale()
 end
 local function method(type_name, name)
   if name == "getGimmickList(app.GimmickID)" then
-    return function(_, id) return list(gimmicks_by_type[id] or {}) end
+    return function(_, id) queried_gimmicks[id]=true; return list(gimmicks_by_type[id] or {}) end
   end
   if name == "getContext(System.Type)" then
     return function(record, context_type) return record[context_type] end
@@ -99,7 +108,8 @@ local function method(type_name, name)
     return function(self, info, _, pointer, _, name_guid)
       assert(info.Pos.x > 0 and info.IsEnable and info.UniqId ~= nil)
       local cursor = objects[pointer]
-      assert(cursor.value < 3, "wrote past icon pool")
+      local limit=name=='addMapIconInfoList' and self.MapIcon:get_Length() or self.MapIconSprite:get_Length()
+      assert(cursor.value < limit, "wrote past icon pool")
       cursor.value = cursor.value + 1
       self.emitted[#self.emitted + 1] = info
       local ui_icon = box()
@@ -145,7 +155,12 @@ sdk = {
     return { get_ResourcePath = function() return path end, add_ref = function(self) return self end }
   end } end,
   find_type_definition = function(name)
-    return { get_field = function() return { get_offset_from_base = function() return 0 end } end,
+    return { get_field = function(_, field)
+      if name=='app.Gm83_169' and field=='FreeBitGet' then
+        return {is_static=function() return true end,get_data=function() return 64 end}
+      end
+      return { get_offset_from_base = function() return 0 end }
+    end,
       get_runtime_type = function() return name end,
       get_method = function(_, member) return method(name, member) end,
       create_instance = box }
@@ -174,9 +189,11 @@ re = { on_config_save = function(callback) callbacks.save = callback end,
 json = {
   load_file = function(path)
     if path == 'raze_MapMarkersAndCollectables/chest-availability.json' then return chest_metadata end
+    if path == 'raze_MapMarkersAndCollectables/dlc-availability.json' then return dlc_metadata end
     if path:match("_settings.json$") then
       settings_reads[#settings_reads + 1] = path
-      return { markers = { ["Golden Trove Beetles"] = { unacquired_show = false } } }
+      return { markers = { ["Golden Trove Beetles"] = { unacquired_show = false },
+        ['Norgan Ducats']={unacquired_show=false} }, quests={enabled=false} }
     end
     if path == "raze_MapMarkersAndCollectables/167.json" then
       return { locations = {
@@ -187,6 +204,7 @@ json = {
     end
     assert(path:match("^raze_MapMarkersAndCollectables/%d+.json$"))
     local kind = tonumber(path:match('/(%d+)%.json$'))
+    if dlc_data[kind] then return dlc_data[kind] end
     return { locations = { [chest_guids[kind] or "00000004-0000-0000-0000-000000000000"] = { x = 1, y = 0, z = 1 } } }
   end,
   dump_file = function(path, value) writes[path] = value; return true end
@@ -886,6 +904,53 @@ for _, ref in ipairs(reset_refs) do
   assert(ref.scale == ref.initial_scale and ref:get_Prio() == ref.initial_priority,
     'script reset did not restore a borrowed sprite')
 end
+-- Exercise the actual collection loop with DLC data, native types, history and filtering.
+saved_keys,saved_records,gimmicks_by_type={}, {}, {}
+saved_settings.show_first_seeker_token=false
+saved_settings.object_icons=true
+saved_settings.hide_unavailable_chests=true
+saved_settings.hide_unexplored_ducats=false
+is_unmoored=false
+map.MapIconSprite={get_Length=function() return 10 end}
+local ducat_picked=false
+gimmicks_by_type[894]={{get_UniqId=function() return {ToString=function() return dlc_guids[894]..'_0' end} end,
+  get_IsGetFreeBit=function() return ducat_picked end}}
+save_context(dlc_guids[894],'app.GimmickContext',{isOnFreeBit=function(_,bit)
+  assert(bit==64,'Ducat history assumed the original token flag'); return true end})
+show_category('Norgan Ducats'); map:setMapScale()
+assert(#map.emitted==0 and #minimap_get_markers({x=1,y=0,z=1},180,60)==0,
+  'a loaded unpicked Ducat overrode its saved pickup history')
+saved_keys,saved_records={},{}
+show_category('Norgan Ducats'); map:setMapScale()
+assert(#map.emitted==1 and #minimap_get_markers({x=1,y=0,z=1},180,60)==1)
+assert(map.emitted[1].IconType==31 and map.emitted[1].ui_icon.IconSprite.Sprite.pattern==10,
+  'Ducat artwork did not reach the full-map renderer')
+map.SelectedIcon=map.emitted[1].ui_icon
+hover_hook.pre({[2]=map}); hover_hook.post(91)
+assert(map.TxtName.message=='Norgan Ducat')
+ducat_picked=true
+show_category('Norgan Ducats'); map:setMapScale()
+assert(#map.emitted==0,'a new Ducat pickup stayed on the map')
+show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted==0,'unknown trial activation was shown as actionable')
+for _,kind in ipairs({755,757,758,795}) do
+  assert(queried_gimmicks[kind],'grouped trial chest native list was not queried')
+  -- A resolved activation fixture proves per-marker native IDs survive grouping.
+  dlc_metadata.records[dlc_guids[kind]].variants[1].unsupported=nil
+end
+local trial_opened=true
+gimmicks_by_type[755]={{get_UniqId=function() return {ToString=function() return dlc_guids[755]..'_0' end} end,
+  get_IsOpenedFreeBit=function() return trial_opened end}}
+show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted==3,'grouped chest types or actual availability IDs were lost')
+local nearby_trials=minimap_get_markers({x=1,y=0,z=1},180,60)
+assert(#minimap_options.filter_markers({},nearby_trials)==3)
+trial_opened=false
+assert(#minimap_get_markers({x=1,y=0,z=1},180,60)==4,
+  'renewed trial chest remained permanently cached as acquired')
+callbacks.save()
+assert(saved_settings.quests and saved_settings.quests.enabled==false,
+  'stable-line testing discarded separate quest-development preferences')
 map:setMapScale()
 local stale = map.SelectedIcon
 hooks["app.ui040205.onDestroy"].pre({ [2] = map })

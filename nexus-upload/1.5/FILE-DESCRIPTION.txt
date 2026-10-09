@@ -1,0 +1,1 @@
+v1.5 test patch adds Norgan Ducats, chest artwork and verified DLC placements, preserves the new native map symbol, and includes v1.4.1 fixes. Trial activation remains limited; requires compatible REFramework.

@@ -1,0 +1,27 @@
+Map Markers and Collectables by Raze
+Version 1.5 - Dark Arisen test patch
+
+Find Seeker's Tokens, Golden Trove Beetles, chests and Norgan Ducats on your full map and minimap. Choose which categories appear and customize their symbols, colors and size.
+
+Dark Arisen additions
+140 Norgan Ducat placements and 389 Norgan chests, with separate ordinary and rare categories.
+New Norgan chest, rare-chest and Ducat artwork. The new native map symbol from Title Update 4.0 is preserved.
+185 fixed Lost Rites chest placements are retained in one category. Their trial activation and renewal are unverified, so unopened markers remain hidden with progression filtering enabled. Six Norgan rare chests with unresolved quest-variable requirements also remain hidden. Turning off Hide unobtainable chests previews positions without confirming availability.
+All 1,350 earlier locations still match the updated game data. Random monster drops and appraised relic contents are outside fixed-location coverage.
+
+Your choices
+Norgan Ducats start enabled, with their own Hide Norgan Ducats in unexplored areas switch. Chest categories start disabled. Existing choices, colors, artwork and collection IDs are kept.
+Ducat history reads the game's native pickup flag. If that read is unavailable, the menu reports the limitation and previously collected Ducats can remain visible. Confirmed nearby pickups and native never-generate records still hide acquired coins.
+Full-map and minimap switches, independent collectible fog options, half-size default icons, size controls, height arrows and progression filters remain available.
+The red first-token marker follows the current save and includes the 1.4.1 Finder pickup correction and optional Show after Finder's Token collection control.
+
+Install
+Use a REFramework build compatible with your installed game update.
+Close the game, disable other collectible-marker overlays, and install the complete Map-Markers-and-Collectables-by-Raze-v1.5.zip with Fluffy Mod Manager. For manual installation, copy both reframework and natives beside DD2.exe.
+Keep reframework/data/raze_MapMarkersAndCollectables_settings.json when updating. Open REFramework > Script Generated UI > Map Markers and Collectables by Raze after restarting.
+
+Test status
+This is an unpublished test package based on the stable 1.4.1 line. The separate 2.0 quest development build is preserved. Automated runtime, placement, provenance, atlas and packaging checks passed; native DLC routing, pickup/hand-in, save reload and trial renewal remain pending. This package does not fix an incompatible REFramework or graphics injector.
+
+Credits
+Mod adaptation and added features by Raze. Original source and dataset credits are retained in the included THIRD_PARTY_NOTICES.md. Donation Points remain disabled under the recorded source terms.

@@ -30,7 +30,7 @@ function M.normalize(loaded, names, marker_types, generic)
   result.show_first_token_after_collection = loaded.show_first_token_after_collection == true
   result.hide_unavailable_chests = loaded.hide_unavailable_chests ~= false
   result.reveal_unmoored_chests = loaded.reveal_unmoored_chests == true
-  for _, key in ipairs({"hide_unexplored_chests", "hide_unexplored_beetles", "hide_unexplored_tokens"}) do
+  for _, key in ipairs({"hide_unexplored_chests", "hide_unexplored_beetles", "hide_unexplored_tokens", "hide_unexplored_ducats"}) do
     result[key] = loaded[key] == true
   end
   local size = loaded.icon_size

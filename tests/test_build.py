@@ -43,6 +43,14 @@ class PackageTests(unittest.TestCase):
         for name, data in existing.items():
             self.assertEqual((game / name).read_bytes(), data, f"Another mod was overwritten: {name}")
 
+    def test_dlc_datasets_and_availability_are_packaged(self):
+        prefix = 'reframework/data/raze_MapMarkersAndCollectables/'
+        with ZipFile(self.archive) as package:
+            for name in ('755.json', '757.json', '758.json', '795.json',
+                         '826.json', '885.json', '894.json', 'dlc-availability.json'):
+                self.assertIn(prefix + name, package.namelist())
+                self.assertEqual(package.read(prefix + name), (ROOT / prefix / name).read_bytes())
+
     def test_documentation_and_credit_link_are_preserved(self):
         with ZipFile(self.archive) as package:
             for name in ("README.md", "CHANGELOG.md", "THIRD_PARTY_NOTICES.md"):

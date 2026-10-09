@@ -17,6 +17,12 @@ for style, expected in pairs({small=80, medium=78, large=81, sunken=82, special=
   configured.unacquired_icon_style = style
   assert(icons.resolve_type(kind, configured, 'unacquired', true) == expected)
 end
+for style, expected in pairs({norgan=84, norgan_rare=85, norgan_ducat=86}) do
+  configured.unacquired_icon_style = style
+  assert(icons.valid_style(style))
+  assert(icons.resolve_type(kind, configured, 'unacquired', false) == expected,
+    'DLC artwork must override the global native-symbol preference')
+end
 
 local generic = { unacquired_show = false, acquired_show = false,
   unacquired_icon_type = 25, acquired_icon_type = 25,

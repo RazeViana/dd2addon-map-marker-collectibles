@@ -1,6 +1,18 @@
 # Development
 
-Map Markers and Collectables by Raze is a Dragon's Dogma 2 REFramework Lua mod. Version 1.4.1 is prepared for release on September 15, 2026. Source and dataset attribution is documented in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+Map Markers and Collectables by Raze is a Dragon's Dogma 2 REFramework Lua mod. Version 1.5 is an unpublished Dark Arisen test patch prepared October 9, 2026, based on the stable 1.4.1 line. Source and dataset attribution is documented in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+
+## Dark Arisen data and runtime
+
+The [October 9 audit](dark-arisen-data-audit-2026-10-09.md) documents 714 new fixed placements and confirms all 1,350 original locations still match current game data. `scripts/dlc_data.py` imports reviewed, ignored audit artifacts only when accepting an extraction. Regular builds validate committed datasets, source hashes and conservative availability rules without requiring the game or extraction artifacts. The importer tests create synthetic inputs in temporary directories and separately validate the committed payload.
+
+`dlc_collectibles.lua` adds Norgan Ducat, ordinary chest, rare chest and grouped Lost Rites chest categories. The grouped category retains each placement's actual native gimmick ID through acquisition and progression checks; it queries all four relevant native gimmick lists. Acquired state for trial chests is reread instead of permanently trusting the positive cache. Trial activation and renewal remain unverified, so unopened trial placements are hidden by default. Six Norgan rare chest quest-variable requirements also remain guarded.
+
+Ducat collection uses protected reflection to read the static `app.Gm83_169.FreeBitGet` value, validating the returned single-bit integer before querying `GimmickContext:isOnFreeBit`. It never assumes the original token's bit 16. An unavailable or uninitialized field is retried and reported in the menu. Positive native never-generate and nearby pickup proof remain usable; unavailable offline history can leave previously collected coins visible. The runtime harness exercises saved history, nearby pickups, new artwork, all four trial native types, per-marker availability and renewal rereads through the actual main script.
+
+The current native atlas has 85 full-map and 82 minimap patterns. Preserve its new pattern and every old native prefix. The object texture has eleven 128-pixel tiles; the original eight remain in order and the three Norgan designs occupy IDs 84–86. Saved quest-development preferences are retained when this stable patch is temporarily tested over 2.0, but the quest overlay is not included.
+
+Native DLC routing, pickup/hand-in, save reload and trial renewal still require in-game acceptance. Offline checks do not establish compatibility of REFramework or other graphics injectors with Title Update 4.0.
 
 ## Runtime
 

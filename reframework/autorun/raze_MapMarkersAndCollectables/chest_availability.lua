@@ -68,11 +68,12 @@ function M.create(game, metadata)
     for _, marker in ipairs(markers) do
       local kind = marker.marker_type
       local show = true
-      if kind and kind.fog_setting == 'hide_unexplored_chests' and marker.acquired ~= true then
+      if kind and (kind.fog_setting == 'hide_unexplored_chests' or kind.availability == true)
+          and marker.acquired ~= true then
         show = false
         local record = records[marker.key]
         local unknown = false
-        if record and record.gimmick_id == kind.gimmick_id and type(record.variants) == 'table'
+        if record and record.gimmick_id == (marker.gimmick_id or kind.gimmick_id) and type(record.variants) == 'table'
             and #record.variants > 0 then
           snapshot = snapshot or game:snapshot()
           for _, rule in ipairs(record.variants) do
@@ -86,7 +87,7 @@ function M.create(game, metadata)
       if show then visible[#visible + 1] = marker end
     end
     if self.unknown_count > 0 then
-      self.error = tostring(self.unknown_count) .. ' unopened chest(s) hidden because availability could not be confirmed.'
+      self.error = tostring(self.unknown_count) .. ' uncollected item(s) hidden because availability could not be confirmed.'
       if snapshot and snapshot.error then self.error = self.error .. ' ' .. snapshot.error end
     end
     self.errors[kind], self.unknown_counts[kind] = self.error, self.unknown_count

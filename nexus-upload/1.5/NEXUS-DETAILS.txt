@@ -1,0 +1,12 @@
+Version: 1.5
+Status: Unpublished test patch; native DLC acceptance pending
+Game: Dragon's Dogma 2
+Author: Raze
+Category: User Interface
+Donation Points: Disabled
+Archive: Map-Markers-and-Collectables-by-Raze-v1.5.zip
+
+Main-file description (209 characters):
+v1.5 test patch adds Norgan Ducats, chest artwork and verified DLC placements, preserves the new native map symbol, and includes v1.4.1 fixes. Trial activation remains limited; requires compatible REFramework.
+
+Use DESCRIPTION.txt for the page, RELEASE-NOTES.md for release notes, CHANGELOG.md for history, and FILE-DESCRIPTION.txt for the file description. The existing gameplay image predates this patch and does not demonstrate DLC features.

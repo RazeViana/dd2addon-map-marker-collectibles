@@ -8,9 +8,12 @@ local MOD_NAME = "Map Markers and Collectables by Raze"
 local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
 local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
+local dlc_collectibles = require("raze_MapMarkersAndCollectables.dlc_collectibles")
 local chest_availability = require("raze_MapMarkersAndCollectables.chest_availability").create(
   require("raze_MapMarkersAndCollectables.chest_game_state").create(sdk),
-  settings_util.load(json, "raze_MapMarkersAndCollectables/chest-availability.json"))
+  dlc_collectibles.availability_catalog(
+    settings_util.load(json, "raze_MapMarkersAndCollectables/chest-availability.json"),
+    settings_util.load(json, "raze_MapMarkersAndCollectables/dlc-availability.json")))
 local fog_visibility = require("raze_MapMarkersAndCollectables.fog_of_war").create(sdk,
   function(pos) return Vector3f.new(pos.x, pos.y, pos.z) end,
   function(message) log.warn(MOD_NAME .. ": " .. message) end)
@@ -373,6 +376,9 @@ local marker_type_names =
 }
 
 local settings_filename = "raze_MapMarkersAndCollectables_settings.json"
+local ducat_callbacks, ducat_diagnostics = dlc_collectibles.coin_callbacks(sdk, get_context, gimmick_context_rt)
+dlc_collectibles.register(marker_types, marker_type_names, function(path) return settings_util.load(json, path) end,
+  chest_get_state_callbacks, ducat_callbacks, chest_defaults)
 local loaded_settings = settings_util.load(json, settings_filename)
 
 local settings_default_generic =
@@ -387,6 +393,10 @@ local settings_default_generic =
 
 local argb_to_abgr = settings_util.argb_to_abgr
 local settings = settings_util.normalize(loaded_settings, marker_type_names, marker_types, settings_default_generic)
+-- Retain preferences when temporarily testing this stable-line patch over the quest build.
+if type(loaded_settings)=='table' and type(loaded_settings.quests)=='table' then
+  settings.quests=loaded_settings.quests
+end
 local token_type = marker_types["Seeker's Tokens"]
 local first_token = require("raze_MapMarkersAndCollectables.first_token").create(sdk,
   type(token_type.data) == "table" and token_type.data.locations)
@@ -493,7 +503,7 @@ re.on_draw_ui(function()
   local collectibles_dirty = false
   local reorder_index = 0
   if imgui.tree_node(MOD_NAME) then
-    imgui.text("v1.4.1 - Map and minimap markers")
+    imgui.text("v1.5 - Map and minimap markers")
     local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
     if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
     if imgui.is_item_hovered() then
@@ -534,6 +544,7 @@ re.on_draw_ui(function()
       end
     end
     local fullmap_changed, show_fullmap = imgui.checkbox("Show on full map", settings.fullmap.enabled)
+    if ducat_diagnostics.error then imgui.text(ducat_diagnostics.error) end
     if fullmap_changed then
       settings.fullmap.enabled = show_fullmap
       markers_dirty = true
@@ -548,7 +559,8 @@ re.on_draw_ui(function()
     for _, control in ipairs({
       {"hide_unexplored_chests", "Hide chests in unexplored areas", "regular and special chests"},
       {"hide_unexplored_beetles", "Hide beetles in unexplored areas", "Golden Trove Beetles"},
-      {"hide_unexplored_tokens", "Hide Seeker's Tokens in unexplored areas", "Seeker's Tokens"}
+      {"hide_unexplored_tokens", "Hide Seeker's Tokens in unexplored areas", "Seeker's Tokens"},
+      {"hide_unexplored_ducats", "Hide Norgan Ducats in unexplored areas", "Norgan Ducats"}
     }) do
       local fog_changed, hide_unexplored = imgui.checkbox(control[2], settings[control[1]])
       if fog_changed then settings[control[1]] = hide_unexplored; markers_dirty = true end
@@ -759,14 +771,17 @@ local get_collectibles = function(all_args, include_position)
         break
       end
 
-      local gimmick_list
+      local gimmick_list, gimmick_map
       if marker_type.get_gimmick_list ~= nil then
         gimmick_list = marker_type.get_gimmick_list(all_args)
+        gimmick_map = get_gimmick_map(gimmick_list)
       else
-        gimmick_list = gimmick_manager_get_gimmick_list(all_args.gimmick_manager, marker_type.gimmick_id)
+        gimmick_map = {}
+        for _, gimmick_id in ipairs(marker_type.gimmick_ids or {marker_type.gimmick_id}) do
+          gimmick_list = gimmick_manager_get_gimmick_list(all_args.gimmick_manager, gimmick_id)
+          for key, value in pairs(get_gimmick_map(gimmick_list)) do gimmick_map[key]=value end
+        end
       end
-
-      local gimmick_map = get_gimmick_map(gimmick_list)
 
       local marker_collectibles = {}
       for collectible_key, collectible_pos in pairs(marker_type.data.locations) do
@@ -784,7 +799,7 @@ local get_collectibles = function(all_args, include_position)
 
           -- cache acquired = true lookups so we don't have to needlessly check again
           local acquired = cache_acquired[collectible_key]
-          if all_args.live_refresh then acquired = nil end
+          if all_args.live_refresh or marker_type.live_acquired then acquired = nil end
           if acquired ~= true then
             for _, get_state_callback in ipairs(marker_type.get_state_callbacks) do
               acquired = get_state_callback(check_args)
@@ -801,6 +816,8 @@ local get_collectibles = function(all_args, include_position)
               id = collectible_id,
               pos = collectible_pos,
               acquired = acquired,
+              gimmick_id = marker_type.data.gimmick_ids and marker_type.data.gimmick_ids[collectible_key]
+                or marker_type.gimmick_id,
               marker_type = marker_type,
               marker_settings = marker_settings,
             })
@@ -842,6 +859,7 @@ local get_markers = function(collectibles)
               id = collectible.id,
               pos = collectible.pos,
               marker_type = collectible.marker_type,
+              gimmick_id = collectible.gimmick_id,
               acquired = collectible.acquired == true,
               icon_type = object_icon_util.resolve_type(collectible.marker_type, marker_settings,
                 collectible.acquired == true and "acquired" or "unacquired", settings.object_icons),

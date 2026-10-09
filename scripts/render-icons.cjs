@@ -5,7 +5,8 @@ const root = path.resolve(__dirname, '../assets/icons');
 (async () => {
   for (const [output, names] of [
     ['markers', ['token', 'beetle', 'chest', 'special-chest',
-      'small-chest', 'large-chest', 'sunken-chest', 'sphinx-chest']],
+      'small-chest', 'large-chest', 'sunken-chest', 'sphinx-chest',
+      'norgan-chest', 'norgan-rare-chest', 'norgan-ducat']],
     ['height-arrows', ['height-up', 'height-down']],
   ]) {
     const tiles = await Promise.all(names.map(async (name, i) => ({
