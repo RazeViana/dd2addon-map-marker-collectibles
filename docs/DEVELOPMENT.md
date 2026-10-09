@@ -20,6 +20,10 @@ On 2026-10-09, Raze selected the reported inaccessible Vernworth sealed-room che
 
 The same probe returned `supported=true`, `initialized=true` and `installed=true` for the native Dark Arisen access check. This confirms the installed-owner call path; absent/error/initializing access remains covered by automated fixtures. The temporary probe is excluded from the package and removed from autorun after identity capture.
 
+The UI now groups common controls under **Maps and appearance**, original collectibles under **Base game**, and expansion controls/categories under **Dark Arisen**. `hide_unavailable_chests` and `hide_unexplored_chests` retain their base-game meanings; new `hide_unavailable_dlc_chests` and `hide_unexplored_dlc_chests` control expansion content independently. Missing/malformed new preferences inherit the corresponding legacy shared value; saved independent boolean values win. Category reorder arrows swap with the nearest category in the same group, preserving other-group order even with interleaved saved preferences. Availability diagnostics are tracked per map and group. Both chest fog scopes retain cave/city local-map bypass.
+
+Raze confirmed that enabling the Lost Rites category alone left its unopened markers hidden, and disabling the former shared unobtainable-chest filter made them appear. No routing change was needed for that report. Activation and refills still require verification. Split-filter integration coverage exercises both maps, independent progression/fog controls, grouped UI, non-owner controls, settings migration and group-preserving reordering.
+
 On 2026-10-09, Raze confirmed that an existing save loads with v1.5 and that markers appear on the full map and minimap on Title Update 4.0. The test used REFramework d1461375aee4ec3f313170f8eaad12064eb542d9 after disabling an incompatible neural-rendering addon. Native DLC routing, pickup/hand-in, save reload and trial renewal still require in-game acceptance. Offline checks do not establish compatibility of REFramework or other graphics injectors with Title Update 4.0.
 
 ## Runtime

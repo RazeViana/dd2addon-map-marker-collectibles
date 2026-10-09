@@ -6,8 +6,9 @@ Category: User Interface
 Donation Points: Disabled
 Archive: Map-Markers-and-Collectables-by-Raze-v1.5.zip
 Dark Arisen: Optional; base-game features work without the DLC
+Controls: Maps and appearance, Base game, Dark Arisen; independent progression and chest-fog filters
 
-Main-file description (234 characters):
-Title Update 4.0 with optional Dark Arisen support: Norgan Ducats, chests and new artwork enabled by default. Base game supported. Hides the inaccessible Vernworth chest. Trial placements stay guarded. Requires compatible REFramework.
+Main-file description (240 characters):
+Optional Dark Arisen support with new artwork enabled by default, separate base-game/DLC filters and grouped controls. Base game supported. Hides the inaccessible Vernworth chest. Trial markers stay guarded. Requires compatible REFramework.
 
 Use DESCRIPTION.txt for the full feature guide with Dark Arisen support first, RELEASE-NOTES.md for release notes, CHANGELOG.md for history, and FILE-DESCRIPTION.txt for the file description. The existing gameplay image predates this patch and does not demonstrate DLC features.

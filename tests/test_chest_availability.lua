@@ -71,3 +71,26 @@ local input = {marker('missing'),marker('gated'),token}
 assert(filter:filter(input,settings)==input and filter.error==nil, 'explicit display override still filtered')
 filter:reset()
 assert(filter.error==nil and filter.unknown_count==0)
+
+metadata.chests.trial={gimmick_id=755,variants={{world='any',unsupported='Trial rules unverified'}}}
+local trial=marker('trial',false,{gimmick_id=755,requires_dlc=true,
+  fog_setting='hide_unexplored_dlc_chests',availability=true})
+local base_locked=marker('unresolved')
+for _, case in ipairs({
+  {{hide_unavailable_chests=true,hide_unavailable_dlc_chests=true},''},
+  {{hide_unavailable_chests=true,hide_unavailable_dlc_chests=false},'trial'},
+  {{hide_unavailable_chests=false,hide_unavailable_dlc_chests=true},'unresolved'},
+  {{hide_unavailable_chests=false,hide_unavailable_dlc_chests=false},'unresolved,trial'},
+}) do
+  local shown=filter:filter({base_locked,trial},case[1])
+  local keys={};for _,m in ipairs(shown) do keys[#keys+1]=m.key end
+  assert(table.concat(keys,',') == case[2], 'base/DLC progression filters hid the wrong group')
+  assert((filter.group_errors.base.default ~= nil) == case[1].hide_unavailable_chests
+    and (filter.group_errors.dlc.default ~= nil) == case[1].hide_unavailable_dlc_chests,
+    'grouped menu diagnostics include a different group or a disabled filter')
+end
+assert(#filter:filter({base_locked,trial},{hide_unavailable_chests=false}) == 2,
+  'legacy shared preview preference did not carry over')
+base_locked.acquired,trial.acquired=true,true
+assert(#filter:filter({base_locked,trial},{hide_unavailable_chests=true,hide_unavailable_dlc_chests=true}) == 2,
+  'split filters suppressed collected history')

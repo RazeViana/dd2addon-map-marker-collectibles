@@ -5,6 +5,7 @@
 - Add 140 Norgan Ducat and 389 Norgan chest placements from the installed Dark Arisen DLC, with separate ordinary/rare categories and three new object icons.
 - Enable uncollected DLC categories and their new artwork by default, including when the legacy global preference uses game symbols. Retain saved appearance/visibility choices and restore category artwork when resetting its appearance.
 - Keep the DLC optional: gate expansion controls and collectible queries on Steam ownership/installation, retain DLC preferences when absent, and refresh map caches when access becomes available or is lost.
+- Split progression and chest-fog filters into independent base-game and DLC settings. Preserve the old shared values when upgrading. Group the UI into Maps and appearance, Base game and Dark Arisen, including category rows, group-specific availability messages and ordering within each group.
 - Omit the inaccessible Vernworth sealed-room chest from both maps in either collection state, even when previewing unobtainable chests. Keep its source record for data reconciliation.
 - Preserve the native map symbol appended by Title Update 4.0 on both maps. Retain the original eight custom designs and all earlier native atlas entries.
 - Add an independent Ducat fog setting. Read its native static pickup flag instead of assuming the Seeker's Token bit, and report unavailable history reads.
@@ -58,7 +59,7 @@ First release of Map Markers and Collectables by Raze.
 - Find Seeker's Tokens, Golden Trove Beetles, and chests on the full map and minimap.
 - Choose which items to show, including items you have already collected.
 - Customize marker symbols and colors.
-- Start with half-size icons and adjust their size on both maps with a 25–150% slider.
+- Start with half-size icons and adjust their size on both maps with a 25â€“150% slider.
 - Recognize tokens, beetles, chests, and special chests by their own symbols, with an option to use the game's symbols instead.
 - Read simple hover labels on the full map, including Chest (S/M/L/XL) and Special Chest (S/M/L).
 - Keep minimap symbols upright while turning the camera.

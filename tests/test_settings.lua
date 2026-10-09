@@ -132,3 +132,20 @@ for _, key in ipairs({'hide_unexplored_beetles', 'hide_unexplored_tokens'}) do
     assert(settings.normalize({[key]=invalid}, names, types, generic)[key] == false)
   end
 end
+
+-- Splitting the old shared controls preserves legacy choices and saves independent overrides.
+for _, enabled in ipairs({false,true}) do
+  local legacy = settings.normalize({hide_unavailable_chests=enabled,hide_unexplored_chests=enabled},names,types,generic)
+  assert(legacy.hide_unavailable_dlc_chests == enabled and legacy.hide_unexplored_dlc_chests == enabled,
+    'new DLC filters did not inherit legacy chest preferences')
+  local split = settings.normalize({hide_unavailable_chests=enabled,hide_unavailable_dlc_chests=not enabled,
+    hide_unexplored_chests=enabled,hide_unexplored_dlc_chests=not enabled},names,types,generic)
+  assert(split.hide_unavailable_chests == enabled and split.hide_unavailable_dlc_chests == not enabled,
+    'base and DLC progression controls are coupled')
+  assert(split.hide_unexplored_chests == enabled and split.hide_unexplored_dlc_chests == not enabled,
+    'base and DLC chest fog controls are coupled')
+  local reloaded = settings.normalize(split,names,types,generic)
+  assert(reloaded.hide_unavailable_dlc_chests == split.hide_unavailable_dlc_chests
+    and reloaded.hide_unexplored_dlc_chests == split.hide_unexplored_dlc_chests,
+    'independent DLC preferences were lost on reload')
+end

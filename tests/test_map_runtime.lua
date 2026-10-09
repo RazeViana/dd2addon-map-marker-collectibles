@@ -18,6 +18,8 @@ local dlc_data, dlc_guids, queried_gimmicks = {}, {}, {}
 local steam_initialized, dlc_installed = true, true
 local drawn_categories = {}
 local drawn_checkboxes, drawn_text = {}, {}
+local drawn_sections, category_sections, checkbox_sections = {}, {}, {}
+local active_section, requested_move = nil, nil
 local dlc_module = require('raze_MapMarkersAndCollectables.dlc_collectibles')
 local create_coin_callbacks, ducat_diagnostics = dlc_module.coin_callbacks, nil
 dlc_module.coin_callbacks = function(...)
@@ -235,16 +237,32 @@ json = {
   dump_file = function(path, value) writes[path] = value; return true end
 }
 imgui = {
-  tree_node = function(label) return label == "Map Markers and Collectables by Raze" end,
-  tree_pop = function() end, text = function(message) drawn_text[message]=true end, text_colored = function() end,
-  push_id = function(id) ids[#ids + 1] = id; drawn_categories[id]=true end,
+  tree_node = function(label)
+    if label == 'Maps and appearance' or label == 'Base game' or label == 'Dark Arisen' then
+      assert(active_section == nil, 'UI sections unexpectedly nested')
+      active_section = label; drawn_sections[label] = true; return true
+    end
+    return label == "Map Markers and Collectables by Raze"
+  end,
+  tree_pop = function() if active_section then active_section = nil end end,
+  text = function(message) drawn_text[message]=true end, text_colored = function() end,
+  push_id = function(id)
+    ids[#ids + 1] = id; drawn_categories[id]=true
+    if active_section and not category_sections[id] then category_sections[id]=active_section end
+  end,
   pop_id = function() table.remove(ids) end,
   push_style_color = function() end, pop_style_color = function() end,
-  arrow_button = function() return false end, same_line = function() end,
+  arrow_button = function(label)
+    if requested_move and ids[1] == requested_move.category and label == requested_move.button then
+      requested_move = nil; return true
+    end
+    return false
+  end, same_line = function() end,
   slider_int = function(_, value) return false, value end,
   is_item_hovered = function() return false end, button = function() return false end,
   checkbox = function(label, value)
     drawn_checkboxes[label]=true
+    if active_section then checkbox_sections[label]=active_section end
     if not toggled and ids[1] == "Seeker's Tokens" and ids[2] == "Show Unacquired" then
       toggled = true; return true, false
     end
@@ -568,9 +586,9 @@ toggle_map('Reveal Unmoored-only chests early', true)
 assert(#map.emitted==1 and #minimap_options.filter_markers({},cached_progression_markers)==1)
 toggle_map('Reveal Unmoored-only chests early', false)
 assert(#map.emitted==0)
-toggle_map('Hide unobtainable chests', false)
+toggle_map('Hide unobtainable base-game chests', false)
 assert(#map.emitted==1, 'availability display override did not refresh the map')
-toggle_map('Hide unobtainable chests', true)
+toggle_map('Hide unobtainable base-game chests', true)
 assert(#map.emitted==0)
 callbacks.save()
 assert(saved_settings.hide_unavailable_chests and not saved_settings.reveal_unmoored_chests)
@@ -670,7 +688,7 @@ end }
 map.LocalAreaNow = 17
 map.IsFieldMap = true
 local fog_ui = { LocalAreaNow = 17, IsDispField = true }
-toggle_map("Hide chests in unexplored areas", true)
+toggle_map("Hide base-game chests in unexplored areas", true)
 assert(#map.emitted == 0, "enabling fog filtering left a special chest visible")
 assert(#minimap_options.filter_markers(fog_ui, minimap_get_markers({x=1,y=0,z=1},180,60)) == 0,
   "fog-covered chest appeared on the minimap")
@@ -745,7 +763,7 @@ map.IsFieldMap, fog_ui.IsDispField = true, true
 fog_revealed = false
 map:setMapScale()
 assert(#map.emitted == 0, "acquired-only chest bypassed fog filtering")
-toggle_map("Hide chests in unexplored areas", false)
+toggle_map("Hide base-game chests in unexplored areas", false)
 assert(#map.emitted == 1 and map.emitted[1].IconType == 25,
   "disabling fog filtering did not restore the saved chest display")
 callbacks.save()
@@ -974,6 +992,95 @@ assert(#minimap_options.filter_markers({},nearby_trials)==3)
 trial_opened=false
 assert(#minimap_get_markers({x=1,y=0,z=1},180,60)==4,
   'renewed trial chest remained permanently cached as acquired')
+-- Controls and categories belong to their own sections, even with interleaved saved order.
+drawn_sections, category_sections, checkbox_sections = {}, {}, {}
+callbacks.ui()
+for _, section in ipairs({'Maps and appearance','Base game','Dark Arisen'}) do
+  assert(drawn_sections[section], 'missing settings section: '..section)
+end
+assert(category_sections["Seeker's Tokens"] == 'Base game'
+  and category_sections['Chests (S)'] == 'Base game'
+  and category_sections['Lost Rites Chests'] == 'Dark Arisen'
+  and category_sections['Norgan Ducats'] == 'Dark Arisen', 'category shown in wrong settings group')
+assert(checkbox_sections['Show on full map'] == 'Maps and appearance'
+  and checkbox_sections['Show first Seeker\'s Token'] == 'Base game'
+  and checkbox_sections['Hide unobtainable base-game chests'] == 'Base game'
+  and checkbox_sections['Hide unobtainable DLC collectibles'] == 'Dark Arisen'
+  and checkbox_sections['Hide base-game chests in unexplored areas'] == 'Base game'
+  and checkbox_sections['Hide DLC chests in unexplored areas'] == 'Dark Arisen'
+  and checkbox_sections['Hide Norgan Ducats in unexplored areas'] == 'Dark Arisen',
+  'progression, fog or global controls shown in wrong group')
+local original_order = saved_settings.marker_order
+local interleaved = {"Seeker's Tokens",'Norgan Ducats','Golden Trove Beetles','Norgan Chests'}
+for _, name in ipairs(original_order) do
+  if name ~= "Seeker's Tokens" and name ~= 'Norgan Ducats'
+      and name ~= 'Golden Trove Beetles' and name ~= 'Norgan Chests' then
+    interleaved[#interleaved+1] = name
+  end
+end
+saved_settings.marker_order = interleaved
+requested_move = {category='Golden Trove Beetles',button='#Move Up'}
+callbacks.ui()
+assert(interleaved[1] == 'Golden Trove Beetles' and interleaved[2] == 'Norgan Ducats'
+  and interleaved[3] == "Seeker's Tokens", 'base category reorder crossed into the DLC group')
+requested_move = {category='Norgan Ducats',button='#Move Down'}
+callbacks.ui()
+assert(interleaved[2] == 'Norgan Chests' and interleaved[4] == 'Norgan Ducats',
+  'DLC category reorder crossed into the base group')
+saved_settings.marker_order = original_order
+-- Each progression toggle affects its own chests on both map surfaces.
+dlc_metadata.records[dlc_guids[755]].variants[1].unsupported='Trial activation unverified'
+saved_keys, saved_records = {}, {}
+small_rule.world = 'unmoored'
+toggle_map('Hide unobtainable DLC collectibles', false)
+assert(saved_settings.hide_unavailable_chests == true
+  and saved_settings.hide_unavailable_dlc_chests == false, 'DLC progression toggle changed base preference')
+show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted == 4 and #minimap_options.filter_markers({},
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 4,
+  'DLC progression override did not reveal trial previews on both maps')
+show_category('Chests (S)'); map:setMapScale()
+assert(#map.emitted == 0 and #minimap_options.filter_markers({},
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 0,
+  'DLC progression override bypassed base-game chest rules')
+toggle_map('Hide unobtainable base-game chests', false)
+assert(saved_settings.hide_unavailable_chests == false
+  and saved_settings.hide_unavailable_dlc_chests == false, 'base progression toggle changed DLC preference')
+assert(#map.emitted == 1 and #minimap_options.filter_markers({},
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 1,
+  'base progression override did not reveal base chest on both maps')
+toggle_map('Hide unobtainable DLC collectibles', true)
+show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted == 3 and #minimap_options.filter_markers({},
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 3,
+  'DLC progression guard did not hide trial while base override stayed off')
+-- DLC chest fog and base chest fog stay independent on both surfaces.
+toggle_map('Hide unobtainable DLC collectibles', false)
+fog_revealed = false
+map.IsFieldMap, fog_ui.IsDispField = true, true
+toggle_map('Hide DLC chests in unexplored areas', true)
+assert(saved_settings.hide_unexplored_dlc_chests == true and saved_settings.hide_unexplored_chests == false)
+assert(#map.emitted == 0 and #minimap_options.filter_markers(fog_ui,
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 0,
+  'DLC chest fog did not hide trial previews on both maps')
+show_category('Chests (S)'); map:setMapScale()
+assert(#map.emitted == 1 and #minimap_options.filter_markers(fog_ui,
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 1,
+  'DLC chest fog affected base-game chests')
+toggle_map('Hide base-game chests in unexplored areas', true)
+assert(saved_settings.hide_unexplored_chests == true and saved_settings.hide_unexplored_dlc_chests == true)
+assert(#map.emitted == 0 and #minimap_options.filter_markers(fog_ui,
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 0,
+  'base-game chest fog did not hide base chests on both maps')
+toggle_map('Hide DLC chests in unexplored areas', false)
+show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted == 4 and #minimap_options.filter_markers(fog_ui,
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 4,
+  'base-game chest fog affected DLC chests')
+toggle_map('Hide base-game chests in unexplored areas', false)
+toggle_map('Hide unobtainable DLC collectibles', true)
+toggle_map('Hide unobtainable base-game chests', true)
+small_rule.world = 'any'
 -- Base-game owners never query/render DLC content, even with saved DLC choices enabled.
 ducat_picked = false
 dlc_installed = false
@@ -983,6 +1090,7 @@ assert(#map.emitted == 0 and #minimap_get_markers({x=1,y=0,z=1},180,60) == 0
   and next(queried_gimmicks) == nil, 'DLC marker queries reached a non-owner')
 drawn_categories = {}
 drawn_checkboxes, drawn_text = {}, {}
+drawn_sections = {}
 ducat_diagnostics.error = 'Ducat history fixture warning'
 callbacks.ui()
 for _, name in ipairs({'Norgan Ducats','Norgan Chests','Norgan Rare Chests','Lost Rites Chests'}) do
@@ -990,6 +1098,11 @@ for _, name in ipairs({'Norgan Ducats','Norgan Chests','Norgan Rare Chests','Los
 end
 assert(not drawn_checkboxes['Hide Norgan Ducats in unexplored areas'],
   'non-owner was offered the DLC fog control')
+assert(not drawn_sections['Dark Arisen'] and not drawn_checkboxes['Hide unobtainable DLC collectibles']
+  and not drawn_checkboxes['Hide DLC chests in unexplored areas'],
+  'non-owner was offered expansion progression controls')
+assert(drawn_sections['Maps and appearance'] and drawn_sections['Base game']
+  and drawn_categories["Seeker's Tokens"], 'non-owner lost base-game settings')
 assert(not drawn_text['Ducat history fixture warning'], 'non-owner saw a stale DLC warning')
 ducat_diagnostics.error = nil
 show_category("Seeker's Tokens"); map:setMapScale()
@@ -1012,10 +1125,8 @@ local inaccessible = '90a2c89d-100b-03f5-285f-510aa4c098ea'
 small_chest_fixture.locations[inaccessible] = {x=1,y=0,z=1}
 saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
 saved_settings.hide_unavailable_chests = false
-local generate_manager = managers['app.GenerateManager']
-local original_never_generate = generate_manager.isNeverGenerate
 for _, acquired in ipairs({false,true}) do
-  generate_manager.isNeverGenerate = function(_, id) return id.key == inaccessible and acquired end
+  save_context(inaccessible,'app.GmItemContext',{get_IsPick=function() return acquired end})
   show_category('Chests (S)')
   saved_settings.markers['Chests (S)'].acquired_show = true
   map:setMapScale()
@@ -1025,7 +1136,6 @@ for _, acquired in ipairs({false,true}) do
   assert(#markers == 1 and markers[1].key == chest_guids[10],
     'inaccessible Vernworth chest still appears on the minimap, or a normal chest was lost')
 end
-generate_manager.isNeverGenerate = original_never_generate
 callbacks.save()
 assert(saved_settings.quests and saved_settings.quests.enabled==false,
   'stable-line testing discarded separate quest-development preferences')

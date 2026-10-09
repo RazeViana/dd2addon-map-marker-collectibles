@@ -1,1 +1,1 @@
-Title Update 4.0 with optional Dark Arisen support: Norgan Ducats, chests and new artwork enabled by default. Base game supported. Hides the inaccessible Vernworth chest. Trial placements stay guarded. Requires compatible REFramework.
+Optional Dark Arisen support with new artwork enabled by default, separate base-game/DLC filters and grouped controls. Base game supported. Hides the inaccessible Vernworth chest. Trial markers stay guarded. Requires compatible REFramework.

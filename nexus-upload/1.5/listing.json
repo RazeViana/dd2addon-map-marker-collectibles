@@ -9,7 +9,7 @@
     "User Interface",
     "Quality of Life"
   ],
-  "summary": "Map and minimap markers for tokens, beetles and chests, plus optional Dark Arisen collectibles with new artwork enabled by default. DLC not required.",
+  "summary": "Map and minimap markers for tokens, beetles and chests, plus optional Dark Arisen collectibles, new artwork and separate base-game/DLC filters in grouped menus.",
   "required_mods": [
     {
       "name": "REFramework",
@@ -22,7 +22,7 @@
     "name": "Map Markers and Collectables by Raze",
     "version": "1.5",
     "archive": "Map-Markers-and-Collectables-by-Raze-v1.5.zip",
-    "description": "Title Update 4.0 with optional Dark Arisen support: Norgan Ducats, chests and new artwork enabled by default. Base game supported. Hides the inaccessible Vernworth chest. Trial placements stay guarded. Requires compatible REFramework."
+    "description": "Optional Dark Arisen support with new artwork enabled by default, separate base-game/DLC filters and grouped controls. Base game supported. Hides the inaccessible Vernworth chest. Trial markers stay guarded. Requires compatible REFramework."
   },
   "donation_points": false,
   "publication_status": "Unpublished test patch; native DLC acceptance pending. See THIRD_PARTY_NOTICES.md for source terms.",

@@ -515,219 +515,240 @@ end
 re.on_draw_ui(function()
   local markers_dirty = false
   local collectibles_dirty = false
-  local reorder_index = 0
+  local reorder_index, reorder_direction = 0, 0
   if imgui.tree_node(MOD_NAME) then
     local has_dlc = refresh_dlc_access()
     imgui.text("v1.5 - Map and minimap markers")
-    local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
-    if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
-    if imgui.is_item_hovered() then
-      imgui.set_tooltip("Default artwork for categories using 'Follow global icon style'. Category overrides are set below.")
-    end
-    local size_changed, icon_size = imgui.slider_int("Icon size (%)", settings.icon_size, 25, 150)
-    if size_changed then settings.icon_size = icon_size; markers_dirty = true end
-    if object_icon_error then imgui.text(object_icon_error) end
-    if settings_message ~= nil then imgui.text(settings_message) end
-    local first_changed, show_first = imgui.checkbox("Show first Seeker's Token", settings.show_first_seeker_token)
-    if first_changed then settings.show_first_seeker_token = show_first; markers_dirty = true end
-    if imgui.is_item_hovered() then
-      imgui.set_tooltip("Mark your first collected Seeker's Token in red. By default, it disappears after Finder's Token collection; enable the option below to keep it visible. Independent of Acquired/Unacquired visibility; follows token artwork, fog and map settings.")
-    end
-    if settings.show_first_seeker_token then
-      local history_changed, show_history = imgui.checkbox("Show after Finder's Token collection", settings.show_first_token_after_collection)
-      if history_changed then settings.show_first_token_after_collection = show_history; markers_dirty = true end
+    local function draw_fog_control(key, label, kind, is_chest)
+      local fog_changed, hide_unexplored = imgui.checkbox(label, settings[key])
+      if fog_changed then settings[key] = hide_unexplored; markers_dirty = true end
       if imgui.is_item_hovered() then
-        imgui.set_tooltip("Keep the red first-token location visible even after collecting or handing in the Finder's Token. Uses the current playthrough's saved location; still follows token fog and map settings.")
-      end
-    end
-    if settings.show_first_seeker_token and first_token.error then imgui.text(first_token.error) end
-    local progression_changed, hide_unavailable = imgui.checkbox("Hide unobtainable chests", settings.hide_unavailable_chests)
-    if progression_changed then settings.hide_unavailable_chests = hide_unavailable; markers_dirty = true end
-    if imgui.is_item_hovered() then
-      imgui.set_tooltip("Hide unopened chests blocked by their world, quest or environment conditions. Unresolved availability stays hidden. Collected-chest history follows each category's Acquired setting.")
-    end
-    local unmoored_changed, reveal_unmoored = imgui.checkbox("Reveal Unmoored-only chests early", settings.reveal_unmoored_chests)
-    if unmoored_changed then settings.reveal_unmoored_chests = reveal_unmoored; markers_dirty = true end
-    if imgui.is_item_hovered() then
-      imgui.set_tooltip("Reveal recorded Unmoored-only placements before entering that world. Other quest and environment conditions still apply. Turn off Hide unobtainable chests to display every location.")
-    end
-    if settings.hide_unavailable_chests then
-      for _, kind in ipairs({"fullmap", "minimap"}) do
-        if settings[kind].enabled and chest_availability.errors[kind] then
-          imgui.text(chest_availability.errors[kind])
+        imgui.begin_tooltip()
+        local tooltip = "Show " .. kind .. " only where the map's fog of war has cleared. Applies to both maps."
+        if is_chest then
+          tooltip = tooltip .. " Chests ignore fog on cave and city local maps; outdoor maps follow this option again. Category and Acquired/Unacquired choices still apply."
         end
+        imgui.set_tooltip(tooltip)
+        imgui.end_tooltip()
       end
     end
-    local fullmap_changed, show_fullmap = imgui.checkbox("Show on full map", settings.fullmap.enabled)
-    if has_dlc and ducat_diagnostics.error then imgui.text(ducat_diagnostics.error) end
-    if fullmap_changed then
-      settings.fullmap.enabled = show_fullmap
-      markers_dirty = true
-    end
-    local changed, enabled = imgui.checkbox("Show on minimap", settings.minimap.enabled)
-    if changed then
-      settings.minimap.enabled = enabled
-      minimap_error = nil
-      markers_dirty = true
-    end
-    local fog_enabled = false
-    for _, control in ipairs({
-      {"hide_unexplored_chests", "Hide chests in unexplored areas", "regular and special chests"},
-      {"hide_unexplored_beetles", "Hide beetles in unexplored areas", "Golden Trove Beetles"},
-      {"hide_unexplored_tokens", "Hide Seeker's Tokens in unexplored areas", "Seeker's Tokens"},
-      {"hide_unexplored_ducats", "Hide Norgan Ducats in unexplored areas", "Norgan Ducats"}
-    }) do
-      if control[1] ~= "hide_unexplored_ducats" or has_dlc then
-        local fog_changed, hide_unexplored = imgui.checkbox(control[2], settings[control[1]])
-        if fog_changed then settings[control[1]] = hide_unexplored; markers_dirty = true end
-        fog_enabled = fog_enabled or settings[control[1]]
+    if imgui.tree_node("Maps and appearance") then
+        local symbols_changed, use_objects = imgui.checkbox("Use object icons", settings.object_icons)
+        if symbols_changed then settings.object_icons = use_objects; markers_dirty = true end
         if imgui.is_item_hovered() then
-          imgui.begin_tooltip()
-          local tooltip = "Show " .. control[3] .. " only where the map's fog of war has cleared. Applies to both maps."
-          if control[1] == "hide_unexplored_chests" then
-            tooltip = tooltip .. " Chests ignore fog on cave and city local maps; outdoor maps follow this option again. Category and Acquired/Unacquired choices still apply."
-          end
-          imgui.set_tooltip(tooltip)
-          imgui.end_tooltip()
+          imgui.set_tooltip("Default artwork for categories using 'Follow global icon style'. Category overrides are set below.")
         end
-      end
-    end
-    if fog_enabled then
-      if settings.fullmap.enabled and fog_visibility.errors.fullmap then imgui.text(fog_visibility.errors.fullmap) end
-      if settings.minimap.enabled and fog_visibility.errors.minimap then imgui.text(fog_visibility.errors.minimap) end
-    end
-    if minimap_renderer ~= nil then
-      imgui.text(("Minimap: %d custom icons - %s"):format(minimap_renderer.count, minimap_renderer.status))
-    end
-    if minimap_error ~= nil then imgui.text_colored(minimap_error, 0xFF0000FF) end
-    if capacity_status.fullmap then imgui.text(capacity_status.fullmap) end
-    if capacity_status.minimap then imgui.text(capacity_status.minimap) end
-    if imgui.tree_node("Minimap settings") then
-      local height_changed, show_height = imgui.checkbox("Show height indicators", settings.minimap.height_indicators)
-      if height_changed then settings.minimap.height_indicators = show_height; markers_dirty = true end
-      for _, field in ipairs({
-        { "radius", "Search radius (world units)", 25, 300 },
-        { "height", "Maximum height difference", 10, 150 },
-        { "height_tolerance", "Height tolerance (world units)", 0, 30 },
-        { "max_markers", "Maximum custom icons", 1, 200 }
-      }) do
-        local edited, value = imgui.drag_int(field[2], settings.minimap[field[1]], 1, field[3], field[4])
-        if edited then settings.minimap[field[1]] = value; markers_dirty = true end
-      end
-      imgui.text("Uses the category visibility and colors below. Nearest items are shown first.")
-      imgui.text("Height arrows point up or down. No arrow is shown within the height tolerance.")
-      imgui.tree_pop()
-    end
-    if marker_label ~= nil then
-      imgui.text(marker_label)
-    end
-    if show_exception then
-      imgui.text_colored(
-        "An error occurred while getting collectible status. See re2_framework_log.txt and report this to Raze.",
-        0xFF0000FF)
-    end
-    if show_warning then
-      imgui.text_colored(
-        "Reached the icon limit! Icons limited."
-        --.. " You can try increasing icon array size under Advanced."
-        ,
-        0xFF0000FF)
-    end
-    for key_index, marker_type_name in ipairs(settings.marker_order) do
-      local marker_type = marker_types[marker_type_name]
-      if not marker_type.requires_dlc or has_dlc then
-        local marker_settings = settings.markers[marker_type_name]
-        imgui.push_id(marker_type_name)
-        if imgui.arrow_button("#Move Up", 2) then
-          reorder_index = -key_index
+        local size_changed, icon_size = imgui.slider_int("Icon size (%)", settings.icon_size, 25, 150)
+        if size_changed then settings.icon_size = icon_size; markers_dirty = true end
+        if object_icon_error then imgui.text(object_icon_error) end
+        if settings_message ~= nil then imgui.text(settings_message) end
+        local fullmap_changed, show_fullmap = imgui.checkbox("Show on full map", settings.fullmap.enabled)
+        if fullmap_changed then
+          settings.fullmap.enabled = show_fullmap
+          markers_dirty = true
         end
-        imgui.same_line()
-        if imgui.arrow_button("#Move Down", 3) then
-          reorder_index = key_index
-        end
-        imgui.same_line()
-        imgui.push_id("Show Unacquired")
-        imgui.push_style_color(18, marker_settings.unacquired_icon_color)
-        local changed, new_value = imgui.checkbox("", marker_settings.unacquired_show)
-        imgui.pop_style_color()
-        if imgui.is_item_hovered() then
-          imgui.begin_tooltip()
-          if marker_settings.unacquired_show then
-            imgui.set_tooltip("Show unacquired " .. marker_type.label)
-          else
-            imgui.set_tooltip("Hide unacquired " .. marker_type.label)
-          end
-          imgui.end_tooltip()
-        end
+        local changed, enabled = imgui.checkbox("Show on minimap", settings.minimap.enabled)
         if changed then
-          if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
-            collectibles_dirty = true
-          else
-            markers_dirty = true
-          end
-          marker_settings.unacquired_show = new_value
+          settings.minimap.enabled = enabled
+          minimap_error = nil
+          markers_dirty = true
         end
-        imgui.pop_id()
-        imgui.same_line()
-        imgui.push_id("Show Acquired")
-        imgui.push_style_color(18, marker_settings.acquired_icon_color)
-        local changed, new_value = imgui.checkbox("", marker_settings.acquired_show)
-        imgui.pop_style_color()
-        if imgui.is_item_hovered() then
-          imgui.begin_tooltip()
-          if marker_settings.acquired_show then
-            imgui.set_tooltip("Show acquired " .. marker_type.label)
-          else
-            imgui.set_tooltip("Hide acquired " .. marker_type.label)
-          end
-          imgui.end_tooltip()
+        if minimap_renderer ~= nil then
+          imgui.text(("Minimap: %d custom icons - %s"):format(minimap_renderer.count, minimap_renderer.status))
         end
-        if changed then
-          if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
-            collectibles_dirty = true
-          else
-            markers_dirty = true
+        if minimap_error ~= nil then imgui.text_colored(minimap_error, 0xFF0000FF) end
+        if capacity_status.fullmap then imgui.text(capacity_status.fullmap) end
+        if capacity_status.minimap then imgui.text(capacity_status.minimap) end
+        if imgui.tree_node("Minimap settings") then
+          local height_changed, show_height = imgui.checkbox("Show height indicators", settings.minimap.height_indicators)
+          if height_changed then settings.minimap.height_indicators = show_height; markers_dirty = true end
+          for _, field in ipairs({
+            { "radius", "Search radius (world units)", 25, 300 },
+            { "height", "Maximum height difference", 10, 150 },
+            { "height_tolerance", "Height tolerance (world units)", 0, 30 },
+            { "max_markers", "Maximum custom icons", 1, 200 }
+          }) do
+            local edited, value = imgui.drag_int(field[2], settings.minimap[field[1]], 1, field[3], field[4])
+            if edited then settings.minimap[field[1]] = value; markers_dirty = true end
           end
-          marker_settings.acquired_show = new_value
-        end
-        imgui.pop_id()
-        imgui.same_line()
-        local tree_node
-        if type(marker_type.data) ~= "table" or type(marker_type.data.locations) ~= "table" then
-          imgui.push_style_color(0, 0xFF0000FF)
-          tree_node = imgui.tree_node(marker_type.label .. " (data file missing!)")
-          imgui.pop_style_color()
-        else
-          tree_node = imgui.tree_node(marker_type.label)
-        end
-        if marker_type.tooltip ~= nil and imgui.is_item_hovered() then
-          imgui.begin_tooltip()
-          imgui.set_tooltip(marker_type.tooltip)
-          imgui.end_tooltip()
-        end
-        if tree_node then
-          if imgui.tree_node("Unacquired Settings") then
-            local changed = draw_marker_type_settings("unacquired", marker_type, marker_settings)
-            if changed == true then
-              markers_dirty = true
-            elseif changed == false then
-              collectibles_dirty = true
-            end
-            imgui.tree_pop()
-          end
-          if imgui.tree_node("Acquired Settings") then
-            local changed = draw_marker_type_settings("acquired", marker_type, marker_settings)
-            if changed == true then
-              markers_dirty = true
-            elseif changed == false then
-              collectibles_dirty = true
-            end
-            imgui.tree_pop()
-          end
+          imgui.text("Uses the category visibility and colors below. Nearest items are shown first.")
+          imgui.text("Height arrows point up or down. No arrow is shown within the height tolerance.")
           imgui.tree_pop()
         end
-        imgui.pop_id()
+        if marker_label ~= nil then
+          imgui.text(marker_label)
+        end
+        if show_exception then
+          imgui.text_colored(
+            "An error occurred while getting collectible status. See re2_framework_log.txt and report this to Raze.",
+            0xFF0000FF)
+        end
+        if show_warning then
+          imgui.text_colored(
+            "Reached the icon limit! Icons limited."
+            --.. " You can try increasing icon array size under Advanced."
+            ,
+            0xFF0000FF)
+        end
+        imgui.tree_pop()
+    end
+    local function draw_categories(is_dlc)
+        for key_index, marker_type_name in ipairs(settings.marker_order) do
+          local marker_type = marker_types[marker_type_name]
+          if (marker_type.requires_dlc == true) == is_dlc then
+            local marker_settings = settings.markers[marker_type_name]
+            imgui.push_id(marker_type_name)
+            if imgui.arrow_button("#Move Up", 2) then
+              reorder_index, reorder_direction = key_index, -1
+            end
+            imgui.same_line()
+            if imgui.arrow_button("#Move Down", 3) then
+              reorder_index, reorder_direction = key_index, 1
+            end
+            imgui.same_line()
+            imgui.push_id("Show Unacquired")
+            imgui.push_style_color(18, marker_settings.unacquired_icon_color)
+            local changed, new_value = imgui.checkbox("", marker_settings.unacquired_show)
+            imgui.pop_style_color()
+            if imgui.is_item_hovered() then
+              imgui.begin_tooltip()
+              if marker_settings.unacquired_show then
+                imgui.set_tooltip("Show unacquired " .. marker_type.label)
+              else
+                imgui.set_tooltip("Hide unacquired " .. marker_type.label)
+              end
+              imgui.end_tooltip()
+            end
+            if changed then
+              if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
+                collectibles_dirty = true
+              else
+                markers_dirty = true
+              end
+              marker_settings.unacquired_show = new_value
+            end
+            imgui.pop_id()
+            imgui.same_line()
+            imgui.push_id("Show Acquired")
+            imgui.push_style_color(18, marker_settings.acquired_icon_color)
+            local changed, new_value = imgui.checkbox("", marker_settings.acquired_show)
+            imgui.pop_style_color()
+            if imgui.is_item_hovered() then
+              imgui.begin_tooltip()
+              if marker_settings.acquired_show then
+                imgui.set_tooltip("Show acquired " .. marker_type.label)
+              else
+                imgui.set_tooltip("Hide acquired " .. marker_type.label)
+              end
+              imgui.end_tooltip()
+            end
+            if changed then
+              if cache_collectibles ~= nil and cache_collectibles[marker_type_name] == nil then
+                collectibles_dirty = true
+              else
+                markers_dirty = true
+              end
+              marker_settings.acquired_show = new_value
+            end
+            imgui.pop_id()
+            imgui.same_line()
+            local tree_node
+            if type(marker_type.data) ~= "table" or type(marker_type.data.locations) ~= "table" then
+              imgui.push_style_color(0, 0xFF0000FF)
+              tree_node = imgui.tree_node(marker_type.label .. " (data file missing!)")
+              imgui.pop_style_color()
+            else
+              tree_node = imgui.tree_node(marker_type.label)
+            end
+            if marker_type.tooltip ~= nil and imgui.is_item_hovered() then
+              imgui.begin_tooltip()
+              imgui.set_tooltip(marker_type.tooltip)
+              imgui.end_tooltip()
+            end
+            if tree_node then
+              if imgui.tree_node("Unacquired Settings") then
+                local changed = draw_marker_type_settings("unacquired", marker_type, marker_settings)
+                if changed == true then
+                  markers_dirty = true
+                elseif changed == false then
+                  collectibles_dirty = true
+                end
+                imgui.tree_pop()
+              end
+              if imgui.tree_node("Acquired Settings") then
+                local changed = draw_marker_type_settings("acquired", marker_type, marker_settings)
+                if changed == true then
+                  markers_dirty = true
+                elseif changed == false then
+                  collectibles_dirty = true
+                end
+                imgui.tree_pop()
+              end
+              imgui.tree_pop()
+            end
+            imgui.pop_id()
+          end
       end
+    end
+    if imgui.tree_node("Base game") then
+      local first_changed, show_first = imgui.checkbox("Show first Seeker's Token", settings.show_first_seeker_token)
+      if first_changed then settings.show_first_seeker_token = show_first; markers_dirty = true end
+      if imgui.is_item_hovered() then
+        imgui.set_tooltip("Mark your first collected Seeker's Token in red. By default, it disappears after Finder's Token collection; enable the option below to keep it visible. Independent of Acquired/Unacquired visibility; follows token artwork, fog and map settings.")
+      end
+      if settings.show_first_seeker_token then
+        local history_changed, show_history = imgui.checkbox("Show after Finder's Token collection", settings.show_first_token_after_collection)
+        if history_changed then settings.show_first_token_after_collection = show_history; markers_dirty = true end
+        if imgui.is_item_hovered() then
+          imgui.set_tooltip("Keep the red first-token location visible even after collecting or handing in the Finder's Token. Uses the current playthrough's saved location; still follows token fog and map settings.")
+        end
+      end
+      if settings.show_first_seeker_token and first_token.error then imgui.text(first_token.error) end
+      local progression_changed, hide_unavailable = imgui.checkbox("Hide unobtainable base-game chests", settings.hide_unavailable_chests)
+      if progression_changed then settings.hide_unavailable_chests = hide_unavailable; markers_dirty = true end
+      if imgui.is_item_hovered() then
+        imgui.set_tooltip("Hide unopened base-game chests blocked by their world, quest or environment conditions. Unresolved availability stays hidden. Collected history follows each category's Acquired setting.")
+      end
+      local unmoored_changed, reveal_unmoored = imgui.checkbox("Reveal Unmoored-only chests early", settings.reveal_unmoored_chests)
+      if unmoored_changed then settings.reveal_unmoored_chests = reveal_unmoored; markers_dirty = true end
+      if imgui.is_item_hovered() then
+        imgui.set_tooltip("Reveal recorded Unmoored-only placements before entering that world. Other quest and environment conditions still apply. Turn off Hide unobtainable base-game chests to preview every recorded base location.")
+      end
+      if settings.hide_unavailable_chests then
+        for _, kind in ipairs({"fullmap", "minimap"}) do
+          if settings[kind].enabled and chest_availability.group_errors.base[kind] then imgui.text(chest_availability.group_errors.base[kind]) end
+        end
+      end
+      draw_fog_control("hide_unexplored_chests", "Hide base-game chests in unexplored areas", "base-game chests", true)
+      draw_fog_control("hide_unexplored_beetles", "Hide beetles in unexplored areas", "Golden Trove Beetles")
+      draw_fog_control("hide_unexplored_tokens", "Hide Seeker's Tokens in unexplored areas", "Seeker's Tokens")
+      if settings.hide_unexplored_chests or settings.hide_unexplored_beetles or settings.hide_unexplored_tokens then
+        if settings.fullmap.enabled and fog_visibility.errors.fullmap then imgui.text(fog_visibility.errors.fullmap) end
+        if settings.minimap.enabled and fog_visibility.errors.minimap then imgui.text(fog_visibility.errors.minimap) end
+      end
+      draw_categories(false)
+      imgui.tree_pop()
+    end
+    if has_dlc and imgui.tree_node("Dark Arisen") then
+      local progression_changed, hide_unavailable = imgui.checkbox("Hide unobtainable DLC collectibles", settings.hide_unavailable_dlc_chests)
+      if progression_changed then settings.hide_unavailable_dlc_chests = hide_unavailable; markers_dirty = true end
+      if imgui.is_item_hovered() then
+        imgui.set_tooltip("Hide uncollected Dark Arisen chests and Ducats blocked by recorded world, quest or trial requirements. Turn this off to preview locations; keep the item category enabled. A marker does not confirm current availability to loot.")
+      end
+      if settings.hide_unavailable_dlc_chests then
+        for _, kind in ipairs({"fullmap", "minimap"}) do
+          if settings[kind].enabled and chest_availability.group_errors.dlc[kind] then imgui.text(chest_availability.group_errors.dlc[kind]) end
+        end
+      end
+      draw_fog_control("hide_unexplored_dlc_chests", "Hide DLC chests in unexplored areas", "Dark Arisen chests", true)
+      draw_fog_control("hide_unexplored_ducats", "Hide Norgan Ducats in unexplored areas", "Norgan Ducats")
+      if settings.hide_unexplored_dlc_chests or settings.hide_unexplored_ducats then
+        if settings.fullmap.enabled and fog_visibility.errors.fullmap then imgui.text(fog_visibility.errors.fullmap) end
+        if settings.minimap.enabled and fog_visibility.errors.minimap then imgui.text(fog_visibility.errors.minimap) end
+      end
+      if ducat_diagnostics.error then imgui.text(ducat_diagnostics.error) end
+      draw_categories(true)
+      imgui.tree_pop()
     end
     --[[
     if imgui.tree_node("Advanced Settings") then
@@ -750,19 +771,16 @@ re.on_draw_ui(function()
     imgui.tree_pop()
   end
   if reorder_index ~= 0 then
-    local new_index
-    if reorder_index < 0 then
-      reorder_index = -reorder_index
-      new_index = reorder_index - 1
-    else
-      new_index = reorder_index + 1
+    local order = settings.marker_order
+    local source = order[reorder_index]
+    local is_dlc = marker_types[source].requires_dlc == true
+    for target = reorder_index + reorder_direction, reorder_direction == -1 and 1 or #order, reorder_direction do
+      if (marker_types[order[target]].requires_dlc == true) == is_dlc then
+        order[reorder_index], order[target] = order[target], order[reorder_index]
+        markers_dirty = true
+        break
+      end
     end
-    if new_index >= 1 and new_index <= #settings.marker_order then
-      local reorder_key = settings.marker_order[reorder_index]
-      table.remove(settings.marker_order, reorder_index)
-      table.insert(settings.marker_order, new_index, reorder_key)
-    end
-    markers_dirty = true
   end
   if collectibles_dirty then
     cache_collectibles = nil

@@ -97,7 +97,7 @@ function M.register(types, names, load, chest_callbacks, coin_callbacks, chest_d
   for _, item in ipairs({{'Norgan Chests',826,84,0xFFF0D0A0},
       {'Norgan Rare Chests',885,85,0xFFFFA8DA}}) do
     add(item[1], {name=item[1]=='Norgan Chests' and 'Norgan Chest' or 'Norgan Rare Chest',
-      gimmick_id=item[2],object_icon=item[3],fog_setting='hide_unexplored_chests',
+      gimmick_id=item[2],object_icon=item[3],fog_setting='hide_unexplored_dlc_chests',
       data=load(prefix..item[2]..'.json'),get_state_callbacks=chest_callbacks,
       settings_default=defaults(item[4],item[2]==826 and 'norgan' or 'norgan_rare')})
   end
@@ -111,10 +111,10 @@ function M.register(types, names, load, chest_callbacks, coin_callbacks, chest_d
     end
   end
   add('Lost Rites Chests', {name='Lost Rites Chest',gimmick_ids={755,757,758,795},
-    object_icon=85,fog_setting='hide_unexplored_chests',data=merged,
+    object_icon=85,fog_setting='hide_unexplored_dlc_chests',data=merged,
     get_state_callbacks=chest_callbacks,live_acquired=true,
     settings_default=defaults(0xFFDDB7FF,'norgan_rare'),
-    tooltip='Fixed chest placements in the Lost Rites dungeons. Trial activation and renewal are unverified; unopened locations stay hidden with progression filtering enabled. Disable that filter only to preview placements.'})
+    tooltip='Keep this category enabled, then turn off Hide unobtainable DLC collectibles to preview trial chest locations. Some chests may not be ready to loot yet; trial unlocks and refills are still being checked.'})
 end
 
 return M

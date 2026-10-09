@@ -8,7 +8,8 @@ local function signature(markers)
 end
 
 function M.create(game, metadata)
-  local self = { error=nil, unknown_count=0, errors={}, unknown_counts={} }
+  local self = { error=nil, unknown_count=0, errors={}, unknown_counts={},
+    group_errors={base={},dlc={}} }
   local records = type(metadata) == 'table' and metadata.schema_version == 1
     and type(metadata.chests) == 'table' and metadata.chests or {}
 
@@ -63,12 +64,20 @@ function M.create(game, metadata)
     kind = kind or 'default'
     self.error, self.unknown_count = nil, 0
     self.errors[kind], self.unknown_counts[kind] = nil, 0
-    if settings.hide_unavailable_chests == false then return markers, signature(markers) end
+    self.group_errors.base[kind], self.group_errors.dlc[kind] = nil, nil
+    local hide_base = settings.hide_unavailable_chests ~= false
+    local hide_dlc = settings.hide_unavailable_dlc_chests
+    if type(hide_dlc) ~= 'boolean' then hide_dlc = hide_base end
+    if not hide_base and not hide_dlc then return markers, signature(markers) end
     local visible, snapshot, quest_cache, event_cache = {}, nil, {}, {}
+    local group_counts = {base=0,dlc=0}
     for _, marker in ipairs(markers) do
       local kind = marker.marker_type
       local show = true
-      if kind and (kind.fog_setting == 'hide_unexplored_chests' or kind.availability == true)
+      local hiding = hide_base
+      if kind and kind.requires_dlc == true then hiding = hide_dlc end
+      if hiding and kind and (kind.fog_setting == 'hide_unexplored_chests'
+          or kind.fog_setting == 'hide_unexplored_dlc_chests' or kind.availability == true)
           and marker.acquired ~= true then
         show = false
         local record = records[marker.key]
@@ -82,14 +91,22 @@ function M.create(game, metadata)
             if result == nil then unknown = true end
           end
         else unknown = true end
-        if not show and unknown then self.unknown_count = self.unknown_count + 1 end
+        if not show and unknown then
+          self.unknown_count = self.unknown_count + 1
+          local group = kind.requires_dlc == true and 'dlc' or 'base'
+          group_counts[group] = group_counts[group] + 1
+        end
       end
       if show then visible[#visible + 1] = marker end
     end
-    if self.unknown_count > 0 then
-      self.error = tostring(self.unknown_count) .. ' uncollected item(s) hidden because availability could not be confirmed.'
-      if snapshot and snapshot.error then self.error = self.error .. ' ' .. snapshot.error end
+    local function message(count)
+      if count == 0 then return end
+      local text = tostring(count) .. ' uncollected item(s) hidden because availability could not be confirmed.'
+      if snapshot and snapshot.error then text = text .. ' ' .. snapshot.error end
+      return text
     end
+    self.error = message(self.unknown_count)
+    for group, count in pairs(group_counts) do self.group_errors[group][kind] = message(count) end
     self.errors[kind], self.unknown_counts[kind] = self.error, self.unknown_count
     return visible, signature(visible)
   end
@@ -97,6 +114,7 @@ function M.create(game, metadata)
   function self:reset()
     self.error, self.unknown_count = nil, 0
     self.errors, self.unknown_counts = {}, {}
+    self.group_errors = {base={},dlc={}}
     game:reset()
   end
   return self

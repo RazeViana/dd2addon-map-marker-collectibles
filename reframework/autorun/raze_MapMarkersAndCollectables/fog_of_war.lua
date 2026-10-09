@@ -12,7 +12,7 @@ end
 local function should_filter(marker, settings, show_local_chests)
   local key = marker.marker_type and marker.marker_type.fog_setting
   return key ~= nil and settings[key] == true
-    and not (key == "hide_unexplored_chests" and show_local_chests)
+    and not ((key == "hide_unexplored_chests" or key == "hide_unexplored_dlc_chests") and show_local_chests)
 end
 
 function M.create(api, vector, report_error)
@@ -25,7 +25,7 @@ function M.create(api, vector, report_error)
   end
 
   function self:filter(markers, ui, kind, settings)
-    local show_local_chests = settings.hide_unexplored_chests == true and is_local_map(ui, kind)
+    local show_local_chests = is_local_map(ui, kind)
     local has_filtered_markers = false
     for _, marker in ipairs(markers) do
       if should_filter(marker, settings, show_local_chests) then has_filtered_markers = true; break end

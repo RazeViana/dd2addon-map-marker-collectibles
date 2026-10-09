@@ -29,9 +29,19 @@ function M.normalize(loaded, names, marker_types, generic)
   result.show_first_seeker_token = loaded.show_first_seeker_token ~= false
   result.show_first_token_after_collection = loaded.show_first_token_after_collection == true
   result.hide_unavailable_chests = loaded.hide_unavailable_chests ~= false
+  if type(loaded.hide_unavailable_dlc_chests) == 'boolean' then
+    result.hide_unavailable_dlc_chests = loaded.hide_unavailable_dlc_chests
+  else
+    result.hide_unavailable_dlc_chests = result.hide_unavailable_chests
+  end
   result.reveal_unmoored_chests = loaded.reveal_unmoored_chests == true
   for _, key in ipairs({"hide_unexplored_chests", "hide_unexplored_beetles", "hide_unexplored_tokens", "hide_unexplored_ducats"}) do
     result[key] = loaded[key] == true
+  end
+  if type(loaded.hide_unexplored_dlc_chests) == 'boolean' then
+    result.hide_unexplored_dlc_chests = loaded.hide_unexplored_dlc_chests
+  else
+    result.hide_unexplored_dlc_chests = result.hide_unexplored_chests
   end
   local size = loaded.icon_size
   result.icon_size = type(size) == "number" and size % 1 == 0 and size >= 25 and size <= 150 and size or 50

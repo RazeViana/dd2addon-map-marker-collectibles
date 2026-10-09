@@ -9,7 +9,7 @@ Dark Arisen is not required. The same package works with the base game, and expa
 
 The mod includes 185 Lost Rites chest locations and six rare Norgan chest locations, but we're still checking when you can loot them and when the trial chests refill.
 
-Their markers are hidden by default so you don't chase chests you can't get yet. Turn off Hide unobtainable chests to see their locations, but the chests might not be available in your game yet.
+Their markers are hidden by default so you don't chase chests you can't get yet. Under Dark Arisen, keep Lost Rites Chests enabled and turn off Hide unobtainable DLC collectibles to see their locations. The chests might not be available to loot yet. This leaves your base-game chest filter unchanged.
 
 These are fixed placements. Random monster drops and appraised relic contents are outside coverage. This is an unpublished test patch: DLC map routing, pickup/hand-in, save reload and trial renewal still need live checks.
 
@@ -20,7 +20,7 @@ Find Seeker's Tokens, Golden Trove Beetles and chests on your full map, with nea
 - Choose which categories appear, including items you have already collected.
 - Use distinct collectible and chest artwork, or choose game symbols and your own colors.
 - Track your first collected Seeker's Token with a red marker for the Sphinx riddle.
-- Hide unopened chests blocked by world, quest or environment requirements.
+- Hide unopened chests blocked by world, quest or environment requirements, with separate base-game and DLC controls.
 - Reveal collectibles as you explore with independent fog options.
 - Adjust marker size, minimap range and marker limits; use arrows for items above or below you.
 
@@ -34,6 +34,8 @@ https://www.nexusmods.com/dragonsdogma2/mods/8
 1) Close DD2 and disable other collectible-marker overlays to avoid duplicates.
 2) Install the complete v1.5 ZIP with Fluffy Mod Manager. For manual installation, copy both reframework and natives beside DD2.exe.
 3) Restart and open REFramework > Script Generated UI > Map Markers and Collectables by Raze.
+
+The menu is grouped into Maps and appearance, Base game, and Dark Arisen. Shared map, icon-size and minimap controls are in the first section. Each collectible section keeps its visibility, fog and chest filters together. Category reorder arrows stay within that section. Dark Arisen controls appear only when the DLC is available.
 
 Tokens and beetles start enabled. Base-game chest categories start disabled; enable the sizes you want. Uncollected DLC categories start enabled when the expansion is available. Saved choices take precedence over defaults.
 
@@ -49,9 +51,9 @@ Chest color defaults are copper for small, silver for medium, gold for large, bl
 
 CHEST PROGRESSION
 
-Hide unobtainable chests starts enabled and checks requirements per location, independently of chest size. Collected markers follow your Acquired setting even if a location is currently unavailable.
+Hide unobtainable base-game chests and Hide unobtainable DLC collectibles are independent. Both start enabled and check requirements per location; the DLC control covers chests and Norgan Ducats. Turn it off to preview trial chest locations while keeping unavailable base-game chests hidden. Collected markers follow your Acquired setting even if a location is currently unavailable.
 
-Reveal Unmoored-only chests early starts disabled. Those locations normally appear automatically in the Unmoored World. Enable this option to preview them earlier; separate quest and environment requirements still apply. Turning off Hide unobtainable chests previews recorded locations allowed by your category and fog settings. The inaccessible Vernworth marker remains omitted.
+Reveal Unmoored-only chests early is in Base game and starts disabled. Those locations normally appear automatically in the Unmoored World. Enable it to preview them earlier; separate quest and environment requirements still apply. Turning off a group's unobtainable-chest filter previews its recorded locations, subject to category and fog settings. The inaccessible Vernworth marker remains omitted.
 
 Three base-game quest-controlled placements have unresolved activation rules and stay hidden while unopened with progression filtering enabled. The menu reports unresolved checks. Sphinx reward datasets are not exposed as a category because their seal conditions are not yet verified.
 
@@ -63,7 +65,7 @@ The marker normally disappears after Finder's Token collection. Enable Show afte
 
 FOG, SIZE AND MINIMAP
 
-Hide chests in unexplored areas, Hide beetles in unexplored areas, Hide Seeker's Tokens in unexplored areas and the DLC's Hide Norgan Ducats in unexplored areas are independent options on both maps. They start disabled. Enabled categories and collection filters still apply.
+Under Base game, Hide base-game chests in unexplored areas, Hide beetles in unexplored areas and Hide Seeker's Tokens in unexplored areas work independently. Dark Arisen has separate Hide DLC chests in unexplored areas and Hide Norgan Ducats in unexplored areas controls. All work on both maps and start disabled. Enabled categories and collection filters still apply.
 
 Chest fog filtering applies outdoors. Chests ignore fog on cave and city local maps, then follow your saved preference again outdoors. Tokens and beetles retain their own fog behavior. If required data is temporarily unavailable, affected markers stay hidden until checks recover and the menu shows a message.
 

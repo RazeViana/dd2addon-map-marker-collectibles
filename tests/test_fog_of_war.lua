@@ -85,6 +85,28 @@ for _, case in ipairs({
     assert(table.concat(keys,",") == case[2], "fog preferences were coupled or hid the wrong group")
   end
 end
+
+local dlc_chest={key='dlc-chest',marker_type={fog_setting='hide_unexplored_dlc_chests'},
+  pos={x=2,y=3,z=-4}}
+local both={groups[1],dlc_chest}
+available=true;ui.LocalAreaNow=5;revealed[2]=false
+for _,case in ipairs({
+  {{hide_unexplored_chests=true,hide_unexplored_dlc_chests=false},'dlc-chest'},
+  {{hide_unexplored_chests=false,hide_unexplored_dlc_chests=true},'chest'},
+  {{hide_unexplored_chests=true,hide_unexplored_dlc_chests=true},''},
+  {{hide_unexplored_chests=false,hide_unexplored_dlc_chests=false},'chest,dlc-chest'},
+}) do
+  local shown=filter:filter(both,ui,'fullmap',case[1])
+  local keys={};for _,m in ipairs(shown) do keys[#keys+1]=m.key end
+  assert(table.concat(keys,',')==case[2], 'base/DLC chest fog controls hid the wrong group')
+end
+for _,kind in ipairs({'fullmap','minimap'}) do
+  local local_ui=kind=='fullmap' and {IsFieldMap=false} or {IsDispField=false}
+  available=false;local before_calls=calls
+  local input={dlc_chest}
+  assert(filter:filter(input,local_ui,kind,{hide_unexplored_dlc_chests=true})==input and calls==before_calls,
+    'DLC chest fog incorrectly hid trial-local chests or queried an unavailable mask')
+end
 local before = calls
 assert(filter:filter(groups, ui, "minimap", {}) == groups and calls == before and not filter.errors.minimap,
   "disabling all fog controls kept a stale error or queried the game")

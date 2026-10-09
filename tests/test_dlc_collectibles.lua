@@ -39,6 +39,10 @@ dlc.register(types, names, function(path) return files[path:match('[^/]+$')] end
 assert(#names == 5 and names[1] == 'existing', 'DLC categories changed existing ordering')
 assert(types['Norgan Ducats'].object_icon == 86 and types['Norgan Ducats'].get_state_callbacks == callbacks)
 assert(types['Norgan Chests'].object_icon == 84 and types['Norgan Rare Chests'].object_icon == 85)
+assert(types['Norgan Chests'].fog_setting == 'hide_unexplored_dlc_chests'
+  and types['Norgan Rare Chests'].fog_setting == 'hide_unexplored_dlc_chests'
+  and types['Lost Rites Chests'].fog_setting == 'hide_unexplored_dlc_chests',
+  'DLC chest categories still use the base-game fog switch')
 local trial=types['Lost Rites Chests']
 assert(trial.data.locations[guid1].x == 1 and trial.data.locations[guid2].x == 4)
 assert(trial.data.gimmick_ids[guid1] == 755 and trial.data.gimmick_ids[guid2] == 757,
@@ -70,14 +74,21 @@ local extra={schema_version=1,records={coin={gimmick_id=894,variants={{world='no
 local merged=dlc.availability_catalog(base,extra)
 assert(merged.chests.base and merged.chests.coin and not base.chests.coin,
   'DLC availability changed the original catalog')
+local world={unmoored=false}
 local policy=require('raze_MapMarkersAndCollectables.chest_availability').create({
-  snapshot=function() return {unmoored=false} end, reset=function() end}, merged)
-local coin={key='coin',gimmick_id=894,marker_type={availability=true,gimmick_id=894},acquired=false}
+  snapshot=function() return world end, reset=function() end}, merged)
+local coin={key='coin',gimmick_id=894,marker_type=types['Norgan Ducats'],acquired=false}
 local trial_marker={key='trial',gimmick_id=755,marker_type=trial,acquired=false}
 merged.chests.trial={gimmick_id=755,variants={{world='normal',unsupported='Trial activation unverified'}}}
 local visible=policy:filter({coin,trial_marker},{},'fullmap')
 assert(#visible == 1 and visible[1] == coin, 'DLC world/trial requirements were bypassed')
 assert(#policy:filter({trial_marker},{hide_unavailable_chests=false}) == 1, 'explicit previews were blocked')
+world.unmoored=true
+assert(#policy:filter({coin},{hide_unavailable_chests=true,hide_unavailable_dlc_chests=false}) == 1,
+  'Ducat preview still follows the base-game filter')
+assert(#policy:filter({coin},{hide_unavailable_chests=false,hide_unavailable_dlc_chests=true}) == 0,
+  'Ducat world requirements bypass the DLC collectible filter')
+world.unmoored=false
 coin.acquired=true
 assert(#policy:filter({coin},{}) == 1, 'DLC availability suppressed acquired history')
 local normalized=require('raze_MapMarkersAndCollectables.settings').normalize(
