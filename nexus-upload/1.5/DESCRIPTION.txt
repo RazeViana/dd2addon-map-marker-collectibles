@@ -1,19 +1,86 @@
 DARK ARISEN SUPPORT - TITLE UPDATE 4.0
-Adds 140 Norgan Ducats and 389 Norgan chests with three new icon designs. Uncollected DLC markers and their artwork are enabled by default.
 
-The DLC is optional. All base-game features work without it; expansion controls and markers activate only when Dark Arisen is owned and installed. Saved choices are preserved.
+Version 1.5 adds optional expansion support:
+- 140 Norgan Ducat locations.
+- 389 Norgan chests, with separate ordinary and rare categories.
+- Three new icon designs. Uncollected DLC markers and their artwork start enabled.
+
+Dark Arisen is not required. The same package works with the base game, and expansion controls and markers activate only when the DLC is owned and installed. Existing settings are preserved.
+
+The package also includes 185 fixed Lost Rites chest positions. Their trial activation and renewal are still being verified, so unopened trial markers stay hidden with progression filtering enabled. Six Norgan rare chests with unresolved requirements are guarded too. Turn off Hide unobtainable chests only to preview those positions; a marker does not confirm that the chest is currently available.
+
+These are fixed placements. Random monster drops and appraised relic contents are outside coverage. This is an unpublished test patch: DLC map routing, pickup/hand-in, save reload and trial renewal still need live checks.
 
 MAP MARKERS AND COLLECTABLES BY RAZE
-Find Seeker's Tokens, Golden Trove Beetles and chests on your full map and minimap. Customize categories, artwork, colors and size; show collected items, use separate fog filters and track your first Seeker's Token. Progression filtering hides unavailable chests.
 
-INSTALL
-Requires a compatible REFramework: https://www.nexusmods.com/dragonsdogma2/mods/8
-Close DD2 and install the complete v1.5 ZIP with Fluffy Mod Manager, or copy both reframework and natives beside DD2.exe. Keep your settings JSON. Open REFramework > Script Generated UI > Map Markers and Collectables by Raze.
+Find Seeker's Tokens, Golden Trove Beetles and chests on your full map, with nearby items also appearing on your minimap.
 
-COVERAGE
-Fixed DLC placements only; random drops and appraised relics are outside coverage. The 185 Lost Rites chest positions and six unresolved Norgan rare chests stay guarded while unopened. Disabling Hide unobtainable chests previews them without confirming availability.
+- Choose which categories appear, including items you have already collected.
+- Use distinct collectible and chest artwork, or choose game symbols and your own colors.
+- Track your first collected Seeker's Token with a red marker for the Sphinx riddle.
+- Hide unopened chests blocked by world, quest or environment requirements.
+- Reveal collectibles as you explore with independent fog options.
+- Adjust marker size, minimap range and marker limits; use arrows for items above or below you.
 
-Unpublished test patch: DLC routing, pickup/hand-in, save reload and trial renewal still need live checks.
+Full-map collectible icons draw above ordinary game icons when they overlap. Minimap artwork stays upright as you turn the camera. The inaccessible sealed-room chest in Vernworth is omitted from both maps, including previews and collected-item views.
+
+GETTING STARTED
+
+Install a REFramework build compatible with your game update:
+https://www.nexusmods.com/dragonsdogma2/mods/8
+
+1) Close DD2 and disable other collectible-marker overlays to avoid duplicates.
+2) Install the complete v1.5 ZIP with Fluffy Mod Manager. For manual installation, copy both reframework and natives beside DD2.exe.
+3) Restart and open REFramework > Script Generated UI > Map Markers and Collectables by Raze.
+
+Tokens and beetles start enabled. Base-game chest categories start disabled; enable the sizes you want. Uncollected DLC categories start enabled when the expansion is available. Saved choices take precedence over defaults.
+
+CHOOSING YOUR MARKERS
+
+Unacquired means items you have not collected. Acquired includes items collected before installing the mod. Leave Acquired off to hide collected items. Full-map markers show simple hover names such as Chest (S) or Norgan Ducat.
+
+Show on full map and Show on minimap work independently and both start enabled. Changing the full-map switch refreshes an open map without resetting your other choices.
+
+Use object icons controls categories set to Follow global icon style. In each category's Unacquired Settings or Acquired Settings, choose Artwork, select a chest design, or choose Game symbol and set its Icon Type. Each state has its own color and reset button. DLC categories start with their new artwork selected.
+
+Chest color defaults are copper for small, silver for medium, gold for large, blue for extra-large/sunken and purple for special chests. Acquired markers are dimmer. Saved colors are retained; Reset applies that category's defaults. The crown-style Sphinx artwork is a symbol choice, not an extra reward category.
+
+CHEST PROGRESSION
+
+Hide unobtainable chests starts enabled and checks requirements per location, independently of chest size. Collected markers follow your Acquired setting even if a location is currently unavailable.
+
+Reveal Unmoored-only chests early starts disabled. Those locations normally appear automatically in the Unmoored World. Enable this option to preview them earlier; separate quest and environment requirements still apply. Turning off Hide unobtainable chests previews recorded locations allowed by your category and fog settings. The inaccessible Vernworth marker remains omitted.
+
+Three base-game quest-controlled placements have unresolved activation rules and stay hidden while unopened with progression filtering enabled. The menu reports unresolved checks. Sphinx reward datasets are not exposed as a category because their seal conditions are not yet verified.
+
+FIRST SEEKER'S TOKEN
+
+Show first Seeker's Token starts enabled. Its red marker reads the current playthrough's saved first-token location, including when installing later in a save; no new playthrough is needed. Starting the Sphinx riddle does not hide it.
+
+The marker normally disappears after Finder's Token collection. Enable Show after Finder's Token collection to keep it after collection or hand-in. This option starts disabled and requires the main first-token switch to stay enabled. The marker remains available when ordinary acquired tokens are hidden and follows your token artwork, fog, size and map settings, plus minimap range limits.
+
+FOG, SIZE AND MINIMAP
+
+Hide chests in unexplored areas, Hide beetles in unexplored areas, Hide Seeker's Tokens in unexplored areas and the DLC's Hide Norgan Ducats in unexplored areas are independent options on both maps. They start disabled. Enabled categories and collection filters still apply.
+
+Chest fog filtering applies outdoors. Chests ignore fog on cave and city local maps, then follow your saved preference again outdoors. Tokens and beetles retain their own fog behavior. If required data is temporarily unavailable, affected markers stay hidden until checks recover and the menu shows a message.
+
+Under Minimap settings, adjust the search radius, Maximum height difference and marker limit. Nearby items appear first; lower the limit if the map feels crowded. Hidden items do not consume those slots.
+
+Show height indicators starts enabled. An upward arrow marks a higher item; a downward arrow marks a lower one. Height tolerance defaults to 3 world units and can be set from 0 to 30. Arrows show relative height, not a route. Items beyond Maximum height difference stay hidden, and item icons take priority over arrows on crowded maps.
+
+Icon size (%) applies to both maps. It starts at 50% and can be adjusted from 25% to 150%.
+
+UPDATING AND HELP
+
+Install the complete new ZIP and restart. Keep reframework/data/raze_MapMarkersAndCollectables_settings.json to preserve your choices. To uninstall, disable the mod in Fluffy; full manual removal paths are in the included README. Leave REFramework installed if other mods need it.
+
+If a marker is missing, check category visibility, progression and fog settings, then minimap distance and height limits. Include any error message when reporting a problem. Other mods that replace map artwork or add collectible overlays may conflict.
 
 CREDITS
-Adaptation and added features by Raze. Original credits and source terms remain in THIRD_PARTY_NOTICES.md. Donation Points disabled.
+
+Raze: adaptation, minimap support, marker features, settings and improvements.
+gibbed: Arisen's Almanac, the original full-map code and collectible locations.
+https://www.nexusmods.com/dragonsdogma2/mods/194
+
+Full source credits and terms are included in docs/raze_MapMarkersAndCollectables/THIRD_PARTY_NOTICES.md. Donation Points remain disabled.

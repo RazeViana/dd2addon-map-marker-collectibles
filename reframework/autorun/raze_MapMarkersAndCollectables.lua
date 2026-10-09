@@ -5,6 +5,8 @@ Source and dataset attribution: see THIRD_PARTY_NOTICES.md.
 ]]
 
 local MOD_NAME = "Map Markers and Collectables by Raze"
+-- Inaccessible sealed-room chest in Vernworth, identified from the selected map marker.
+local excluded_collectibles = { ["90a2c89d-100b-03f5-285f-510aa4c098ea"] = true }
 local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
 local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
@@ -804,6 +806,7 @@ local get_collectibles = function(all_args, include_position)
       local marker_collectibles = {}
       for collectible_key, collectible_pos in pairs(marker_type.data.locations) do
         repeat
+          if excluded_collectibles[collectible_key] then break end
           if include_position and not include_position(collectible_pos) then break end
           local collectible_guid = guid_parse(nil, collectible_key)
           local collectible_id = unique_id_t:create_instance():add_ref()

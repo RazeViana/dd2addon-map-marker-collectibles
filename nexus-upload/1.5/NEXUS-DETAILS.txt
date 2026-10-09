@@ -1,5 +1,5 @@
 Version: 1.5
-Status: Unpublished test patch; native DLC acceptance pending
+Status: Unpublished test patch; native DLC gameplay acceptance pending
 Game: Dragon's Dogma 2
 Author: Raze
 Category: User Interface
@@ -7,7 +7,7 @@ Donation Points: Disabled
 Archive: Map-Markers-and-Collectables-by-Raze-v1.5.zip
 Dark Arisen: Optional; base-game features work without the DLC
 
-Main-file description (209 characters):
-Title Update 4.0 support with optional Dark Arisen markers: 140 Norgan Ducats, 389 chests and new artwork enabled by default. Works without the DLC. Trial markers stay guarded. Requires compatible REFramework.
+Main-file description (234 characters):
+Title Update 4.0 with optional Dark Arisen support: Norgan Ducats, chests and new artwork enabled by default. Base game supported. Hides the inaccessible Vernworth chest. Trial placements stay guarded. Requires compatible REFramework.
 
-Use DESCRIPTION.txt for the compact page description, RELEASE-NOTES.md for release notes, CHANGELOG.md for history, and FILE-DESCRIPTION.txt for the file description. The existing gameplay image predates this patch and does not demonstrate DLC features.
+Use DESCRIPTION.txt for the full feature guide with Dark Arisen support first, RELEASE-NOTES.md for release notes, CHANGELOG.md for history, and FILE-DESCRIPTION.txt for the file description. The existing gameplay image predates this patch and does not demonstrate DLC features.

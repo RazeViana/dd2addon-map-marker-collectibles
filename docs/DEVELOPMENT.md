@@ -16,6 +16,10 @@ Dark Arisen is optional. `dlc_collectibles.create_access` guards static `via.Ste
 
 Uncollected expansion categories start enabled, with explicit `norgan`, `norgan_rare` or `norgan_ducat` artwork defaults for both acquisition states. Collected markers remain off initially. Normalization and appearance reset honor these category defaults while preserving valid saved overrides. Automated coverage exercises non-owner collection/UI paths, late initialization, access loss, new defaults and saved choices.
 
+On 2026-10-09, Raze selected the reported inaccessible Vernworth sealed-room chest as the last full-map chest selection. The temporary read-only probe matched GUID `90a2c89d-100b-03f5-285f-510aa4c098ea`, gimmick type 10, at `[520.9334106445313, 25.309589385986328, -1074.14794921875]`. The shared collection loop excludes that identity before acquisition queries, so neither map can display it in either collection state, even with progression filtering disabled. The nearby GUID `8677939f-b669-093c-3992-f1d4125ef8f7` is retained. Runtime data and provenance counts remain unchanged. The map integration regression covers both states, both maps and an unaffected chest.
+
+The same probe returned `supported=true`, `initialized=true` and `installed=true` for the native Dark Arisen access check. This confirms the installed-owner call path; absent/error/initializing access remains covered by automated fixtures. The temporary probe is excluded from the package and removed from autorun after identity capture.
+
 On 2026-10-09, Raze confirmed that an existing save loads with v1.5 and that markers appear on the full map and minimap on Title Update 4.0. The test used REFramework d1461375aee4ec3f313170f8eaad12064eb542d9 after disabling an incompatible neural-rendering addon. Native DLC routing, pickup/hand-in, save reload and trial renewal still require in-game acceptance. Offline checks do not establish compatibility of REFramework or other graphics injectors with Title Update 4.0.
 
 ## Runtime

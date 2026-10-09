@@ -23,6 +23,7 @@ These are fixed placements extracted from the installed DLC. Random monster drop
 ## What it does
 
 - Shows tokens, beetles, and different types of chests on both maps.
+- Omits the inaccessible sealed-room chest in Vernworth from both maps, including when showing collected items or previewing unobtainable chests.
 - Lets you turn full-map and minimap markers on or off independently.
 - Uses recognizable token and beetle symbols, with distinct artwork for small, medium, large, sunken and special chests.
 - Shows simple names when you hover over full-map markers, such as **Chest (S)** and **Special Chest (L)**.
@@ -39,7 +40,7 @@ These are fixed placements extracted from the installed DLC. Random monster drop
 - Gives you more room for markers on both maps.
 - Lets you adjust how far away nearby items appear and how many markers appear on the minimap.
 
-Tokens and beetles are shown by default. Turn on chest categories in the mod's menu if you want to find those too.
+Tokens and beetles are shown by default. Uncollected DLC categories and their artwork also start enabled when Dark Arisen is owned and installed. Turn on base-game chest categories in the mod's menu if you want to find those too. Saved choices take precedence.
 
 ## Install
 
@@ -58,9 +59,9 @@ Use the category options to choose what appears on your maps and change its symb
 
 New category color defaults are copper for small, silver for medium, gold for large, blue for extra-large/sunken, and purple for special chests. Acquired markers use a dimmer version. Existing saved colors take precedence; use a category's reset button to apply its new defaults. The crown-style Sphinx artwork is an optional symbol, not an additional Sphinx reward category.
 
-Chest categories contain 637 small, 232 medium, 63 large, 82 extra-large/sunken, and six special chests split by size. Every listed chest matches the fresh game-data extraction. Two unsupported original locations were removed and one extra-large chest position was corrected. Current progression and collection state determine how many appear.
+Base-game chest data contains 637 small, 232 medium, 63 large, 82 extra-large/sunken, and six special chests split by size. Every source record matches the fresh game-data extraction; the inaccessible Vernworth sealed-room chest is omitted from map display. Two unsupported original locations were removed and one extra-large chest position was corrected. Current progression and collection state determine how many appear.
 
-**Hide unobtainable chests** starts enabled. It filters unopened chests using their world, quest and environment conditions. **Reveal Unmoored-only chests early** starts disabled: normally those locations appear automatically in the Unmoored World. Enable it to preview recorded Unmoored-only placements early; separate quest and environment requirements still apply. Disable **Hide unobtainable chests** to see every location allowed by your category and fog settings.
+**Hide unobtainable chests** starts enabled. It filters unopened chests using their world, quest and environment conditions. **Reveal Unmoored-only chests early** starts disabled: normally those locations appear automatically in the Unmoored World. Enable it to preview recorded Unmoored-only placements early; separate quest and environment requirements still apply. Disable **Hide unobtainable chests** to preview recorded locations allowed by your category and fog settings. The inaccessible Vernworth sealed-room marker remains omitted.
 
 Availability is checked per chest, independently of its size or artwork. Acquired markers follow the category's **Acquired** setting even when that location is currently unavailable. Three quest-controlled chest locations have unresolved availability and remain hidden while unopened with progression filtering on; the menu reports unresolved checks. Their placements exist in the fresh data, but their activation rules need further verification. The retained Sphinx reward datasets are not exposed as a category because their seal conditions are not yet verified.
 

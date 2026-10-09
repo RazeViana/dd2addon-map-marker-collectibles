@@ -13,6 +13,7 @@ for _, kind in ipairs({10,11,12,495,692,693,694}) do
   chest_metadata.chests[key] = {gimmick_id=kind, variants={{world='any',quests={}}}}
 end
 local gimmicks_by_type, saved_keys, saved_records = {}, {}, {}
+local small_chest_fixture = {locations={[chest_guids[10]]={x=1,y=0,z=1}}}
 local dlc_data, dlc_guids, queried_gimmicks = {}, {}, {}
 local steam_initialized, dlc_installed = true, true
 local drawn_categories = {}
@@ -227,6 +228,7 @@ json = {
     end
     assert(path:match("^raze_MapMarkersAndCollectables/%d+.json$"))
     local kind = tonumber(path:match('/(%d+)%.json$'))
+    if kind == 10 then return small_chest_fixture end
     if dlc_data[kind] then return dlc_data[kind] end
     return { locations = { [chest_guids[kind] or "00000004-0000-0000-0000-000000000000"] = { x = 1, y = 0, z = 1 } } }
   end,
@@ -1005,6 +1007,25 @@ assert(#map.emitted == 1, 'cached base-only map did not recover when DLC access 
 dlc_installed = false
 map:setMapScale()
 assert(#map.emitted == 0, 'cached DLC marker survived loss of DLC access')
+-- The selected sealed-room chest stays absent on both maps in either acquisition state.
+local inaccessible = '90a2c89d-100b-03f5-285f-510aa4c098ea'
+small_chest_fixture.locations[inaccessible] = {x=1,y=0,z=1}
+saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
+saved_settings.hide_unavailable_chests = false
+local generate_manager = managers['app.GenerateManager']
+local original_never_generate = generate_manager.isNeverGenerate
+for _, acquired in ipairs({false,true}) do
+  generate_manager.isNeverGenerate = function(_, id) return id.key == inaccessible and acquired end
+  show_category('Chests (S)')
+  saved_settings.markers['Chests (S)'].acquired_show = true
+  map:setMapScale()
+  assert(#map.emitted == 1 and map.emitted[1].UniqId.key == chest_guids[10],
+    'inaccessible Vernworth chest still appears on the full map, or a normal chest was lost')
+  local markers = minimap_get_markers({x=1,y=0,z=1},180,60)
+  assert(#markers == 1 and markers[1].key == chest_guids[10],
+    'inaccessible Vernworth chest still appears on the minimap, or a normal chest was lost')
+end
+generate_manager.isNeverGenerate = original_never_generate
 callbacks.save()
 assert(saved_settings.quests and saved_settings.quests.enabled==false,
   'stable-line testing discarded separate quest-development preferences')
