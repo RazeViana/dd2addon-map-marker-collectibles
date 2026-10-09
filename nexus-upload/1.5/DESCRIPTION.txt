@@ -7,7 +7,9 @@ Version 1.5 adds optional expansion support:
 
 Dark Arisen is not required. The same package works with the base game, and expansion controls and markers activate only when the DLC is owned and installed. Existing settings are preserved.
 
-The package also includes 185 fixed Lost Rites chest positions. Their trial activation and renewal are still being verified, so unopened trial markers stay hidden with progression filtering enabled. Six Norgan rare chests with unresolved requirements are guarded too. Turn off Hide unobtainable chests only to preview those positions; a marker does not confirm that the chest is currently available.
+The mod includes 185 Lost Rites chest locations and six rare Norgan chest locations, but we're still checking when you can loot them and when the trial chests refill.
+
+Their markers are hidden by default so you don't chase chests you can't get yet. Turn off Hide unobtainable chests to see their locations, but the chests might not be available in your game yet.
 
 These are fixed placements. Random monster drops and appraised relic contents are outside coverage. This is an unpublished test patch: DLC map routing, pickup/hand-in, save reload and trial renewal still need live checks.
 
