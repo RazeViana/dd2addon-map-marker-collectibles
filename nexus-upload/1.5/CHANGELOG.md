@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.5 (test patch, 2026-10-09)
+## 1.5 (2026-10-09)
 
 - Add 140 Norgan Ducat and 389 Norgan chest placements from the installed Dark Arisen DLC, with separate ordinary/rare categories and three new object icons.
 - Enable uncollected DLC categories and their new artwork by default, including when the legacy global preference uses game symbols. Retain saved appearance/visibility choices and restore category artwork when resetting its appearance.
@@ -12,8 +12,9 @@
 - Retain 185 fixed Lost Rites chest placements in one category, with acquisition refreshed instead of permanently cached. Hide unopened trial placements until activation rules are verified; explicit progression-filter overrides can preview them.
 - Keep six quest-variable-controlled Norgan rare chests hidden with progression filtering enabled. Do not infer activation from a catalog entry alone.
 - Verify all 1,350 existing locations against effective Title Update 4.0 base and DLC files without changing their GUIDs or coordinates.
-- Include the unpublished 1.4.1 Finder's Token correction and retention option. Preserve existing collectible settings and any separate quest development preferences.
-- Add import, provenance, gate, pickup-mask, category and atlas regressions. Existing-save loading and full-map/minimap markers passed an in-game check on Title Update 4.0 with compatible REFramework. This package is unpublished; native DLC acceptance remains pending.
+- Include the 1.4.1 Finder's Token correction and retention option. Preserve existing collectible settings and any separate quest development preferences.
+- Update the Nexus thumbnail and banner with matching Dark Arisen Edition ribbons.
+- Add import, provenance, gate, pickup-mask, category and atlas regressions. Existing-save loading and full-map/minimap markers passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC acceptance remains pending.
 
 ## 1.4.1 (2026-09-15)
 

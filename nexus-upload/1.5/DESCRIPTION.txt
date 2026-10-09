@@ -11,7 +11,7 @@ The mod includes 185 Lost Rites chest locations and six rare Norgan chest locati
 
 Their markers are hidden by default so you don't chase chests you can't get yet. Under Dark Arisen, keep Lost Rites Chests enabled and turn off Hide unobtainable DLC collectibles to see their locations. The chests might not be available to loot yet. This leaves your base-game chest filter unchanged.
 
-These are fixed placements. Random monster drops and appraised relic contents are outside coverage. This is an unpublished test patch: DLC map routing, pickup/hand-in, save reload and trial renewal still need live checks.
+These are fixed placements. Random monster drops and appraised relic contents are outside coverage. DLC map routing, pickup/hand-in, save reload and trial renewal still need live checks.
 
 MAP MARKERS AND COLLECTABLES BY RAZE
 

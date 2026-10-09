@@ -1,10 +1,12 @@
 # Map Markers and Collectables by Raze
 
+![Map Markers and Collectables by Raze: Dark Arisen Edition](https://raw.githubusercontent.com/RazeViana/dd2addon-map-marker-collectibles/v1.5/nexus-upload/1.5/images/banner.png)
+
 Find Seeker's Tokens, Golden Trove Beetles, chests, and Dark Arisen collectibles in Dragon's Dogma 2. This mod marks their locations on your full map and shows nearby items on your minimap while you explore.
 
 **Current version: 1.5.**
 
-Version 1.5 is an unpublished Dark Arisen test patch prepared October 9, 2026. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.5.zip` package. DLC native acceptance checks are pending; see the supported scope below.
+Version 1.5 adds optional Dark Arisen support for Title Update 4.0. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.5.zip` package from [Nexus Mods](https://www.nexusmods.com/dragonsdogma2/mods/1551) or the [GitHub release](https://github.com/RazeViana/dd2addon-map-marker-collectibles/releases/tag/v1.5). Some DLC activation and renewal checks remain pending; see the supported scope below.
 
 ## Dark Arisen additions
 
@@ -18,7 +20,7 @@ Dark Arisen is optional. Base-game markers work without the expansion; DLC categ
 
 Uncollected DLC categories start enabled with the new Norgan artwork; collected markers start hidden. Saved visibility and artwork choices take precedence. Base-game chest defaults are unchanged. Norgan Ducats have their own **Hide Norgan Ducats in unexplored areas** control. Ducat history uses the game's current pickup flag; if it cannot be read, the menu reports the limitation and previously collected Ducats can remain visible. Nearby confirmed pickups and native never-generate records still hide acquired coins.
 
-These are fixed placements extracted from the installed DLC. Random monster drops and appraised relic contents are not fixed collectible destinations. Loading an existing save and displaying markers on the full map and minimap passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC map routing, pickup/hand-in, save reload, and trial renewal still need in-game validation. This patch follows the stable 1.4.1 line; the separate 2.0 quest development build is preserved.
+These are fixed placements extracted from the installed DLC. Random monster drops and appraised relic contents are not fixed collectible destinations. Loading an existing save and displaying markers on the full map and minimap passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC map routing, pickup/hand-in, save reload, and trial renewal still need in-game validation. This release follows the stable 1.4.1 line; the separate 2.0 quest development build is preserved.
 
 ## What it does
 

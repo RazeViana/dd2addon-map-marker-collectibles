@@ -1,6 +1,8 @@
 # Development
 
-Map Markers and Collectables by Raze is a Dragon's Dogma 2 REFramework Lua mod. Version 1.5 is an unpublished Dark Arisen test patch prepared October 9, 2026, based on the stable 1.4.1 line. Source and dataset attribution is documented in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+Map Markers and Collectables by Raze is a Dragon's Dogma 2 REFramework Lua mod. Version 1.5 is the Dark Arisen Edition release prepared October 9, 2026, based on the stable 1.4.1 line. The [GitHub release](https://github.com/RazeViana/dd2addon-map-marker-collectibles/releases/tag/v1.5) includes the complete package and release materials; the mod's [Nexus page](https://www.nexusmods.com/dragonsdogma2/mods/1551) is linked from the README. Source and dataset attribution is documented in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+
+The public Nexus file listing was checked live on October 9 and confirms v1.5 with archive SHA-256 `2dad8ab579713aec5ac5f57b81fe4c3993d6c76c2a2bda8b3b0f0b097314dd6f`. GitHub uses that exact archive, including its original packaged documentation. Publication wording, links and branding in the repository were refreshed afterward; runtime and data payloads remain identical to the released package. Rebuilding from the refreshed documentation creates a different ZIP, so preserve the published archive and its original manifest/checksum when maintaining the v1.5 release.
 
 ## Dark Arisen data and runtime
 

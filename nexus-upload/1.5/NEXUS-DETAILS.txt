@@ -1,5 +1,7 @@
 Version: 1.5
-Status: Unpublished test patch; native DLC gameplay acceptance pending
+Status: Version 1.5 release; native DLC gameplay acceptance pending
+Nexus page: https://www.nexusmods.com/dragonsdogma2/mods/1551
+GitHub release: https://github.com/RazeViana/dd2addon-map-marker-collectibles/releases/tag/v1.5
 Game: Dragon's Dogma 2
 Author: Raze
 Category: User Interface
@@ -7,6 +9,7 @@ Donation Points: Disabled
 Archive: Map-Markers-and-Collectables-by-Raze-v1.5.zip
 Dark Arisen: Optional; base-game features work without the DLC
 Controls: Maps and appearance, Base game, Dark Arisen; independent progression and chest-fog filters
+Artwork: Matching Dark Arisen Edition thumbnail and banner
 
 Main-file description (240 characters):
 Optional Dark Arisen support with new artwork enabled by default, separate base-game/DLC filters and grouped controls. Base game supported. Hides the inaccessible Vernworth chest. Trial markers stay guarded. Requires compatible REFramework.
