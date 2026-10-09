@@ -21,7 +21,7 @@ Close the game, disable other collectible-marker overlays, and install the compl
 Keep reframework/data/raze_MapMarkersAndCollectables_settings.json when updating. Open REFramework > Script Generated UI > Map Markers and Collectables by Raze after restarting.
 
 Test status
-This is an unpublished test package based on the stable 1.4.1 line. The separate 2.0 quest development build is preserved. Automated runtime, placement, provenance, atlas and packaging checks passed; native DLC routing, pickup/hand-in, save reload and trial renewal remain pending. This package does not fix an incompatible REFramework or graphics injector.
+This is an unpublished test package based on the stable 1.4.1 line. The separate 2.0 quest development build is preserved. Automated runtime, placement, provenance, atlas and packaging checks passed. Existing-save loading and full-map/minimap markers passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC routing, pickup/hand-in, save reload and trial renewal remain pending. This package does not fix an incompatible REFramework or graphics injector.
 
 Credits
 Mod adaptation and added features by Raze. Original source and dataset credits are retained in the included THIRD_PARTY_NOTICES.md. Donation Points remain disabled under the recorded source terms.

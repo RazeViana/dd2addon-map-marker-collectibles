@@ -1,6 +1,6 @@
 # Nexus upload kit - version 1.5
 
-Unpublished Dark Arisen test package. Native DLC acceptance is pending; the release notes and page describe the supported scope and unresolved activation rules.
+Unpublished Dark Arisen test package. Existing-save loading and full-map/minimap markers passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC acceptance is pending; the release notes and page describe the supported scope and unresolved activation rules.
 
 - `Map-Markers-and-Collectables-by-Raze-v1.5.zip`: complete Fluffy/manual package.
 - `listing.json` and `FILE-DESCRIPTION.txt`: metadata and copy-ready file description, limited to 250 characters.

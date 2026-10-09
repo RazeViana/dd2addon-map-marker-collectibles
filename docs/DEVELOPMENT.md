@@ -12,7 +12,7 @@ Ducat collection uses protected reflection to read the static `app.Gm83_169.Free
 
 The current native atlas has 85 full-map and 82 minimap patterns. Preserve its new pattern and every old native prefix. The object texture has eleven 128-pixel tiles; the original eight remain in order and the three Norgan designs occupy IDs 84–86. Saved quest-development preferences are retained when this stable patch is temporarily tested over 2.0, but the quest overlay is not included.
 
-Native DLC routing, pickup/hand-in, save reload and trial renewal still require in-game acceptance. Offline checks do not establish compatibility of REFramework or other graphics injectors with Title Update 4.0.
+On 2026-10-09, Raze confirmed that an existing save loads with v1.5 and that markers appear on the full map and minimap on Title Update 4.0. The test used REFramework d1461375aee4ec3f313170f8eaad12064eb542d9 after disabling an incompatible neural-rendering addon. Native DLC routing, pickup/hand-in, save reload and trial renewal still require in-game acceptance. Offline checks do not establish compatibility of REFramework or other graphics injectors with Title Update 4.0.
 
 ## Runtime
 

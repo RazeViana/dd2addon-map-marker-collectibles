@@ -16,7 +16,7 @@ Version 1.5 is an unpublished Dark Arisen test patch prepared October 9, 2026. I
 
 Norgan Ducats start enabled and have their own **Hide Norgan Ducats in unexplored areas** control. Chest categories start disabled. Ducat history uses the game's current pickup flag; if it cannot be read, the menu reports the limitation and previously collected Ducats can remain visible. Nearby confirmed pickups and native never-generate records still hide acquired coins.
 
-These are fixed placements extracted from the installed DLC. Random monster drops and appraised relic contents are not fixed collectible destinations. Native DLC map routing, pickup/hand-in, save reload, and trial renewal still need in-game validation. This patch follows the stable 1.4.1 line; the separate 2.0 quest development build is preserved.
+These are fixed placements extracted from the installed DLC. Random monster drops and appraised relic contents are not fixed collectible destinations. Loading an existing save and displaying markers on the full map and minimap passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC map routing, pickup/hand-in, save reload, and trial renewal still need in-game validation. This patch follows the stable 1.4.1 line; the separate 2.0 quest development build is preserved.
 
 ## What it does
 
