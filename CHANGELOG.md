@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.1 (2026-10-10)
+
+- Add the missing Spoils chest family from the current game-file scan: 94 native records at 86 distinct positions, grouped into Spoils Chests with a new default icon.
+- Add three quest-linked Norgan chests, with unresolved unlock requirements still guarded by the ordinary DLC availability filter.
+- Show potential Lost Rites and Spoils chest locations by default, with independent controls that preserve the base-game and general DLC filter settings.
+- Associate all 185 Lost Rites chest records with their source trial map IDs and native bounds. Filter trial coordinates from outdoor maps and keep separate trials apart on both maps.
+- Let a loaded, renewed closed trial/Spoils chest override an older opening recorded in the save. Keep permanent base-game chest handling unchanged.
+- Retain existing choices, DLC access checks, native atlas symbols, first-token guidance and the inaccessible Vernworth chest exclusion.
+- Add coverage, routing, visibility, renewal and icon regressions. Full-map trial locations cover the selected trial across floors; native DLC rendering and renewal acceptance remain pending.
+
 ## 1.5 (2026-10-09)
 
 - Add 140 Norgan Ducat and 389 Norgan chest placements from the installed Dark Arisen DLC, with separate ordinary/rare categories and three new object icons.

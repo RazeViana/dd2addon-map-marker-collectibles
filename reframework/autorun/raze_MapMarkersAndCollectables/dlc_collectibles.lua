@@ -69,6 +69,19 @@ function M.coin_callbacks(api, get_context, context_type)
   }, diagnostics
 end
 
+function M.repeatable_chest_callbacks(chest_callbacks)
+  local result = {function(args)
+    local gimmick = args.gimmick_map[args.collectible_id:ToString()]
+    if gimmick then
+      local opened = gimmick:get_IsOpenedFreeBit()
+      -- A renewed, loaded closed chest overrides an opening from its previous cycle.
+      if type(opened) == 'boolean' then return opened end
+    end
+  end}
+  for _, callback in ipairs(chest_callbacks) do result[#result+1] = callback end
+  return result
+end
+
 function M.register(types, names, load, chest_callbacks, coin_callbacks, chest_defaults)
   local prefix='raze_MapMarkersAndCollectables/'
   local function add(name, definition)
@@ -101,20 +114,39 @@ function M.register(types, names, load, chest_callbacks, coin_callbacks, chest_d
       data=load(prefix..item[2]..'.json'),get_state_callbacks=chest_callbacks,
       settings_default=defaults(item[4],item[2]==826 and 'norgan' or 'norgan_rare')})
   end
-  local merged={locations={},gimmick_ids={}}
-  for _, kind in ipairs({755,757,758,795}) do
-    local data=load(prefix..kind..'.json')
-    for key, position in pairs(type(data)=='table' and data.locations or {}) do
-      assert(merged.locations[key]==nil,'Duplicate Lost Rites chest: '..key)
-      merged.locations[key]=position
-      merged.gimmick_ids[key]=kind
+  local function merge(kinds)
+    local merged={locations={},gimmick_ids={},map_areas={},map_bounds={}}
+    for _, kind in ipairs(kinds) do
+      local data=load(prefix..kind..'.json')
+      for key, position in pairs(type(data)=='table' and data.locations or {}) do
+        assert(merged.locations[key]==nil,'Duplicate DLC chest: '..key)
+        merged.locations[key]=position
+        merged.gimmick_ids[key]=kind
+        if data.map_areas then merged.map_areas[key]=data.map_areas[key] end
+      end
+      for area, bounds in pairs(type(data)=='table' and data.map_bounds or {}) do
+        merged.map_bounds[tonumber(area)]=bounds
+      end
     end
+    return merged
   end
+  local repeatable_callbacks=M.repeatable_chest_callbacks(chest_callbacks)
+  local merged=merge({755,757,758,795})
   add('Lost Rites Chests', {name='Lost Rites Chest',gimmick_ids={755,757,758,795},
     object_icon=85,fog_setting='hide_unexplored_dlc_chests',data=merged,
-    get_state_callbacks=chest_callbacks,live_acquired=true,
+    get_state_callbacks=repeatable_callbacks,live_acquired=true,
+    preview_setting='show_potential_lost_rites_chests',
     settings_default=defaults(0xFFDDB7FF,'norgan_rare'),
-    tooltip='Keep this category enabled, then turn off Hide unobtainable DLC collectibles to preview trial chest locations. Some chests may not be ready to loot yet; trial unlocks and refills are still being checked.'})
+    tooltip='Potential chest positions from the game files, shown on the selected Lost Rites map. Trial progress and refills affect what is ready to loot. Positions cover the whole trial, across its floors.'})
+  add('Spoils Chests', {name='Spoils Chest',gimmick_ids={908,1004,1023},object_icon=87,
+    fog_setting='hide_unexplored_dlc_chests',data=merge({908,1004,1023}),
+    get_state_callbacks=repeatable_callbacks,live_acquired=true,
+    preview_setting='show_potential_spoils_chests',settings_default=defaults(0xFFA8F0A8,'spoils'),
+    tooltip='Potential Spoils-related chest positions from the game files. Rotating events can use different chests at the same spot; an icon does not guarantee a chest has spawned.'})
+  add('Norgan Quest Chests', {name='Norgan Quest Chest',gimmick_id=994,object_icon=85,
+    fog_setting='hide_unexplored_dlc_chests',data=load(prefix..'994.json'),
+    get_state_callbacks=chest_callbacks,settings_default=defaults(0xFFFFA8DA,'norgan_rare'),
+    tooltip='Three quest-linked chest positions. Their unlock requirements remain guarded by Hide unobtainable DLC collectibles; turn it off to preview them.'})
 end
 
 return M

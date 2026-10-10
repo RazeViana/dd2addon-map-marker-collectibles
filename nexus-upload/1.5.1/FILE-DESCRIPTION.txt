@@ -1,0 +1,1 @@
+Adds missing Spoils chest types and a new icon. Lost Rites locations now show by default on their trial maps, with separate potential-location toggles. Includes three quest chests. Base game supported; Dark Arisen optional. Requires REFramework.

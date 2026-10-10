@@ -36,7 +36,7 @@ dlc.register(types, names, function(path) return files[path:match('[^/]+$')] end
   {'chest'}, callbacks, function(color) return {unacquired_icon_type=25,acquired_icon_type=25,
     unacquired_icon_color=color,acquired_icon_color=color,
     unacquired_show=false,acquired_show=false} end)
-assert(#names == 5 and names[1] == 'existing', 'DLC categories changed existing ordering')
+assert(#names == 7 and names[1] == 'existing', 'DLC categories changed existing ordering')
 assert(types['Norgan Ducats'].object_icon == 86 and types['Norgan Ducats'].get_state_callbacks == callbacks)
 assert(types['Norgan Chests'].object_icon == 84 and types['Norgan Rare Chests'].object_icon == 85)
 assert(types['Norgan Chests'].fog_setting == 'hide_unexplored_dlc_chests'
@@ -81,7 +81,9 @@ local coin={key='coin',gimmick_id=894,marker_type=types['Norgan Ducats'],acquire
 local trial_marker={key='trial',gimmick_id=755,marker_type=trial,acquired=false}
 merged.chests.trial={gimmick_id=755,variants={{world='normal',unsupported='Trial activation unverified'}}}
 local visible=policy:filter({coin,trial_marker},{},'fullmap')
-assert(#visible == 1 and visible[1] == coin, 'DLC world/trial requirements were bypassed')
+assert(#visible == 2, 'potential trial positions still require disabling ordinary DLC progression')
+visible=policy:filter({coin,trial_marker},{show_potential_lost_rites_chests=false},'fullmap')
+assert(#visible == 1 and visible[1] == coin, 'strict trial requirements were bypassed')
 assert(#policy:filter({trial_marker},{hide_unavailable_chests=false}) == 1, 'explicit previews were blocked')
 world.unmoored=true
 assert(#policy:filter({coin},{hide_unavailable_chests=true,hide_unavailable_dlc_chests=false}) == 1,

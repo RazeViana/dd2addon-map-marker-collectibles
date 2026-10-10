@@ -9,6 +9,7 @@ import uuid
 from zipfile import ZipFile, ZIP_DEFLATED
 from icon_assets import validate as validate_icon_assets
 from dlc_data import COUNTS as DLC_COUNTS, validate_dlc_availability
+from chest_coverage import validate_trial_routes
 from update_chest_data import digest, reconstruct_original
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +22,7 @@ DLC_METADATA = "dlc-availability.json"
 # Only player-facing runtime files belong in the release, even if debug scripts are staged nearby.
 RUNTIME_FILES = [f"reframework/autorun/{PREFIX}.lua"] + [
     f"reframework/autorun/{PREFIX}/{module}.lua"
-    for module in ("chest_availability", "chest_game_state", "dlc_collectibles", "first_token", "fog_of_war", "minimap", "nearby", "object_icons", "settings", "sprite_pool")
+    for module in ("chest_availability", "chest_game_state", "dlc_collectibles", "first_token", "fog_of_war", "map_routing", "minimap", "nearby", "object_icons", "settings", "sprite_pool")
 ]
 DOCUMENTATION_FILES = ("README.md", "CHANGELOG.md", "THIRD_PARTY_NOTICES.md")
 
@@ -122,6 +123,8 @@ def build():
             assert len(locations) == expected['fresh_count'] == DLC_COUNTS[kind], f'DLC count differs from audited data: {path.name}'
             assert digest(sorted(locations)) == expected['fresh_guids_sha256'], f'DLC GUIDs differ from audited data: {path.name}'
             dlc_locations[kind] = locations
+            if kind in (755, 757, 758, 795):
+                validate_trial_routes(dataset)
         elif path.stem not in ('161', '167'):
             chest_locations[int(path.stem)] = locations
             validate_chest_provenance(dataset, expected)

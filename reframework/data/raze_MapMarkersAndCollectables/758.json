@@ -63,5 +63,67 @@
     "gimmick_id": 758,
     "label": "Lost Rites special chest Gm83_016"
   },
-  "credits": "See THIRD_PARTY_NOTICES.md for dataset authorship."
+  "credits": "See THIRD_PARTY_NOTICES.md for dataset authorship.",
+  "map_areas": {
+    "083c0380-688d-03ac-30c1-f08454ab57a3": 6008,
+    "1e03b30f-b9f7-055f-11c4-58f3aefadc94": 6009,
+    "2a8a82cb-fb88-0021-2545-1dbe4e770d98": 6004,
+    "33ae6c5d-b402-0029-2085-276535df8ff3": 6009,
+    "49ff3a3d-dd7a-0cf5-148e-514a06d948e9": 6007,
+    "71cef495-c07c-09a0-2107-6b461ba722f5": 6010,
+    "9c18c301-dfcb-0af9-3c96-357b865ba0b7": 6005,
+    "bc439c2c-fec0-0b65-0d4b-5e3df15a3bcb": 6009,
+    "cee3180a-6c7f-0e21-37e5-d4d4c5312360": 6009,
+    "f1e5ddae-28e0-0a89-2f76-2dfd6b9be7d7": 6002
+  },
+  "map_bounds": {
+    "6008": [
+      -1746,
+      -110,
+      -1234,
+      402
+    ],
+    "6009": [
+      -2053,
+      54,
+      -1541,
+      566
+    ],
+    "6004": [
+      -1697,
+      -1530,
+      -1185,
+      -1018
+    ],
+    "6007": [
+      -2536,
+      -386,
+      -2024,
+      126
+    ],
+    "6010": [
+      -962,
+      -44,
+      -450,
+      468
+    ],
+    "6005": [
+      -2332,
+      794,
+      -1820,
+      1306
+    ],
+    "6002": [
+      887,
+      -1610,
+      1399,
+      -1098
+    ]
+  },
+  "map_source": {
+    "date": "2026-10-10",
+    "trials_sha256": "cfb89a160e5fcbe1c0d5778afe20655a3842941fabe68137cef2a0850b61faad",
+    "map_routing_sha256": "06840dc5e2d05629d3ebefa9127c691e5c2676221b01e1d8705222453e85ee73",
+    "floor_assignment": "Not inferred; full map shows positions throughout the selected trial."
+  }
 }

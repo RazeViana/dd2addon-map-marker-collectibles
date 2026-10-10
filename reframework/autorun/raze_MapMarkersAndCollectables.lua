@@ -9,6 +9,7 @@ local MOD_NAME = "Map Markers and Collectables by Raze"
 local excluded_collectibles = { ["90a2c89d-100b-03f5-285f-510aa4c098ea"] = true }
 local settings_util = require("raze_MapMarkersAndCollectables.settings")
 local nearby = require("raze_MapMarkersAndCollectables.nearby")
+local map_routing = require("raze_MapMarkersAndCollectables.map_routing")
 local object_icon_util = require("raze_MapMarkersAndCollectables.object_icons")
 local dlc_collectibles = require("raze_MapMarkersAndCollectables.dlc_collectibles")
 local dlc_access = dlc_collectibles.create_access(sdk)
@@ -518,7 +519,7 @@ re.on_draw_ui(function()
   local reorder_index, reorder_direction = 0, 0
   if imgui.tree_node(MOD_NAME) then
     local has_dlc = refresh_dlc_access()
-    imgui.text("v1.5 - Map and minimap markers")
+    imgui.text("v1.5.1 - Map and minimap markers")
     local function draw_fog_control(key, label, kind, is_chest)
       local fog_changed, hide_unexplored = imgui.checkbox(label, settings[key])
       if fog_changed then settings[key] = hide_unexplored; markers_dirty = true end
@@ -733,7 +734,16 @@ re.on_draw_ui(function()
       local progression_changed, hide_unavailable = imgui.checkbox("Hide unobtainable DLC collectibles", settings.hide_unavailable_dlc_chests)
       if progression_changed then settings.hide_unavailable_dlc_chests = hide_unavailable; markers_dirty = true end
       if imgui.is_item_hovered() then
-        imgui.set_tooltip("Hide uncollected Dark Arisen chests and Ducats blocked by recorded world, quest or trial requirements. Turn this off to preview locations; keep the item category enabled. A marker does not confirm current availability to loot.")
+        imgui.set_tooltip("Hide uncollected Dark Arisen items blocked by recorded conditions. Lost Rites and Spoils potential positions have their own controls below. Turn this off to preview other guarded positions. A marker does not guarantee available loot.")
+      end
+      for _, option in ipairs({
+          {'show_potential_lost_rites_chests','Show potential Lost Rites chest locations'},
+          {'show_potential_spoils_chests','Show potential Spoils chest locations'}}) do
+        local changed, value = imgui.checkbox(option[2], settings[option[1]])
+        if changed then settings[option[1]]=value; markers_dirty=true end
+        if imgui.is_item_hovered() then
+          imgui.set_tooltip("Show fixed positions from the game files, even when the trial or event is inactive. Keep the category enabled. Turning this off shows only loaded chests or confirmed conditions, independently of the general DLC filter; distant chests may disappear.")
+        end
       end
       if settings.hide_unavailable_dlc_chests then
         for _, kind in ipairs({"fullmap", "minimap"}) do
@@ -855,6 +865,10 @@ local get_collectibles = function(all_args, include_position)
               id = collectible_id,
               pos = collectible_pos,
               acquired = acquired,
+              loaded = marker_type.live_acquired and gimmick_map[collectible_id:ToString()] ~= nil,
+              map_area = marker_type.data.map_areas and marker_type.data.map_areas[collectible_key],
+              map_bounds = marker_type.data.map_areas and marker_type.data.map_bounds
+                and marker_type.data.map_bounds[marker_type.data.map_areas[collectible_key]],
               gimmick_id = marker_type.data.gimmick_ids and marker_type.data.gimmick_ids[collectible_key]
                 or marker_type.gimmick_id,
               marker_type = marker_type,
@@ -900,6 +914,9 @@ local get_markers = function(collectibles)
               marker_type = collectible.marker_type,
               gimmick_id = collectible.gimmick_id,
               acquired = collectible.acquired == true,
+              loaded = collectible.loaded,
+              map_area = collectible.map_area,
+              map_bounds = collectible.map_bounds,
               icon_type = object_icon_util.resolve_type(collectible.marker_type, marker_settings,
                 collectible.acquired == true and "acquired" or "unacquired", settings.object_icons),
               icon_color = icon_color,
@@ -1047,7 +1064,7 @@ local add_markers = function(this)
   -- Check it before querying fog so local masks receive only relevant positions.
   local in_range = {}
   for _, marker in ipairs(markers) do
-    if this:isInDispRange(Vector3f.new(marker.pos.x, marker.pos.y, marker.pos.z)) then
+    if map_routing.in_range(marker, this) then
       in_range[#in_range + 1] = marker
     end
   end
@@ -1277,6 +1294,7 @@ if ui020301_t and thread and thread.get_hook_storage then
       settings = settings.minimap, clock = os.clock, get_markers = get_minimap_markers,
       filter_markers = function(ui, markers)
         markers = with_first_token(markers)
+        markers = map_routing.filter(markers, ui, "minimap")
         markers = chest_availability:filter(markers, settings, "minimap")
         return fog_visibility:filter(markers, ui, "minimap", settings)
       end,

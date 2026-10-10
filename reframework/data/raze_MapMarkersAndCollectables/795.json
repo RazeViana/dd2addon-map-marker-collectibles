@@ -58,5 +58,30 @@
     "gimmick_id": 795,
     "label": "Lost Rites special chest Gm83_025"
   },
-  "credits": "See THIRD_PARTY_NOTICES.md for dataset authorship."
+  "credits": "See THIRD_PARTY_NOTICES.md for dataset authorship.",
+  "map_areas": {
+    "2469443e-ee41-024f-129d-472e9642cb1d": 6011,
+    "27908039-b2bd-09ef-063a-a9ee9291383b": 6011,
+    "4f7f29e7-d23d-0631-30f7-34090ad840a4": 6011,
+    "4fc8f836-1def-05a0-26a4-b3339d8996b5": 6011,
+    "86c974f2-0837-0d20-359e-bdfecb1bf6c2": 6011,
+    "88e63186-312f-0156-2415-7623e26c1c59": 6011,
+    "cb71979a-c4d9-0624-1937-769d3ddc3b4d": 6011,
+    "f5f48056-9921-0fea-1017-73e86a074119": 6011,
+    "f82c9190-3014-0269-16f0-305f40b2ffe3": 6011
+  },
+  "map_bounds": {
+    "6011": [
+      -514,
+      -392,
+      -2,
+      120
+    ]
+  },
+  "map_source": {
+    "date": "2026-10-10",
+    "trials_sha256": "cfb89a160e5fcbe1c0d5778afe20655a3842941fabe68137cef2a0850b61faad",
+    "map_routing_sha256": "06840dc5e2d05629d3ebefa9127c691e5c2676221b01e1d8705222453e85ee73",
+    "floor_assignment": "Not inferred; full map shows positions throughout the selected trial."
+  }
 }

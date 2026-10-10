@@ -1,0 +1,48 @@
+{
+  "locations": {
+    "03ea8a7d-9073-0011-2bb4-ccb8ea9efaf8": {
+      "x": -3329.343017578125,
+      "y": 276.03033447265625,
+      "z": -3254.470947265625
+    },
+    "6e351ac0-189d-0bdf-34fa-8a58a52b7142": {
+      "x": -3207.7509765625,
+      "y": 273.70135498046875,
+      "z": -3302.93408203125
+    },
+    "6ed5f414-3d0f-0036-35b6-ac882aa95083": {
+      "x": -3356.406494140625,
+      "y": 263.12548828125,
+      "z": -3270.53173828125
+    },
+    "94260147-2915-091a-30ec-c2c490662fc7": {
+      "x": -3425.645751953125,
+      "y": 290.8404235839844,
+      "z": -3461.13720703125
+    },
+    "af5305ed-1964-093a-3c92-a6867f7fb4da": {
+      "x": -3411.0908203125,
+      "y": 282.3361511230469,
+      "z": -3383.583984375
+    },
+    "bf80f7cf-d43d-061e-31e2-e4e9deb64ffa": {
+      "x": -3341.5400390625,
+      "y": 298.1385803222656,
+      "z": -3360.6787109375
+    }
+  },
+  "source": {
+    "game_version": "4.0.0.0",
+    "date": "2026-10-10",
+    "source_archive": "re_dlc_stm_2593290.pak",
+    "chest_audit_sha256": "1c0a208f99e3a437ecc4874469169b37463e48f907530732941a48717570b4dd",
+    "archive_entry_tables": {
+      "re_chunk_000.pak": "f3f16130d8609da884e470c333bd42d9c4ecd173d0956daf96c047f3e6cdd9fb",
+      "re_dlc_stm_2593290.pak": "02876e88fe318eb0f0d94bff4c09089e812eb1f28b5cbaf1a5334357f60a0ff0"
+    },
+    "validation": "Fixed placements from installed game files; event and quest activation are not inferred.",
+    "gimmick_id": 1023,
+    "label": "Spoils chest"
+  },
+  "credits": "See THIRD_PARTY_NOTICES.md for dataset authorship."
+}

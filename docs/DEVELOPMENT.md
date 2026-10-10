@@ -4,6 +4,16 @@ Map Markers and Collectables by Raze is a Dragon's Dogma 2 REFramework Lua mod. 
 
 The public Nexus file listing was checked live on October 9 and confirms v1.5 with archive SHA-256 `2dad8ab579713aec5ac5f57b81fe4c3993d6c76c2a2bda8b3b0f0b097314dd6f`. GitHub uses that exact archive, including its original packaged documentation. Publication wording, links and branding in the repository were refreshed afterward; runtime and data payloads remain identical to the released package. Rebuilding from the refreshed documentation creates a different ZIP, so preserve the published archive and its original manifest/checksum when maintaining the v1.5 release.
 
+## Current patch: 1.5.1 chest coverage
+
+The [October 10 chest audit](chest-coverage-audit-2026-10-10.md) adds 97 omitted native chest records: 94 Gm83_102-family records at 86 positions and three quest-linked chests. `scripts/chest_coverage.py` imports the accepted scan after the original DLC importer, attaches source-derived UI map IDs/bounds to all 185 trials, and extends availability coverage to 811 DLC records. It validates everything before writes; release builds require only committed data. The original importer rejects an already extended payload before writing, so a new full extraction must start in a fresh staging directory and then apply the coverage importer. Repeating the coverage import itself is safe. The original base datasets and published v1.5 kit remain intact.
+
+Potential Lost Rites and Spoils locations have independent default-on controls. Unknown event activation is displayed as potential guidance; known-false world/quest gates remain hidden when filtering. Turning previews off shows only loaded chests or evaluated availability independently of the general DLC filter. A loaded closed repeatable chest overrides previous picked history; permanent base chest callbacks retain their earlier semantics. `map_routing.lua` filters source trial IDs from outdoor/other-trial maps and uses native trial rectangles for full-map range checks. Individual floor assignments remain unverified and are not inferred.
+
+The object texture now has twelve tiles, with Spoils appended as ID 87. All native UV patterns/sequences are preserved. The full main-script harness exercises default potential visibility, trial selection, outdoor exclusion, Spoils emission and renewal against older save contexts. Native DLC rendering and renewal acceptance remain pending. The new Nexus kit is a candidate; it does not update the public Nexus page automatically.
+
+The following sections document the published v1.5 baseline.
+
 ## Dark Arisen data and runtime
 
 The [October 9 audit](dark-arisen-data-audit-2026-10-09.md) documents 714 new fixed placements and confirms all 1,350 original locations still match current game data. `scripts/dlc_data.py` imports reviewed, ignored audit artifacts only when accepting an extraction. Regular builds validate committed datasets, source hashes and conservative availability rules without requiring the game or extraction artifacts. The importer tests create synthetic inputs in temporary directories and separately validate the committed payload.

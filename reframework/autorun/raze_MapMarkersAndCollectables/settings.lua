@@ -35,6 +35,8 @@ function M.normalize(loaded, names, marker_types, generic)
     result.hide_unavailable_dlc_chests = result.hide_unavailable_chests
   end
   result.reveal_unmoored_chests = loaded.reveal_unmoored_chests == true
+  result.show_potential_lost_rites_chests = loaded.show_potential_lost_rites_chests ~= false
+  result.show_potential_spoils_chests = loaded.show_potential_spoils_chests ~= false
   for _, key in ipairs({"hide_unexplored_chests", "hide_unexplored_beetles", "hide_unexplored_tokens", "hide_unexplored_ducats"}) do
     result[key] = loaded[key] == true
   end

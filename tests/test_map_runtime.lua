@@ -21,6 +21,12 @@ local drawn_checkboxes, drawn_text = {}, {}
 local drawn_sections, category_sections, checkbox_sections = {}, {}, {}
 local active_section, requested_move = nil, nil
 local dlc_module = require('raze_MapMarkersAndCollectables.dlc_collectibles')
+local registered_types
+local original_register = dlc_module.register
+dlc_module.register = function(types, ...)
+  registered_types = types
+  return original_register(types, ...)
+end
 local create_coin_callbacks, ducat_diagnostics = dlc_module.coin_callbacks, nil
 dlc_module.coin_callbacks = function(...)
   local callbacks, diagnostics = create_coin_callbacks(...)
@@ -28,7 +34,7 @@ dlc_module.coin_callbacks = function(...)
   return callbacks, diagnostics
 end
 local dlc_metadata={schema_version=1,records={}}
-for _, kind in ipairs({755,757,758,795,826,885,894}) do
+for _, kind in ipairs({755,757,758,795,826,885,894,908,994,1004,1023}) do
   local guid=string.format('%08x-0000-0000-0000-000000000000',kind+9000)
   dlc_guids[kind]=guid
   dlc_data[kind]={locations={[guid]={x=1,y=0,z=1}}}
@@ -218,7 +224,8 @@ json = {
       settings_reads[#settings_reads + 1] = path
       return { markers = { ["Golden Trove Beetles"] = { unacquired_show = false },
         ['Norgan Ducats']={unacquired_show=false},['Norgan Chests']={unacquired_show=false},
-        ['Norgan Rare Chests']={unacquired_show=false},['Lost Rites Chests']={unacquired_show=false}
+        ['Norgan Rare Chests']={unacquired_show=false},['Lost Rites Chests']={unacquired_show=false},
+        ['Spoils Chests']={unacquired_show=false},['Norgan Quest Chests']={unacquired_show=false}
       }, quests={enabled=false} }
     end
     if path == "raze_MapMarkersAndCollectables/167.json" then
@@ -838,6 +845,8 @@ do
   local mini = minimap_options.filter_markers(fog_ui, cached)
   assert(#mini == 3 and mini[1].icon_color == 0xFF0000FF,
     'cached minimap candidates did not replace the original token with red guidance')
+  assert(#minimap_options.filter_markers({MapAreaNow=6001,IsDispField=false},{}) == 0,
+    'base-game first-token guidance leaked onto a trial with overlapping coordinates')
   for _, marker in ipairs(mini) do assert(marker.key ~= proof.key, 'duplicate original token') end
   -- The Sphinx turns on the item's display flag before the Finder is collected.
   finder_spawned, tick = true, tick + 2
@@ -953,6 +962,7 @@ saved_keys,saved_records,gimmicks_by_type={}, {}, {}
 saved_settings.show_first_seeker_token=false
 saved_settings.object_icons=true
 saved_settings.hide_unavailable_chests=true
+saved_settings.show_potential_lost_rites_chests=false
 saved_settings.hide_unexplored_ducats=false
 is_unmoored=false
 map.MapIconSprite={get_Length=function() return 10 end}
@@ -1010,6 +1020,9 @@ assert(checkbox_sections['Show on full map'] == 'Maps and appearance'
   and checkbox_sections['Hide DLC chests in unexplored areas'] == 'Dark Arisen'
   and checkbox_sections['Hide Norgan Ducats in unexplored areas'] == 'Dark Arisen',
   'progression, fog or global controls shown in wrong group')
+assert(checkbox_sections['Show potential Lost Rites chest locations'] == 'Dark Arisen'
+  and checkbox_sections['Show potential Spoils chest locations'] == 'Dark Arisen',
+  'potential-location controls shown in wrong group')
 local original_order = saved_settings.marker_order
 local interleaved = {"Seeker's Tokens",'Norgan Ducats','Golden Trove Beetles','Norgan Chests'}
 for _, name in ipairs(original_order) do
@@ -1030,15 +1043,20 @@ assert(interleaved[2] == 'Norgan Chests' and interleaved[4] == 'Norgan Ducats',
 saved_settings.marker_order = original_order
 -- Each progression toggle affects its own chests on both map surfaces.
 dlc_metadata.records[dlc_guids[755]].variants[1].unsupported='Trial activation unverified'
+gimmicks_by_type[755]=nil -- an unloaded guarded chest has no positive presence proof
 saved_keys, saved_records = {}, {}
 small_rule.world = 'unmoored'
 toggle_map('Hide unobtainable DLC collectibles', false)
 assert(saved_settings.hide_unavailable_chests == true
   and saved_settings.hide_unavailable_dlc_chests == false, 'DLC progression toggle changed base preference')
 show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted == 3 and #minimap_options.filter_markers({},
+  minimap_get_markers({x=1,y=0,z=1},180,60)) == 3,
+  'DLC progression override ignored the independent potential-location switch')
+toggle_map('Show potential Lost Rites chest locations', true)
 assert(#map.emitted == 4 and #minimap_options.filter_markers({},
   minimap_get_markers({x=1,y=0,z=1},180,60)) == 4,
-  'DLC progression override did not reveal trial previews on both maps')
+  'potential-location switch did not reveal trial previews on both maps')
 show_category('Chests (S)'); map:setMapScale()
 assert(#map.emitted == 0 and #minimap_options.filter_markers({},
   minimap_get_markers({x=1,y=0,z=1},180,60)) == 0,
@@ -1049,6 +1067,7 @@ assert(saved_settings.hide_unavailable_chests == false
 assert(#map.emitted == 1 and #minimap_options.filter_markers({},
   minimap_get_markers({x=1,y=0,z=1},180,60)) == 1,
   'base progression override did not reveal base chest on both maps')
+toggle_map('Show potential Lost Rites chest locations', false)
 toggle_map('Hide unobtainable DLC collectibles', true)
 show_category('Lost Rites Chests'); map:setMapScale()
 assert(#map.emitted == 3 and #minimap_options.filter_markers({},
@@ -1056,6 +1075,7 @@ assert(#map.emitted == 3 and #minimap_options.filter_markers({},
   'DLC progression guard did not hide trial while base override stayed off')
 -- DLC chest fog and base chest fog stay independent on both surfaces.
 toggle_map('Hide unobtainable DLC collectibles', false)
+toggle_map('Show potential Lost Rites chest locations', true)
 fog_revealed = false
 map.IsFieldMap, fog_ui.IsDispField = true, true
 toggle_map('Hide DLC chests in unexplored areas', true)
@@ -1081,19 +1101,71 @@ toggle_map('Hide base-game chests in unexplored areas', false)
 toggle_map('Hide unobtainable DLC collectibles', true)
 toggle_map('Hide unobtainable base-game chests', true)
 small_rule.world = 'any'
+-- Potential repeatable locations no longer require disabling the general DLC filter.
+saved_keys, saved_records, gimmicks_by_type = {}, {}, {}
+saved_settings.show_potential_lost_rites_chests=true
+saved_settings.hide_unavailable_dlc_chests=true
+saved_settings.hide_unexplored_dlc_chests=false
+show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted==4, 'default potential Lost Rites positions were suppressed by the DLC filter')
+
+-- Trial coordinates can overlap outdoor worlds: select the source map, not the player area.
+local trial_data=registered_types['Lost Rites Chests'].data
+trial_data.map_areas,trial_data.map_bounds={}, {[6001]={0,0,10,10},[6002]={0,0,10,10}}
+for _,kind in ipairs({755,757,758,795}) do trial_data.map_areas[dlc_guids[kind]]=6001 end
+trial_data.map_areas[dlc_guids[757]]=6002
+local old_range=map.isInDispRange
+map.DetailArea,map.IsFieldMap=6001,false
+map.isInDispRange=function() return false end -- native field-range test rejects trial coordinates
+show_category('Lost Rites Chests'); map:setMapScale()
+assert(#map.emitted==3, 'selected Lost Rites map lost its source positions or leaked another trial')
+local trial_ui={MapAreaNow=6001,IsDispField=false}
+local candidates=minimap_get_markers({x=1,y=0,z=1},180,60)
+assert(#minimap_options.filter_markers(trial_ui,candidates)==3, 'minimap mixed trial maps')
+map.DetailArea=6002; map:setMapScale()
+assert(#map.emitted==1 and map.emitted[1].UniqId.key==dlc_guids[757], 'remote trial selection followed the player')
+map.DetailArea,map.IsFieldMap=0,true
+map.isInDispRange=old_range
+map:setMapScale()
+assert(#map.emitted==0, 'trial chest coordinates leaked onto an outdoor map')
+assert(#minimap_options.filter_markers({MapAreaNow=0,IsDispField=true},candidates)==0,
+  'trial chest coordinates leaked onto the outdoor minimap')
+trial_data.map_areas,trial_data.map_bounds=nil,nil
+map.DetailArea=nil
+
+-- Newly imported Spoils identities reach both maps and regain visibility after renewal.
+show_category('Spoils Chests'); map:setMapScale()
+assert(#map.emitted==3 and #minimap_options.filter_markers({},
+  minimap_get_markers({x=1,y=0,z=1},180,60))==3, 'omitted Spoils types did not reach both maps')
+assert(map.emitted[1].IconType==31 and map.emitted[1].ui_icon.IconSprite.Sprite.pattern==11,
+  'Spoils artwork did not reach the renderer')
+local spoil_opened=true
+gimmicks_by_type[908]={{get_UniqId=function() return {ToString=function() return dlc_guids[908]..'_0' end} end,
+  get_IsOpenedFreeBit=function() return spoil_opened end}}
+save_context(dlc_guids[908],'app.GmItemContext',{get_IsPick=function() return true end})
+show_category('Spoils Chests'); map:setMapScale()
+assert(#map.emitted==2, 'opened Spoils chest stayed uncollected')
+spoil_opened=false
+show_category('Spoils Chests'); map:setMapScale()
+assert(#map.emitted==3 and #minimap_get_markers({x=1,y=0,z=1},180,60)==3,
+  'renewed closed Spoils chest remained hidden by its older saved opening')
+
 -- Base-game owners never query/render DLC content, even with saved DLC choices enabled.
 ducat_picked = false
 dlc_installed = false
 queried_gimmicks = {}
-show_category('Norgan Ducats'); map:setMapScale()
-assert(#map.emitted == 0 and #minimap_get_markers({x=1,y=0,z=1},180,60) == 0
-  and next(queried_gimmicks) == nil, 'DLC marker queries reached a non-owner')
+for _,name in ipairs({'Norgan Ducats','Norgan Chests','Norgan Rare Chests',
+    'Lost Rites Chests','Spoils Chests','Norgan Quest Chests'}) do
+  show_category(name); map:setMapScale()
+  assert(#map.emitted == 0 and #minimap_get_markers({x=1,y=0,z=1},180,60) == 0
+    and next(queried_gimmicks) == nil, 'DLC marker queries reached a non-owner: '..name)
+end
 drawn_categories = {}
 drawn_checkboxes, drawn_text = {}, {}
 drawn_sections = {}
 ducat_diagnostics.error = 'Ducat history fixture warning'
 callbacks.ui()
-for _, name in ipairs({'Norgan Ducats','Norgan Chests','Norgan Rare Chests','Lost Rites Chests'}) do
+for _, name in ipairs({'Norgan Ducats','Norgan Chests','Norgan Rare Chests','Lost Rites Chests','Spoils Chests','Norgan Quest Chests'}) do
   assert(not drawn_categories[name], 'non-owner was offered unavailable DLC controls')
 end
 assert(not drawn_checkboxes['Hide Norgan Ducats in unexplored areas'],

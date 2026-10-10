@@ -4,15 +4,18 @@
 
 Find Seeker's Tokens, Golden Trove Beetles, chests, and Dark Arisen collectibles in Dragon's Dogma 2. This mod marks their locations on your full map and shows nearby items on your minimap while you explore.
 
-**Current version: 1.5.**
+**Current version: 1.5.1.**
 
-Version 1.5 adds optional Dark Arisen support for Title Update 4.0. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.5.zip` package from [Nexus Mods](https://www.nexusmods.com/dragonsdogma2/mods/1551) or the [GitHub release](https://github.com/RazeViana/dd2addon-map-marker-collectibles/releases/tag/v1.5). Some DLC activation and renewal checks remain pending; see the supported scope below.
+Version 1.5.1 expands optional Dark Arisen support for Title Update 4.0. It adds the missing Spoils chest types and makes potential Lost Rites chest locations visible without turning off the general DLC filter. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.5.1.zip` package. [Nexus Mods](https://www.nexusmods.com/dragonsdogma2/mods/1551) carries the published version; this patch's native DLC acceptance is still pending.
 
 ## Dark Arisen additions
 
 - Add 140 Norgan Ducat placements and 389 Norgan chests, split into 267 ordinary and 122 rare chests.
 - Add separate Norgan Ducat, chest and rare-chest artwork while preserving the new native map symbol added in Title Update 4.0.
-- Retain 185 fixed Lost Rites chest placements in one category. Their trial activation and renewal are not yet verified, so unopened markers stay hidden with DLC progression filtering enabled. Under **Dark Arisen**, keep **Lost Rites Chests** enabled and disable **Hide unobtainable DLC collectibles** to preview their recorded positions. The base-game filter stays independent; a preview does not mean the chest is currently available to loot.
+- Add **Spoils Chests**, with 94 chest records at 86 distinct positions read from the installed game files, plus a new chest-and-gem icon. Some rotating events share the same spot.
+- Show 185 potential **Lost Rites Chests** on the selected trial map. These markers start visible and no longer require turning off **Hide unobtainable DLC collectibles**. Trial maps use their own source map IDs and bounds, so their coordinates do not appear on outdoor maps.
+- Give Lost Rites and Spoils separate **Show potential … chest locations** controls, both on by default. They show where chests can appear; trial progress and rotating events determine what is ready to loot. Turning potential locations off leaves only loaded chests or evaluated availability, independently of the general DLC filter, so distant chests may disappear. Keep the relevant category enabled.
+- Add three **Norgan Quest Chests**. Their unresolved unlock requirements stay guarded by the general DLC filter; turn it off to preview them.
 - Keep six Norgan rare chests with unresolved quest-variable requirements hidden while unopened with progression filtering enabled. The other 383 Norgan chest records have supported normal-world placement rules.
 - Keep existing category choices, colors, artwork, collection GUIDs and first-token guidance. All 1,350 original bundled locations match the updated game's placement data.
 
@@ -20,7 +23,9 @@ Dark Arisen is optional. Base-game markers work without the expansion; DLC categ
 
 Uncollected DLC categories start enabled with the new Norgan artwork; collected markers start hidden. Saved visibility and artwork choices take precedence. Base-game chest defaults are unchanged. Norgan Ducats have their own **Hide Norgan Ducats in unexplored areas** control. Ducat history uses the game's current pickup flag; if it cannot be read, the menu reports the limitation and previously collected Ducats can remain visible. Nearby confirmed pickups and native never-generate records still hide acquired coins.
 
-These are fixed placements extracted from the installed DLC. Random monster drops and appraised relic contents are not fixed collectible destinations. Loading an existing save and displaying markers on the full map and minimap passed an in-game check on Title Update 4.0 with compatible REFramework. Native DLC map routing, pickup/hand-in, save reload, and trial renewal still need in-game validation. This release follows the stable 1.4.1 line; the separate 2.0 quest development build is preserved.
+These are fixed positions extracted from the installed game files. A potential marker does not guarantee a chest is present. Lost Rites full-map markers cover the selected trial across its floors; individual floor assignments have not been inferred. Minimap distance, height limits and arrows still apply. Random monster drops and the contents rolled during appraisal are outside coverage.
+
+The earlier v1.5 package passed existing-save loading and base full-map/minimap checks on Title Update 4.0. This patch has automated coverage for the new data, trial routing and renewed chest state. Its native DLC rendering, pickup/hand-in, save reload and event/trial renewal still need an in-game check. The separate 2.0 quest development build is preserved.
 
 ## What it does
 
@@ -50,7 +55,7 @@ Tokens and beetles are shown by default. Uncollected DLC categories and their ar
 You need [REFramework for Dragon's Dogma 2](https://www.nexusmods.com/dragonsdogma2/mods/8). Install it first.
 
 1. Close the game and disable any other mod that adds collectable markers, so you do not see duplicates.
-2. Install `Map-Markers-and-Collectables-by-Raze-v1.5.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
+2. Install `Map-Markers-and-Collectables-by-Raze-v1.5.1.zip` with Fluffy Mod Manager. For a manual installation, open the ZIP and copy both its `reframework` and `natives` folders into your game folder, alongside `DD2.exe`.
 3. Start the game. In the REFramework menu, open **Script Generated UI > Map Markers and Collectables by Raze**.
 4. Choose the items you want to see, then explore with your full map or minimap.
 

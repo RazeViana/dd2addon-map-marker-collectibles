@@ -68,7 +68,13 @@ function M.create(game, metadata)
     local hide_base = settings.hide_unavailable_chests ~= false
     local hide_dlc = settings.hide_unavailable_dlc_chests
     if type(hide_dlc) ~= 'boolean' then hide_dlc = hide_base end
-    if not hide_base and not hide_dlc then return markers, signature(markers) end
+    local filter_potential = false
+    for _, marker in ipairs(markers) do
+      local category = marker.marker_type
+      if category and category.preview_setting and settings[category.preview_setting] == false
+          and marker.acquired ~= true then filter_potential = true; break end
+    end
+    if not hide_base and not hide_dlc and not filter_potential then return markers, signature(markers) end
     local visible, snapshot, quest_cache, event_cache = {}, nil, {}, {}
     local group_counts = {base=0,dlc=0}
     for _, marker in ipairs(markers) do
@@ -76,7 +82,8 @@ function M.create(game, metadata)
       local show = true
       local hiding = hide_base
       if kind and kind.requires_dlc == true then hiding = hide_dlc end
-      if hiding and kind and (kind.fog_setting == 'hide_unexplored_chests'
+      local confirmed_only = kind and kind.preview_setting and settings[kind.preview_setting] == false
+      if (hiding or confirmed_only) and kind and (kind.fog_setting == 'hide_unexplored_chests'
           or kind.fog_setting == 'hide_unexplored_dlc_chests' or kind.availability == true)
           and marker.acquired ~= true then
         show = false
@@ -91,6 +98,11 @@ function M.create(game, metadata)
             if result == nil then unknown = true end
           end
         else unknown = true end
+        if not show and unknown and kind.preview_setting then
+          -- Static repeatable positions are useful guidance even when a cycle is inactive.
+          -- This never turns a known-false world/quest condition into an available chest.
+          if settings[kind.preview_setting] ~= false or marker.loaded == true then show = true end
+        end
         if not show and unknown then
           self.unknown_count = self.unknown_count + 1
           local group = kind.requires_dlc == true and 'dlc' or 'base'

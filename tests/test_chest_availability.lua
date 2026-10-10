@@ -94,3 +94,42 @@ assert(#filter:filter({base_locked,trial},{hide_unavailable_chests=false}) == 2,
 base_locked.acquired,trial.acquired=true,true
 assert(#filter:filter({base_locked,trial},{hide_unavailable_chests=true,hide_unavailable_dlc_chests=true}) == 2,
   'split filters suppressed collected history')
+
+-- Potential positions have independent switches even with the general filter off.
+trial.acquired=false
+trial.marker_type.preview_setting='show_potential_lost_rites_chests'
+metadata.chests.spoils={gimmick_id=908,variants={{world='any',unsupported='Event rules unverified'}}}
+local spoils=marker('spoils',false,{gimmick_id=908,requires_dlc=true,
+  fog_setting='hide_unexplored_dlc_chests',availability=true,
+  preview_setting='show_potential_spoils_chests'})
+for _, hide_dlc in ipairs({false,true}) do
+  for _, potential_trial in ipairs({false,true}) do
+    for _, potential_spoils in ipairs({false,true}) do
+      local options={hide_unavailable_chests=false,hide_unavailable_dlc_chests=hide_dlc,
+        show_potential_lost_rites_chests=potential_trial,
+        show_potential_spoils_chests=potential_spoils}
+      local shown=filter:filter({trial,spoils},options)
+      local keys={}; for _,m in ipairs(shown) do keys[#keys+1]=m.key end
+      local expected={}
+      if potential_trial then expected[#expected+1]='trial' end
+      if potential_spoils then expected[#expected+1]='spoils' end
+      assert(table.concat(keys,',')==table.concat(expected,','),
+        'a potential-location switch depended on the general DLC filter or the other category')
+    end
+  end
+end
+local strict={hide_unavailable_chests=false,hide_unavailable_dlc_chests=false,
+  show_potential_lost_rites_chests=false,show_potential_spoils_chests=false}
+trial.loaded=true
+assert(#filter:filter({trial,spoils},strict)==1,
+  'a loaded repeatable chest was hidden with potential positions off')
+trial.loaded=false
+metadata.chests.trial.variants={{world='any',quests={}}}
+assert(#filter:filter({trial,spoils},strict)==1,
+  'an evaluated repeatable chest was hidden with potential positions off')
+metadata.chests.trial.variants={{world='normal',unsupported='Trial rules unverified'}}
+state.unmoored=true
+trial.loaded=true
+assert(#filter:filter({trial},{hide_unavailable_dlc_chests=true,
+  show_potential_lost_rites_chests=true})==0,
+  'potential guidance bypassed a known-false world condition')

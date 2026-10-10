@@ -1,0 +1,33 @@
+{
+  "locations": {
+    "4285ce25-0f29-0b43-0179-8ec9eb25db99": {
+      "x": -3915.88037109375,
+      "y": 200.6365203857422,
+      "z": -2868.82373046875
+    },
+    "7008de07-be38-0ab3-3f82-38a859d95e96": {
+      "x": -3914.146728515625,
+      "y": 200.7714385986328,
+      "z": -2873.733154296875
+    },
+    "7a701947-cf05-0aa4-3614-25471a94363e": {
+      "x": -3909.000244140625,
+      "y": 200.64456176757812,
+      "z": -2872.928955078125
+    }
+  },
+  "source": {
+    "game_version": "4.0.0.0",
+    "date": "2026-10-10",
+    "source_archive": "re_dlc_stm_2593290.pak",
+    "chest_audit_sha256": "1c0a208f99e3a437ecc4874469169b37463e48f907530732941a48717570b4dd",
+    "archive_entry_tables": {
+      "re_chunk_000.pak": "f3f16130d8609da884e470c333bd42d9c4ecd173d0956daf96c047f3e6cdd9fb",
+      "re_dlc_stm_2593290.pak": "02876e88fe318eb0f0d94bff4c09089e812eb1f28b5cbaf1a5334357f60a0ff0"
+    },
+    "validation": "Fixed placements from installed game files; event and quest activation are not inferred.",
+    "gimmick_id": 994,
+    "label": "Norgan quest chest"
+  },
+  "credits": "See THIRD_PARTY_NOTICES.md for dataset authorship."
+}

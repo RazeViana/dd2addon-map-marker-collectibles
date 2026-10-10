@@ -10,7 +10,7 @@ TEXTURE = "raze/mapmarkers/markers.tex"
 HEIGHT_TEXTURE = "raze/mapmarkers/height-arrows.tex"
 LAYOUT = ROOT / "assets/icons/native-atlas-layout.json"
 PATTERN = struct.Struct("<Q4f2i")
-OBJECT_COUNT = 11
+OBJECT_COUNT = 12
 
 
 def atlas_bytes(layout, height_arrows=False):

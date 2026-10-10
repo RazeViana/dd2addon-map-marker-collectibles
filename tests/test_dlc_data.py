@@ -63,6 +63,8 @@ def shipped_data():
     datasets = {kind: json.loads((DATA / f'{kind}.json').read_text(encoding='utf-8'))
                 for kind in COUNTS}
     availability = json.loads((DATA / 'dlc-availability.json').read_text(encoding='utf-8'))
+    legacy_guids = {guid for dataset in datasets.values() for guid in dataset['locations']}
+    availability['records'] = {guid: record for guid, record in availability['records'].items() if guid in legacy_guids}
     return datasets, availability
 
 
@@ -117,6 +119,17 @@ class DlcDataTests(unittest.TestCase):
         for kind in (826, 894):
             self.assertTrue(all(records[guid]['variants'] == [{'world': 'normal', 'quests': []}]
                                 for guid in by_type[kind]))
+
+    def test_legacy_import_rejects_extended_payload_before_writing(self):
+        for path in DATA.glob('*.json'):
+            shutil.copy2(path, self.data / path.name)
+        before = {p.name: p.read_bytes() for p in self.data.iterdir()}
+        before['dataset-manifest.json'] = self.manifest.read_bytes()
+        with self.assertRaisesRegex(AssertionError, 'coverage extension'):
+            import_audits(*self.audits, self.data, self.manifest)
+        after = {p.name: p.read_bytes() for p in self.data.iterdir()}
+        after['dataset-manifest.json'] = self.manifest.read_bytes()
+        self.assertEqual(after, before, 'Legacy import modified extended coverage before rejecting it')
 
     def test_validator_rejects_missing_coverage_wrong_type_and_lost_gate(self):
         datasets, availability = shipped_data()

@@ -13,7 +13,9 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'reframework/data/raze_MapMarkersAndCollectables'
 MANIFEST = ROOT / 'scripts/dataset-manifest.json'
-COUNTS = {755: 119, 757: 47, 758: 10, 795: 9, 826: 267, 885: 122, 894: 140}
+COUNTS = {755: 119, 757: 47, 758: 10, 795: 9, 826: 267, 885: 122, 894: 140,
+          908: 40, 994: 3, 1004: 48, 1023: 6}
+COVERAGE_TYPES = {908, 994, 1004, 1023}
 RITUAL_TYPES = {755, 757, 758, 795}
 GAME_VERSION = '4.0.0.0'
 AUDIT_DATE = '2026-10-09'
@@ -62,7 +64,7 @@ def validate_dlc_availability(metadata, locations_by_type):
         for variant in variants:
             assert variant.get('world') == 'normal' and variant.get('quests') == [], f'Unverified DLC gate inferred: {guid}'
             unsupported = variant.get('unsupported')
-            if kind in RITUAL_TYPES or provenance.get('quest_variables'):
+            if kind in RITUAL_TYPES or kind in COVERAGE_TYPES or provenance.get('quest_variables'):
                 assert isinstance(unsupported, str) and unsupported.strip(), f'Unverified gate dropped: {guid}'
             else:
                 assert unsupported is None, f'Unexpected unsupported gate: {guid}'
@@ -71,6 +73,13 @@ def validate_dlc_availability(metadata, locations_by_type):
 def import_audits(collectibles_path, ritual_path, data_dir=DATA, manifest_path=MANIFEST):
     collectibles_path, ritual_path = Path(collectibles_path), Path(ritual_path)
     data_dir, manifest_path = Path(data_dir), Path(manifest_path)
+    extended = any((data_dir / f'{kind}.json').exists() for kind in COVERAGE_TYPES)
+    for kind in RITUAL_TYPES:
+        path = data_dir / f'{kind}.json'
+        if path.exists() and 'map_areas' in json.loads(path.read_bytes()):
+            extended = True
+    assert not extended, ('Chest coverage extension present; use scripts/chest_coverage.py to refresh it. '
+                          'Import a new full extraction into a fresh staging directory first.')
     raw_collectibles, raw_ritual = collectibles_path.read_bytes(), ritual_path.read_bytes()
     audits = [(json.loads(raw_collectibles), {826, 885, 894}),
               (json.loads(raw_ritual), RITUAL_TYPES)]

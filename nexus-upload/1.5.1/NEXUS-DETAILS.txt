@@ -1,0 +1,18 @@
+Version: 1.5.1
+Status: Candidate; native DLC acceptance pending
+Nexus page: https://www.nexusmods.com/dragonsdogma2/mods/1551
+Game: Dragon's Dogma 2
+Author: Raze
+Category: User Interface
+Donation Points: Disabled
+Archive: Map-Markers-and-Collectables-by-Raze-v1.5.1.zip
+Dark Arisen: Optional; base-game features work without it
+New chest records: 94 Spoils-related, three quest-linked
+Lost Rites: 185 positions, shown by default on their trial maps
+Potential-location controls: separate for Lost Rites and Spoils
+Artwork: new Spoils icon; Dark Arisen Edition thumbnail and banner retained
+
+Main-file description (245 characters):
+Adds missing Spoils chest types and a new icon. Lost Rites locations now show by default on their trial maps, with separate potential-location toggles. Includes three quest chests. Base game supported; Dark Arisen optional. Requires REFramework.
+
+Use DESCRIPTION.txt for the complete guide and FILE-DESCRIPTION.txt for the Nexus file description. Native DLC acceptance remains pending.
