@@ -54,7 +54,7 @@
 - [x] Run the complete test suite and package builder; inspect the exact archive and description length.
 - [x] Review the diff for routing, renewal, ownership and packaging errors; correct issues and rerun affected checks.
 - [x] With DD2 closed, back up and install only the new marker payload; preserve user settings.
-- [ ] Commit and push the patch branch and provide an installable kit. Keep native acceptance pending until tested inside a trial.
+- [x] Commit and push the patch branch and provide an installable kit. Keep native acceptance pending until tested inside a trial.
 
 Review corrected trial routing after the first-token minimap overlay, independent potential controls with the general DLC filter off, and protection against the legacy import erasing extended trial data. The complete automated run passed 14 Lua suites and 25 Python tests. Coverage-import fixtures verify idempotence and rejection before writes. Native trial rendering and event renewal still require in-game acceptance.
 
