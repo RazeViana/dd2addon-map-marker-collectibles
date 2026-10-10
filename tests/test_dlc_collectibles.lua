@@ -51,6 +51,7 @@ assert(trial.live_acquired == true, 'repeatable trial chests cached acquisition 
 local settings_util = require('raze_MapMarkersAndCollectables.settings')
 local artwork = require('raze_MapMarkersAndCollectables.object_icons')
 local fresh = settings_util.normalize({object_icons=false}, names, types, generic)
+assert(types['Spoils Chests'].preview_setting == nil, 'Spoils retained a separate preview switch')
 for name, icon in pairs({['Norgan Ducats']=86,['Norgan Chests']=84,
     ['Norgan Rare Chests']=85,['Lost Rites Chests']=85}) do
   assert(types[name].requires_dlc == true, 'expansion category lacks its DLC guard')
@@ -80,6 +81,13 @@ local policy=require('raze_MapMarkersAndCollectables.chest_availability').create
 local coin={key='coin',gimmick_id=894,marker_type=types['Norgan Ducats'],acquired=false}
 local trial_marker={key='trial',gimmick_id=755,marker_type=trial,acquired=false}
 merged.chests.trial={gimmick_id=755,variants={{world='normal',unsupported='Trial activation unverified'}}}
+local spoils_marker={key='spoils',gimmick_id=908,marker_type=types['Spoils Chests'],acquired=false}
+merged.chests.spoils={gimmick_id=908,variants={{world='normal',unsupported='Event activation unverified'}}}
+assert(#policy:filter({coin,spoils_marker},fresh)==2,
+  'new-install defaults hid Spoils locations')
+fresh.hide_unavailable_dlc_chests=true
+assert(#policy:filter({coin,spoils_marker},fresh)==1,
+  'Spoils did not follow the general DLC availability filter')
 local visible=policy:filter({coin,trial_marker},{},'fullmap')
 assert(#visible == 2, 'potential trial positions still require disabling ordinary DLC progression')
 visible=policy:filter({coin,trial_marker},{show_potential_lost_rites_chests=false},'fullmap')

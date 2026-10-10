@@ -18,6 +18,10 @@ for _, loaded in ipairs({ false, 123, "bad", {}, { markers = false } }) do
   assert(actual.show_first_seeker_token == true, 'first-token marker must default on')
   assert(actual.hide_unavailable_chests == true and actual.reveal_unmoored_chests == false,
     'new installs must hide progression-locked chests without revealing Unmoored placements early')
+  assert(actual.hide_unavailable_dlc_chests == false,
+    'DLC availability filtering must default off independently of the base-game default')
+  assert(actual.show_potential_lost_rites_chests == true and actual.show_potential_spoils_chests == nil,
+    'only Lost Rites should retain a potential-location preference')
   assert(actual.icon_size == 50)
   assert(actual.hide_unexplored_chests == false, "existing settings must keep chests visible through fog")
   assert(actual.hide_unexplored_beetles == false and actual.hide_unexplored_tokens == false,
@@ -133,11 +137,11 @@ for _, key in ipairs({'hide_unexplored_beetles', 'hide_unexplored_tokens'}) do
   end
 end
 
--- Splitting the old shared controls preserves legacy choices and saves independent overrides.
+-- DLC progression defaults off; fog still inherits the legacy shared preference.
 for _, enabled in ipairs({false,true}) do
   local legacy = settings.normalize({hide_unavailable_chests=enabled,hide_unexplored_chests=enabled},names,types,generic)
-  assert(legacy.hide_unavailable_dlc_chests == enabled and legacy.hide_unexplored_dlc_chests == enabled,
-    'new DLC filters did not inherit legacy chest preferences')
+  assert(legacy.hide_unavailable_dlc_chests == false and legacy.hide_unexplored_dlc_chests == enabled,
+    'DLC progression inherited the base filter or lost the legacy fog preference')
   local split = settings.normalize({hide_unavailable_chests=enabled,hide_unavailable_dlc_chests=not enabled,
     hide_unexplored_chests=enabled,hide_unexplored_dlc_chests=not enabled},names,types,generic)
   assert(split.hide_unavailable_chests == enabled and split.hide_unavailable_dlc_chests == not enabled,
@@ -149,3 +153,9 @@ for _, enabled in ipairs({false,true}) do
     and reloaded.hide_unexplored_dlc_chests == split.hide_unexplored_dlc_chests,
     'independent DLC preferences were lost on reload')
 end
+for _, invalid in ipairs({'true',1,0,{}}) do
+  assert(settings.normalize({hide_unavailable_dlc_chests=invalid},names,types,generic)
+    .hide_unavailable_dlc_chests == false, 'malformed DLC availability preference did not default off')
+end
+assert(settings.normalize({show_potential_spoils_chests=false},names,types,generic)
+  .show_potential_spoils_chests == nil, 'removed Spoils preference survived normalization')

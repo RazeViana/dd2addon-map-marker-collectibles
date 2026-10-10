@@ -1021,8 +1021,8 @@ assert(checkbox_sections['Show on full map'] == 'Maps and appearance'
   and checkbox_sections['Hide Norgan Ducats in unexplored areas'] == 'Dark Arisen',
   'progression, fog or global controls shown in wrong group')
 assert(checkbox_sections['Show potential Lost Rites chest locations'] == 'Dark Arisen'
-  and checkbox_sections['Show potential Spoils chest locations'] == 'Dark Arisen',
-  'potential-location controls shown in wrong group')
+  and not checkbox_sections['Show potential Spoils chest locations'],
+  'Lost Rites preview is missing or the removed Spoils switch is still shown')
 local original_order = saved_settings.marker_order
 local interleaved = {"Seeker's Tokens",'Norgan Ducats','Golden Trove Beetles','Norgan Chests'}
 for _, name in ipairs(original_order) do
@@ -1134,11 +1134,21 @@ trial_data.map_areas,trial_data.map_bounds=nil,nil
 map.DetailArea=nil
 
 -- Newly imported Spoils identities reach both maps and regain visibility after renewal.
+for _,kind in ipairs({908,1004,1023}) do
+  dlc_metadata.records[dlc_guids[kind]].variants[1].unsupported='Event activation unverified'
+end
+toggle_map('Hide unobtainable DLC collectibles', false)
+saved_settings.show_potential_spoils_chests=false -- obsolete settings must not suppress Spoils
 show_category('Spoils Chests'); map:setMapScale()
 assert(#map.emitted==3 and #minimap_options.filter_markers({},
   minimap_get_markers({x=1,y=0,z=1},180,60))==3, 'omitted Spoils types did not reach both maps')
 assert(map.emitted[1].IconType==31 and map.emitted[1].ui_icon.IconSprite.Sprite.pattern==11,
   'Spoils artwork did not reach the renderer')
+toggle_map('Hide unobtainable DLC collectibles', true)
+assert(#map.emitted==0 and #minimap_options.filter_markers({},
+  minimap_get_markers({x=1,y=0,z=1},180,60))==0,
+  'Spoils locations ignored the general DLC availability filter')
+toggle_map('Hide unobtainable DLC collectibles', false)
 local spoil_opened=true
 gimmicks_by_type[908]={{get_UniqId=function() return {ToString=function() return dlc_guids[908]..'_0' end} end,
   get_IsOpenedFreeBit=function() return spoil_opened end}}

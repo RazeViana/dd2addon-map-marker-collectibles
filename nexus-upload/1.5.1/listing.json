@@ -11,7 +11,7 @@
     "User Interface",
     "Quality of Life"
   ],
-  "summary": "Optional Dark Arisen map and minimap support with Spoils chest icons, default-on potential Lost Rites locations, and separate base-game/DLC filters.",
+  "summary": "Optional Dark Arisen support with Spoils chest icons, trial-map Lost Rites markers, and independent base-game/DLC filters. DLC availability filtering starts off.",
   "required_mods": [
     {
       "name": "REFramework",
@@ -24,7 +24,7 @@
     "name": "Map Markers and Collectables by Raze",
     "version": "1.5.1",
     "archive": "Map-Markers-and-Collectables-by-Raze-v1.5.1.zip",
-    "description": "Adds missing Spoils chest types and a new icon. Lost Rites locations now show by default on their trial maps, with separate potential-location toggles. Includes three quest chests. Base game supported; Dark Arisen optional. Requires REFramework."
+    "description": "Adds missing Spoils chests and a new icon, trial-map markers for 185 Lost Rites chests, and three quest chests. DLC filtering starts off; Lost Rites keeps its preview toggle. Dark Arisen optional. Requires REFramework."
   },
   "donation_points": false,
   "publication_status": "v1.5.1 candidate; native DLC acceptance pending.",

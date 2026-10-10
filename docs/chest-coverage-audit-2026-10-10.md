@@ -17,7 +17,7 @@ The Gm83_102 family strongly matches the reported Spoils chest category: 92 reco
 
 All 185 Lost Rites chest positions were matched to their source trial, `rdl_01` through `rdl_012`, and its native UI map ID, 6001 through 6012. Every position lies within that map's installed `MapTexListData.Param` rectangle. Full-map routing uses the displayed trial; minimap routing uses `MapAreaNow`. Trial positions are excluded from outdoor maps. Individual floor assignments are not guessed: full-map markers cover all floors of the selected trial.
 
-Potential Lost Rites/Spoils positions have separate default-on preview controls. Ordinary unresolved DLC quest gates remain guarded. A loaded closed repeatable chest overrides an older acquired context. These are Lua/data regression findings; native DLC rendering, pickup, save reload and renewal acceptance remain pending.
+Lost Rites keeps a default-on preview control. Spoils follows the general DLC availability filter, which defaults off so potential DLC positions are visible. Unresolved event/quest gates are guarded when that filter is enabled. A loaded closed repeatable chest overrides an older acquired context. These are Lua/data regression findings; native DLC rendering, pickup, save reload and renewal acceptance remain pending.
 
 Archive entry-table SHA-256:
 

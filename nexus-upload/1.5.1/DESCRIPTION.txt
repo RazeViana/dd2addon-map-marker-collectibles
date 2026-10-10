@@ -8,11 +8,11 @@ Version 1.5.1 adds the missing chest types found in the game files and makes Los
 
 Dark Arisen is optional. The same package works with the base game. Expansion controls and markers appear only when the DLC is owned and installed. Uncollected DLC categories and their artwork start enabled; your saved choices are kept.
 
-Show potential Lost Rites chest locations and Show potential Spoils chest locations are separate controls, both on by default. They mark where chests can appear. Trial progress and rotating events affect what is ready to loot, so an icon does not guarantee a chest is there.
+Hide unobtainable DLC collectibles starts off, so potential DLC positions are visible. Spoils uses this general filter and has no separate preview switch. Trial progress and rotating events affect what is ready to loot, so an icon does not guarantee a chest is there.
 
-Keep the category you want enabled. Switching potential locations off leaves only loaded chests or confirmed conditions, so distant chests may disappear. These switches work independently of Hide unobtainable DLC collectibles. Your base-game filter stays independent too.
+Keep the category you want enabled. Show potential Lost Rites chest locations stays on by default. Switching it off leaves only loaded trial chests or confirmed conditions, so distant chests may disappear. It works independently of Hide unobtainable DLC collectibles. Your base-game filter stays independent too.
 
-The full Lost Rites map shows potential positions throughout the selected trial, across its floors. Minimap arrows help indicate height. Six rare Norgan chests and the three quest-linked chests still have unresolved unlock rules; turn off the general DLC filter to preview those positions.
+The full Lost Rites map shows potential positions throughout the selected trial, across its floors. Minimap arrows help indicate height. Six rare Norgan chests and the three quest-linked chests still have unresolved unlock rules; enabling the general DLC filter hides those unconfirmed positions.
 
 A renewed, loaded closed trial or Spoils chest can appear again after an earlier opening. The updated data, routing and collection behavior have automated checks; native DLC rendering, pickup, save reload and renewal still need an in-game check. Random monster drops and the contents rolled during appraisal are outside coverage.
 
@@ -54,7 +54,7 @@ Chest color defaults are copper for small, silver for medium, gold for large, bl
 
 CHEST PROGRESSION
 
-Hide unobtainable base-game chests and Hide unobtainable DLC collectibles are independent. Both start enabled and check requirements per location; the DLC control covers chests and Norgan Ducats. Lost Rites and Spoils have separate potential-location controls, so you can keep the general filter enabled while seeing their possible positions. Collected markers follow your Acquired setting even if a location is currently unavailable.
+Hide unobtainable base-game chests and Hide unobtainable DLC collectibles are independent. The base-game filter starts enabled; the DLC filter starts disabled so potential positions remain visible. Enable the DLC filter to check availability for chests and Norgan Ducats. Lost Rites keeps a separate potential-location control; Spoils uses the general DLC filter. Existing saved choices are kept. Collected markers follow your Acquired setting even if a location is currently unavailable.
 
 Reveal Unmoored-only chests early is in Base game and starts disabled. Those locations normally appear automatically in the Unmoored World. Enable it to preview them earlier; separate quest and environment requirements still apply. Turning off a group's unobtainable-chest filter previews its recorded locations, subject to category and fog settings. The inaccessible Vernworth marker remains omitted.
 

@@ -14,8 +14,9 @@ Version 1.5.1 expands optional Dark Arisen support for Title Update 4.0. It adds
 - Add separate Norgan Ducat, chest and rare-chest artwork while preserving the new native map symbol added in Title Update 4.0.
 - Add **Spoils Chests**, with 94 chest records at 86 distinct positions read from the installed game files, plus a new chest-and-gem icon. Some rotating events share the same spot.
 - Show 185 potential **Lost Rites Chests** on the selected trial map. These markers start visible and no longer require turning off **Hide unobtainable DLC collectibles**. Trial maps use their own source map IDs and bounds, so their coordinates do not appear on outdoor maps.
-- Give Lost Rites and Spoils separate **Show potential … chest locations** controls, both on by default. They show where chests can appear; trial progress and rotating events determine what is ready to loot. Turning potential locations off leaves only loaded chests or evaluated availability, independently of the general DLC filter, so distant chests may disappear. Keep the relevant category enabled.
-- Add three **Norgan Quest Chests**. Their unresolved unlock requirements stay guarded by the general DLC filter; turn it off to preview them.
+- Keep **Show potential Lost Rites chest locations** on by default. Turning it off leaves only loaded chests or evaluated availability, independently of the general DLC filter, so distant trial chests may disappear. Spoils follows the general DLC filter and has no separate preview switch.
+- Start **Hide unobtainable DLC collectibles** off so potential DLC positions are visible. Enable it to filter positions whose availability cannot be confirmed. Existing saved choices are retained; the base-game filter stays independent and defaults on.
+- Add three **Norgan Quest Chests**. Their unresolved unlock requirements are guarded when the general DLC filter is enabled.
 - Keep six Norgan rare chests with unresolved quest-variable requirements hidden while unopened with progression filtering enabled. The other 383 Norgan chest records have supported normal-world placement rules.
 - Keep existing category choices, colors, artwork, collection GUIDs and first-token guidance. All 1,350 original bundled locations match the updated game's placement data.
 

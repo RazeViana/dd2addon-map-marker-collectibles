@@ -6,13 +6,13 @@
   },
   {
     "path": "docs/raze_MapMarkersAndCollectables/README.md",
-    "bytes": 14779,
-    "sha256": "4dca37db88818d5119d17c36ea9166adba5f15dc6d75f0627c33ab5a1ffd4b83"
+    "bytes": 14902,
+    "sha256": "ed5eca5d1d4161be791f614ceb7a3bf832e76fcf459f3d06e552c8406d4c6a6d"
   },
   {
     "path": "docs/raze_MapMarkersAndCollectables/CHANGELOG.md",
-    "bytes": 9136,
-    "sha256": "6d96c478c10e55bfcd3a2b4f82cd686bc0010b8251045b3b970b7a21d5a15f28"
+    "bytes": 9325,
+    "sha256": "f09b68aae72fcf41523b2bca146deebf1d9cb7c57adb9935ca387131a8179a82"
   },
   {
     "path": "docs/raze_MapMarkersAndCollectables/THIRD_PARTY_NOTICES.md",
@@ -21,8 +21,8 @@
   },
   {
     "path": "reframework/autorun/raze_MapMarkersAndCollectables.lua",
-    "bytes": 55030,
-    "sha256": "9ce99124ca89db33bfbe5bcc5bef50339a1929c054b3f18846b8a3585ec6aa74"
+    "bytes": 54949,
+    "sha256": "9525df489b2a06e95823f138a23b493eaa00532c5f2bcb6905c026d6f0efd928"
   },
   {
     "path": "reframework/autorun/raze_MapMarkersAndCollectables/chest_availability.lua",
@@ -36,8 +36,8 @@
   },
   {
     "path": "reframework/autorun/raze_MapMarkersAndCollectables/dlc_collectibles.lua",
-    "bytes": 7007,
-    "sha256": "14bf3d942947fa480135655b3e3ae68c0483f643fff5c9e111b28b3cf83e3ae2"
+    "bytes": 7005,
+    "sha256": "efa32b0e5ba2c2912ca0557f737e335a33a45ae9b0d7aa227de1b38d149a17a3"
   },
   {
     "path": "reframework/autorun/raze_MapMarkersAndCollectables/first_token.lua",
@@ -71,8 +71,8 @@
   },
   {
     "path": "reframework/autorun/raze_MapMarkersAndCollectables/settings.lua",
-    "bytes": 4512,
-    "sha256": "eea731bf1302c2e5a9e67b883567e3f59a25a372af5c7b4c945af8947ef3fe29"
+    "bytes": 4284,
+    "sha256": "2f42327663849d9d6bea3f03fbb1615358976c07b908065ed0a24f56d19b0473"
   },
   {
     "path": "reframework/autorun/raze_MapMarkersAndCollectables/sprite_pool.lua",

@@ -39,7 +39,7 @@
 
 **Files:** dlc_collectibles.lua, chest_availability.lua, map_routing.lua, settings.lua, main Lua, tests/test_dlc_collectibles.lua, tests/test_map_runtime.lua, tests/test_dlc_icons.py, object_icons.lua, icon asset builder/SVG.
 
-**Interfaces:** `map_routing.filter(markers, ui, kind)` uses each marker's optional `map_area` and `map_bounds`; repeatable category `preview_setting` controls unsupported availability previews. `repeatable_chest_callbacks(chest_callbacks)` queries a loaded chest before saved context.
+**Interfaces:** `map_routing.filter(markers, ui, kind)` uses each marker's optional `map_area` and `map_bounds`; Lost Rites `preview_setting` controls its unsupported availability previews. Spoils follows the general DLC filter, which defaults off. `repeatable_chest_callbacks(chest_callbacks)` queries a loaded chest before saved context.
 
 - [x] Add failing full-script checks for default Lost Rites visibility, selected trial routing despite a field-only range check, Spoils emission on both maps and renewal against picked history.
 - [x] Add a 12th nonempty icon-tile check and run it red against existing assets.
@@ -56,6 +56,6 @@
 - [x] With DD2 closed, back up and install only the new marker payload; preserve user settings.
 - [x] Commit and push the patch branch and provide an installable kit. Keep native acceptance pending until tested inside a trial.
 
-Review corrected trial routing after the first-token minimap overlay, independent potential controls with the general DLC filter off, and protection against the legacy import erasing extended trial data. The complete automated run passed 14 Lua suites and 25 Python tests. Coverage-import fixtures verify idempotence and rejection before writes. Native trial rendering and event renewal still require in-game acceptance.
+Review corrected trial routing after the first-token minimap overlay, independent Lost Rites previews with the general DLC filter off, and protection against the legacy import erasing extended trial data. The complete automated run passed 14 Lua suites and 25 Python tests, including removal of the Spoils preview preference, DLC filtering default-off, and preservation of explicit saved choices. Coverage-import fixtures verify idempotence and rejection before writes. Native trial rendering and event renewal still require in-game acceptance.
 
-The fresh archive contains 45 verified files; 44 owned payload files are installed and match the archive. Settings bytes are preserved, and the previous install is backed up locally. The 245-character Nexus file description and all package hashes validate. The published v1.5 archive and twelve base-game datasets remain byte-identical.
+The fresh archive contains 45 verified files; 44 owned payload files are installed and match the archive. The requested DLC filter is off in the local settings, the obsolete Spoils preference is removed, and all other preferences are preserved. The previous install and settings are backed up locally. The 218-character Nexus file description and all package hashes validate. The published v1.5 archive and twelve base-game datasets remain byte-identical.

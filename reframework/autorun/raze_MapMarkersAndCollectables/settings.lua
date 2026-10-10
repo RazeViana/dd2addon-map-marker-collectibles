@@ -29,14 +29,9 @@ function M.normalize(loaded, names, marker_types, generic)
   result.show_first_seeker_token = loaded.show_first_seeker_token ~= false
   result.show_first_token_after_collection = loaded.show_first_token_after_collection == true
   result.hide_unavailable_chests = loaded.hide_unavailable_chests ~= false
-  if type(loaded.hide_unavailable_dlc_chests) == 'boolean' then
-    result.hide_unavailable_dlc_chests = loaded.hide_unavailable_dlc_chests
-  else
-    result.hide_unavailable_dlc_chests = result.hide_unavailable_chests
-  end
+  result.hide_unavailable_dlc_chests = loaded.hide_unavailable_dlc_chests == true
   result.reveal_unmoored_chests = loaded.reveal_unmoored_chests == true
   result.show_potential_lost_rites_chests = loaded.show_potential_lost_rites_chests ~= false
-  result.show_potential_spoils_chests = loaded.show_potential_spoils_chests ~= false
   for _, key in ipairs({"hide_unexplored_chests", "hide_unexplored_beetles", "hide_unexplored_tokens", "hide_unexplored_ducats"}) do
     result[key] = loaded[key] == true
   end

@@ -4,7 +4,8 @@
 
 - Add the missing Spoils chest family from the current game-file scan: 94 native records at 86 distinct positions, grouped into Spoils Chests with a new default icon.
 - Add three quest-linked Norgan chests, with unresolved unlock requirements still guarded by the ordinary DLC availability filter.
-- Show potential Lost Rites and Spoils chest locations by default, with independent controls that preserve the base-game and general DLC filter settings.
+- Show potential Lost Rites locations by default with a separate preview control. Spoils follows the general DLC filter without a separate preview switch.
+- Default Hide unobtainable DLC collectibles to off so potential DLC positions are visible. Preserve explicit saved choices and the independent base-game filter, which still defaults on.
 - Associate all 185 Lost Rites chest records with their source trial map IDs and native bounds. Filter trial coordinates from outdoor maps and keep separate trials apart on both maps.
 - Let a loaded, renewed closed trial/Spoils chest override an older opening recorded in the save. Keep permanent base-game chest handling unchanged.
 - Retain existing choices, DLC access checks, native atlas symbols, first-token guidance and the inaccessible Vernworth chest exclusion.

@@ -734,11 +734,10 @@ re.on_draw_ui(function()
       local progression_changed, hide_unavailable = imgui.checkbox("Hide unobtainable DLC collectibles", settings.hide_unavailable_dlc_chests)
       if progression_changed then settings.hide_unavailable_dlc_chests = hide_unavailable; markers_dirty = true end
       if imgui.is_item_hovered() then
-        imgui.set_tooltip("Hide uncollected Dark Arisen items blocked by recorded conditions. Lost Rites and Spoils potential positions have their own controls below. Turn this off to preview other guarded positions. A marker does not guarantee available loot.")
+        imgui.set_tooltip("Hide uncollected Dark Arisen items whose availability cannot be confirmed. Starts off so you can see potential positions, including Spoils chests. Lost Rites has its own preview control below. A marker does not guarantee available loot.")
       end
       for _, option in ipairs({
-          {'show_potential_lost_rites_chests','Show potential Lost Rites chest locations'},
-          {'show_potential_spoils_chests','Show potential Spoils chest locations'}}) do
+          {'show_potential_lost_rites_chests','Show potential Lost Rites chest locations'}}) do
         local changed, value = imgui.checkbox(option[2], settings[option[1]])
         if changed then settings[option[1]]=value; markers_dirty=true end
         if imgui.is_item_hovered() then

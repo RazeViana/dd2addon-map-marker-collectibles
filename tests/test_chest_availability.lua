@@ -95,31 +95,28 @@ base_locked.acquired,trial.acquired=true,true
 assert(#filter:filter({base_locked,trial},{hide_unavailable_chests=true,hide_unavailable_dlc_chests=true}) == 2,
   'split filters suppressed collected history')
 
--- Potential positions have independent switches even with the general filter off.
+-- Lost Rites has a separate preview; Spoils follows the general DLC filter.
 trial.acquired=false
 trial.marker_type.preview_setting='show_potential_lost_rites_chests'
 metadata.chests.spoils={gimmick_id=908,variants={{world='any',unsupported='Event rules unverified'}}}
 local spoils=marker('spoils',false,{gimmick_id=908,requires_dlc=true,
-  fog_setting='hide_unexplored_dlc_chests',availability=true,
-  preview_setting='show_potential_spoils_chests'})
+  fog_setting='hide_unexplored_dlc_chests',availability=true})
 for _, hide_dlc in ipairs({false,true}) do
   for _, potential_trial in ipairs({false,true}) do
-    for _, potential_spoils in ipairs({false,true}) do
-      local options={hide_unavailable_chests=false,hide_unavailable_dlc_chests=hide_dlc,
-        show_potential_lost_rites_chests=potential_trial,
-        show_potential_spoils_chests=potential_spoils}
-      local shown=filter:filter({trial,spoils},options)
-      local keys={}; for _,m in ipairs(shown) do keys[#keys+1]=m.key end
-      local expected={}
-      if potential_trial then expected[#expected+1]='trial' end
-      if potential_spoils then expected[#expected+1]='spoils' end
-      assert(table.concat(keys,',')==table.concat(expected,','),
-        'a potential-location switch depended on the general DLC filter or the other category')
-    end
+    local options={hide_unavailable_chests=false,hide_unavailable_dlc_chests=hide_dlc,
+      show_potential_lost_rites_chests=potential_trial,
+      show_potential_spoils_chests=false} -- obsolete preference is ignored
+    local shown=filter:filter({trial,spoils},options)
+    local keys={}; for _,m in ipairs(shown) do keys[#keys+1]=m.key end
+    local expected={}
+    if potential_trial then expected[#expected+1]='trial' end
+    if not hide_dlc then expected[#expected+1]='spoils' end
+    assert(table.concat(keys,',')==table.concat(expected,','),
+      'Lost Rites preview or Spoils availability followed the wrong control')
   end
 end
-local strict={hide_unavailable_chests=false,hide_unavailable_dlc_chests=false,
-  show_potential_lost_rites_chests=false,show_potential_spoils_chests=false}
+local strict={hide_unavailable_chests=false,hide_unavailable_dlc_chests=true,
+  show_potential_lost_rites_chests=false}
 trial.loaded=true
 assert(#filter:filter({trial,spoils},strict)==1,
   'a loaded repeatable chest was hidden with potential positions off')

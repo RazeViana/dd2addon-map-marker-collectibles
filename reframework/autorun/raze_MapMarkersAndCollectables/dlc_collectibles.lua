@@ -141,12 +141,12 @@ function M.register(types, names, load, chest_callbacks, coin_callbacks, chest_d
   add('Spoils Chests', {name='Spoils Chest',gimmick_ids={908,1004,1023},object_icon=87,
     fog_setting='hide_unexplored_dlc_chests',data=merge({908,1004,1023}),
     get_state_callbacks=repeatable_callbacks,live_acquired=true,
-    preview_setting='show_potential_spoils_chests',settings_default=defaults(0xFFA8F0A8,'spoils'),
+    settings_default=defaults(0xFFA8F0A8,'spoils'),
     tooltip='Potential Spoils-related chest positions from the game files. Rotating events can use different chests at the same spot; an icon does not guarantee a chest has spawned.'})
   add('Norgan Quest Chests', {name='Norgan Quest Chest',gimmick_id=994,object_icon=85,
     fog_setting='hide_unexplored_dlc_chests',data=load(prefix..'994.json'),
     get_state_callbacks=chest_callbacks,settings_default=defaults(0xFFFFA8DA,'norgan_rare'),
-    tooltip='Three quest-linked chest positions. Their unlock requirements remain guarded by Hide unobtainable DLC collectibles; turn it off to preview them.'})
+    tooltip='Three quest-linked chest positions. Their unlock requirements are unverified. Hide unobtainable DLC collectibles filters them when enabled; it starts off so you can preview their positions.'})
 end
 
 return M
