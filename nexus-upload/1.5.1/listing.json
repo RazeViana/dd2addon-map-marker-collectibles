@@ -27,7 +27,7 @@
     "description": "Adds missing Spoils chests and a new icon, trial-map markers for 185 Lost Rites chests, and three quest chests. DLC filtering starts off; Lost Rites keeps its preview toggle. Dark Arisen optional. Requires REFramework."
   },
   "donation_points": false,
-  "publication_status": "v1.5.1 candidate; native DLC acceptance pending.",
+  "publication_status": "Release-ready v1.5.1 archive and upload kit; Nexus publication pending; GitHub staged as a draft.",
   "permission_confirmed": false,
   "permission_checked_on": "2026-09-06",
   "source_notice": "../../THIRD_PARTY_NOTICES.md",

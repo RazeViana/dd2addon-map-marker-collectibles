@@ -6,7 +6,7 @@ Find Seeker's Tokens, Golden Trove Beetles, chests, and Dark Arisen collectibles
 
 **Current version: 1.5.1.**
 
-Version 1.5.1 expands optional Dark Arisen support for Title Update 4.0. It adds the missing Spoils chest types and makes potential Lost Rites chest locations visible without turning off the general DLC filter. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.5.1.zip` package. [Nexus Mods](https://www.nexusmods.com/dragonsdogma2/mods/1551) carries the published version; this patch's native DLC acceptance is still pending.
+Version 1.5.1 expands optional Dark Arisen support for Title Update 4.0. It adds the missing Spoils chest types and makes potential Lost Rites chest locations visible without turning off the general DLC filter. Install the complete `Map-Markers-and-Collectables-by-Raze-v1.5.1.zip` package. The v1.5.1 upload kit contains matching descriptions, artwork and release notes for [Nexus Mods](https://www.nexusmods.com/dragonsdogma2/mods/1551).
 
 ## Dark Arisen additions
 

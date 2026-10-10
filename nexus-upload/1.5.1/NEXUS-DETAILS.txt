@@ -1,5 +1,5 @@
 Version: 1.5.1
-Status: Candidate; native DLC acceptance pending
+Status: Release-ready archive and upload kit; publication pending
 Nexus page: https://www.nexusmods.com/dragonsdogma2/mods/1551
 Game: Dragon's Dogma 2
 Author: Raze
@@ -16,4 +16,4 @@ Artwork: new Spoils icon; Dark Arisen Edition thumbnail and banner retained
 Main-file description (218 characters):
 Adds missing Spoils chests and a new icon, trial-map markers for 185 Lost Rites chests, and three quest chests. DLC filtering starts off; Lost Rites keeps its preview toggle. Dark Arisen optional. Requires REFramework.
 
-Use DESCRIPTION.txt for the complete guide and FILE-DESCRIPTION.txt for the Nexus file description. Native DLC acceptance remains pending.
+Use DESCRIPTION.txt for the complete guide and FILE-DESCRIPTION.txt for the Nexus file description. Native DLC rendering, pickup, save reload and renewal remain unverified in-game.

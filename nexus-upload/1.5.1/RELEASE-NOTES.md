@@ -8,7 +8,7 @@ A currently loaded, renewed closed trial/Spoils chest overrides its older openin
 
 Potential icons show where a chest can appear. Trial progress and rotating events determine whether it is ready to loot. Six Norgan rare chests and three quest-linked positions retain unresolved unlock guards when the general DLC filter is enabled. Random drops and appraisal contents are outside coverage.
 
-Automated runtime, data, routing, renewal, artwork and package checks pass. Native DLC rendering, pickup/hand-in, save reload and event/trial renewal remain pending. This is a candidate for in-game acceptance; it does not replace the published v1.5 Nexus file automatically.
+The final v1.5.1 archive and Nexus upload materials are prepared for release. Automated runtime, data, routing, renewal, artwork and package checks pass. Native DLC rendering, pickup/hand-in, save reload and event/trial renewal have not yet been confirmed in-game. Preparing this package does not replace the published v1.5 Nexus file automatically.
 
 Close DD2 and install the complete ZIP with Fluffy Mod Manager, or copy its reframework and natives folders beside DD2.exe. Preserve reframework/data/raze_MapMarkersAndCollectables_settings.json. Requires compatible REFramework. Source credits are included in docs/raze_MapMarkersAndCollectables/THIRD_PARTY_NOTICES.md.
 
